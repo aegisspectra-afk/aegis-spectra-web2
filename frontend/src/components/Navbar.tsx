@@ -53,7 +53,13 @@ export function Navbar() {
     router.push("/");
   };
 
-  const navLinks = [
+  // Navigation links - use anchor links for homepage, regular links for other pages
+  const navLinks = pathname === '/' ? [
+    { href: "/services", label: "שירותים" },
+    { href: "/products", label: "מוצרים" },
+    { href: "/about", label: "אודות" },
+    { href: "#faq", label: "שאלות נפוצות" },
+  ] : [
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },
     { href: "/about", label: "אודות" },
@@ -74,14 +80,26 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6 text-sm">
           {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="hover:text-gold transition relative group"
-            >
-              {link.label}
-              <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
-            </Link>
+            link.href.startsWith('#') ? (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className="hover:text-gold transition relative group"
+              >
+                {link.label}
+                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:text-gold transition relative group"
+              >
+                {link.label}
+                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
+              </Link>
+            )
           ))}
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
@@ -170,14 +188,28 @@ export function Navbar() {
             >
               <div className="p-6 space-y-4">
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
-                  >
-                    {link.label}
-                  </Link>
+                  link.href.startsWith('#') ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      onClick={(e) => {
+                        handleSmoothScroll(e, link.href);
+                        setIsOpen(false);
+                      }}
+                      className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
+                    >
+                      {link.label}
+                    </Link>
+                  )
                 ))}
                 {isLoggedIn ? (
                   <>

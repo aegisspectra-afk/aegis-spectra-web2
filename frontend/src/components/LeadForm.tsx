@@ -13,14 +13,15 @@ export default function LeadForm() {
     const formData = new FormData(form);
     
     try {
-      // Netlify Forms - שליחה ל-endpoint האוטומטי
-      const response = await fetch("/", {
+      // שליחה ל-API route שישמור ב-DB
+      const response = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formData as any).toString(),
+        body: formData,
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.ok) {
         setStatus("ok");
         form.reset();
       } else {
@@ -36,16 +37,9 @@ export default function LeadForm() {
 
   return (
     <form 
-      name="lead-form" 
-      method="POST" 
-      data-netlify="true" 
-      data-netlify-honeypot="bot-field"
       onSubmit={onSubmit}
       className="grid md:grid-cols-2 gap-4"
     >
-      {/* Hidden field for Netlify Forms */}
-      <input type="hidden" name="form-name" value="lead-form" />
-      
       {/* Honeypot field for spam protection */}
       <div className="hidden">
         <label>

@@ -91,7 +91,7 @@ export default function LeadForm() {
 
       <div className="relative">
         <input 
-          className={base}
+          className={`${base} ${errors.name && touched.name ? errorClass : ""}`}
           name="name" 
           type="text"
           required 
@@ -99,6 +99,7 @@ export default function LeadForm() {
           disabled={status === "loading"}
           aria-label="שם מלא"
           aria-required="true"
+          aria-invalid={errors.name ? "true" : "false"}
           onBlur={(e) => handleBlur("name", e.target.value)}
         />
         {errors.name && touched.name && (

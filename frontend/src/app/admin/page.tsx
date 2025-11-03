@@ -182,6 +182,7 @@ export default function AdminPage() {
     }, 30000);
     
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   async function updateLead(id: number, status: string, notes: string) {
@@ -364,6 +365,15 @@ export default function AdminPage() {
     return filtered;
   }, [leads, searchQuery, statusFilter, sortBy, sortOrder]);
 
+  // Charts data
+  const chartData = useMemo(() => {
+    return [
+      { label: "חדש", value: stats.new, color: "#D4AF37" },
+      { label: "נוצר קשר", value: stats.contacted, color: "#10B981" },
+      { label: "סגור", value: stats.closed, color: "#3B82F6" },
+    ];
+  }, [stats]);
+
   // מסך התחברות
   if (!isAuthenticated) {
     return (
@@ -423,15 +433,6 @@ export default function AdminPage() {
       </main>
     );
   }
-
-  // Charts data
-  const chartData = useMemo(() => {
-    return [
-      { label: "חדש", value: stats.new, color: "#D4AF37" },
-      { label: "נוצר קשר", value: stats.contacted, color: "#10B981" },
-      { label: "סגור", value: stats.closed, color: "#3B82F6" },
-    ];
-  }, [stats]);
 
   return (
     <main className="relative min-h-screen">

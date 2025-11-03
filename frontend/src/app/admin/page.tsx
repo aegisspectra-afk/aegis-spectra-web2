@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Shield, Phone, MapPin, Package, MessageSquare, Calendar, CheckCircle, XCircle, Lock } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Shield, Phone, MapPin, Package, MessageSquare, Calendar, 
+  CheckCircle, XCircle, Lock, Search, Filter, RefreshCw, 
+  TrendingUp, Users, Clock, Edit2, Save, X, Download,
+  ChevronDown, ChevronUp
+} from "lucide-react";
 
 type Lead = {
   id: number;
@@ -15,6 +21,13 @@ type Lead = {
   notes: string | null;
 };
 
+type StatusCounts = {
+  new: number;
+  contacted: number;
+  closed: number;
+  total: number;
+};
+
 const fmt = (n: number) => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS" }).format(n);
 
 export default function AdminPage() {
@@ -24,6 +37,17 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  
+  // חיפוש וסינון
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  
+  // עריכה
+  const [editingLead, setEditingLead] = useState<number | null>(null);
+  const [editStatus, setEditStatus] = useState<string>("");
+  const [editNotes, setEditNotes] = useState<string>("");
 
   // בדיקה אם כבר מאומת
   useEffect(() => {
@@ -32,7 +56,6 @@ export default function AdminPage() {
     if (savedAuth === "true" && savedPassword) {
       setIsAuthenticated(true);
       setPassword(savedPassword);
-      // נטען את הלידים אחרי שהקומפוננטה מוכנה
       setTimeout(() => {
         fetchLeads();
       }, 100);
@@ -58,7 +81,7 @@ export default function AdminPage() {
       if (data.ok && data.leads) {
         setIsAuthenticated(true);
         localStorage.setItem("admin_auth", "true");
-        localStorage.setItem("admin_password", password); // שמירת הסיסמה
+        localStorage.setItem("admin_password", password);
         setLeads(data.leads);
         setLoading(false);
       } else if (data.requiresAuth) {
@@ -94,7 +117,6 @@ export default function AdminPage() {
         return;
       }
 
-      // נשלח את הסיסמה מהזיכרון
       const res = await fetch("/api/leads", {
         headers: {
           "Authorization": `Bearer ${savedPassword}`
@@ -106,7 +128,6 @@ export default function AdminPage() {
       if (data.ok && data.leads) {
         setLeads(data.leads);
       } else if (data.requiresAuth) {
-        // אם הסיסמה לא תקינה, נבקש התחברות מחדש
         setIsAuthenticated(false);
         localStorage.removeItem("admin_auth");
         localStorage.removeItem("admin_password");
@@ -122,14 +143,108 @@ export default function AdminPage() {
     }
   }
 
+  async function updateLead(id: number, status: string, notes: string) {
+    try {
+      const savedPassword = localStorage.getItem("admin_password");
+      if (!savedPassword) return;
+
+      const res = await fetch(`/api/leads/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${savedPassword}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status, notes })
+      });
+
+      const data = await res.json();
+
+      if (data.ok && data.lead) {
+        setLeads(leads.map(l => l.id === id ? data.lead : l));
+        setEditingLead(null);
+      } else {
+        alert("שגיאה בעדכון הליד");
+      }
+    } catch (err) {
+      console.error("Error updating lead:", err);
+      alert("שגיאה בעדכון הליד");
+    }
+  }
+
+  function startEdit(lead: Lead) {
+    setEditingLead(lead.id);
+    setEditStatus(lead.status || "new");
+    setEditNotes(lead.notes || "");
+  }
+
+  function cancelEdit() {
+    setEditingLead(null);
+    setEditStatus("");
+    setEditNotes("");
+  }
+
+  // סטטיסטיקות
+  const stats: StatusCounts = useMemo(() => {
+    return leads.reduce((acc, lead) => {
+      acc.total++;
+      const status = lead.status || "new";
+      if (status === "new") acc.new++;
+      else if (status === "contacted") acc.contacted++;
+      else if (status === "closed") acc.closed++;
+      return acc;
+    }, { new: 0, contacted: 0, closed: 0, total: 0 } as StatusCounts);
+  }, [leads]);
+
+  // לידים מסוננים וממוינים
+  const filteredLeads = useMemo(() => {
+    let filtered = [...leads];
+
+    // חיפוש
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(lead => 
+        lead.name.toLowerCase().includes(query) ||
+        lead.phone.includes(query) ||
+        (lead.city && lead.city.toLowerCase().includes(query)) ||
+        (lead.product_sku && lead.product_sku.toLowerCase().includes(query))
+      );
+    }
+
+    // סינון לפי סטטוס
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(lead => (lead.status || "new") === statusFilter);
+    }
+
+    // מיון
+    filtered.sort((a, b) => {
+      if (sortBy === "date") {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      } else {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return sortOrder === "asc" 
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      }
+    });
+
+    return filtered;
+  }, [leads, searchQuery, statusFilter, sortBy, sortOrder]);
+
   // מסך התחברות
   if (!isAuthenticated) {
     return (
       <main className="relative min-h-screen flex items-center justify-center">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
         
-        <div className="max-w-md w-full px-4">
-          <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full px-4"
+        >
+          <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-6 justify-center">
               <Shield className="text-gold size-8" />
               <h1 className="text-2xl font-extrabold">Admin Dashboard</h1>
@@ -150,9 +265,13 @@ export default function AdminPage() {
               </div>
               
               {authError && (
-                <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400"
+                >
                   {authError}
-                </div>
+                </motion.div>
               )}
               
               <button
@@ -169,7 +288,7 @@ export default function AdminPage() {
               ניתן לשנות ב-Netlify Environment Variables
             </p>
           </div>
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -178,7 +297,8 @@ export default function AdminPage() {
     <main className="relative min-h-screen">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
       
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Shield className="text-gold size-8" />
@@ -187,139 +307,312 @@ export default function AdminPage() {
               <p className="text-zinc-400 text-sm mt-1">Aegis Spectra - Admin Dashboard</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm"
-          >
-            <Lock className="size-4" />
-            התנתק
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchLeads}
+              disabled={loading}
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+              רענון
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+            >
+              <Lock className="size-4" />
+              התנתק
+            </button>
+          </div>
         </div>
 
+        {/* סטטיסטיקות */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-2xl border border-zinc-800 bg-black/30 p-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm opacity-70">סה&ldquo;כ לידים</span>
+              <Users className="size-5 text-gold" />
+            </div>
+            <div className="text-3xl font-extrabold text-gold">{stats.total}</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl border border-gold/30 bg-gold/10 p-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm opacity-70">חדשים</span>
+              <Clock className="size-5 text-gold" />
+            </div>
+            <div className="text-3xl font-extrabold text-gold">{stats.new}</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm opacity-70">נוצר קשר</span>
+              <CheckCircle className="size-5 text-green-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-green-400">{stats.contacted}</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-2xl border border-zinc-700/50 bg-zinc-800/30 p-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm opacity-70">סגורים</span>
+              <TrendingUp className="size-5 text-zinc-400" />
+            </div>
+            <div className="text-3xl font-extrabold text-zinc-400">{stats.closed}</div>
+          </motion.div>
+        </div>
+
+        {/* חיפוש וסינון */}
+        <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 mb-6 backdrop-blur-sm">
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* חיפוש */}
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-zinc-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="חיפוש לפי שם, טלפון, עיר..."
+                className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-gold/70 transition"
+              />
+            </div>
+
+            {/* סינון לפי סטטוס */}
+            <div className="relative">
+              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-zinc-400 pointer-events-none" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-gold/70 transition"
+              >
+                <option value="all">כל הסטטוסים</option>
+                <option value="new">חדש</option>
+                <option value="contacted">נוצר קשר</option>
+                <option value="closed">סגור</option>
+              </select>
+            </div>
+
+            {/* מיון */}
+            <div className="flex items-center gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "date" | "name")}
+                className="flex-1 bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-gold/70 transition"
+              >
+                <option value="date">מיון לפי תאריך</option>
+                <option value="name">מיון לפי שם</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="p-3 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition"
+              >
+                {sortOrder === "asc" ? <ChevronUp className="size-5" /> : <ChevronDown className="size-5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading */}
         {loading && (
           <div className="text-center py-12">
+            <RefreshCw className="size-8 animate-spin mx-auto mb-4 text-gold" />
             <p className="opacity-70">טוען לידים...</p>
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div className="rounded-2xl border border-red-500/50 bg-red-500/10 p-6 mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-red-500/50 bg-red-500/10 p-6 mb-6"
+          >
             <div className="flex items-center gap-3 mb-2">
               <XCircle className="text-red-400" />
               <h3 className="text-red-400 font-semibold">שגיאה</h3>
             </div>
             <p className="text-sm opacity-90 mb-4">{error}</p>
-            {error.includes("table not found") && (
-              <div className="bg-black/30 p-4 rounded-lg text-sm">
-                <p className="mb-2 font-semibold">פתרון:</p>
-                <p className="opacity-80">
-                  1. לך ל-Netlify Dashboard → Database → SQL Editor<br />
-                  2. הרץ את הקוד מ-<code className="bg-black/50 px-2 py-1 rounded">schema.sql</code>
-                </p>
-              </div>
-            )}
             <button 
               onClick={fetchLeads}
               className="mt-4 rounded-lg border border-red-500 px-4 py-2 hover:bg-red-500/20 transition"
             >
               נסה שוב
             </button>
+          </motion.div>
+        )}
+
+        {/* רשימת לידים */}
+        {!loading && !error && filteredLeads.length === 0 && (
+          <div className="text-center py-12 rounded-2xl border border-zinc-800 bg-black/30">
+            <p className="opacity-70 mb-2">אין לידים התואמים לחיפוש</p>
+            <p className="text-sm opacity-60">נסה לשנות את החיפוש או הסינון</p>
           </div>
         )}
 
-        {!loading && !error && leads.length === 0 && (
-          <div className="text-center py-12">
-            <p className="opacity-70 mb-4">אין לידים עדיין</p>
-            <p className="text-sm opacity-60">כל ליד שיישלח דרך הטופס יופיע כאן</p>
-          </div>
-        )}
-
-        {!loading && !error && leads.length > 0 && (
-          <>
-            <div className="mb-6 flex items-center justify-between">
-              <div className="text-sm opacity-70">
-                סה&ldquo;כ {leads.length} לידים
-              </div>
-              <button 
-                onClick={fetchLeads}
-                className="text-sm rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition"
-              >
-                רענון
-              </button>
+        {!loading && !error && filteredLeads.length > 0 && (
+          <div className="space-y-4">
+            <div className="text-sm opacity-70 mb-4">
+              מציג {filteredLeads.length} מתוך {leads.length} לידים
             </div>
-
-            <div className="space-y-4">
-              {leads.map((lead) => (
-                <div 
-                  key={lead.id} 
-                  className="rounded-2xl border border-zinc-800 bg-black/30 p-6 hover:border-zinc-700 transition"
+            
+            <AnimatePresence>
+              {filteredLeads.map((lead, index) => (
+                <motion.div
+                  key={lead.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="rounded-2xl border border-zinc-800 bg-black/30 p-6 hover:border-zinc-700 transition backdrop-blur-sm"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gold mb-1">{lead.name}</h3>
-                      <div className="flex items-center gap-4 text-sm opacity-80">
+                  {editingLead === lead.id ? (
+                    // מצב עריכה
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold text-gold">{lead.name}</h3>
                         <div className="flex items-center gap-2">
-                          <Phone className="size-4" />
-                          {lead.phone}
+                          <button
+                            onClick={() => updateLead(lead.id, editStatus, editNotes)}
+                            className="p-2 rounded-lg bg-gold text-black hover:bg-gold/90 transition"
+                          >
+                            <Save className="size-4" />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="p-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition"
+                          >
+                            <X className="size-4" />
+                          </button>
                         </div>
-                        {lead.city && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="size-4" />
-                            {lead.city}
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm opacity-70 mb-2">סטטוס</label>
+                          <select
+                            value={editStatus}
+                            onChange={(e) => setEditStatus(e.target.value)}
+                            className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                          >
+                            <option value="new">חדש</option>
+                            <option value="contacted">נוצר קשר</option>
+                            <option value="closed">סגור</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm opacity-70 mb-2">הערות</label>
+                          <textarea
+                            value={editNotes}
+                            onChange={(e) => setEditNotes(e.target.value)}
+                            className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                            rows={3}
+                            placeholder="הערות מנהל..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // מצב תצוגה
+                    <>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-gold mb-2">{lead.name}</h3>
+                          <div className="flex flex-wrap items-center gap-4 text-sm opacity-80">
+                            <div className="flex items-center gap-2">
+                              <Phone className="size-4" />
+                              <a href={`tel:${lead.phone}`} className="hover:text-gold transition">
+                                {lead.phone}
+                              </a>
+                            </div>
+                            {lead.city && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="size-4" />
+                                {lead.city}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Calendar className="size-4" />
+                              {new Date(lead.created_at).toLocaleDateString("he-IL", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              })}
+                            </div>
                           </div>
-                        )}
+                        </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="size-4" />
-                          {new Date(lead.created_at).toLocaleDateString("he-IL", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                          })}
+                          <button
+                            onClick={() => startEdit(lead)}
+                            className="p-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition"
+                            title="עריכה"
+                          >
+                            <Edit2 className="size-4" />
+                          </button>
+                          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            lead.status === 'new' ? 'bg-gold/20 text-gold' :
+                            lead.status === 'contacted' ? 'bg-green-500/20 text-green-400' :
+                            'bg-zinc-700/50 text-zinc-300'
+                          }`}>
+                            {lead.status === 'new' ? 'חדש' :
+                             lead.status === 'contacted' ? 'נוצר קשר' :
+                             lead.status === 'closed' ? 'סגור' : 'חדש'}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      lead.status === 'new' ? 'bg-gold/20 text-gold' :
-                      lead.status === 'contacted' ? 'bg-green-500/20 text-green-400' :
-                      'bg-zinc-700/50 text-zinc-300'
-                    }`}>
-                      {lead.status || 'new'}
-                    </div>
-                  </div>
 
-                  {lead.product_sku && (
-                    <div className="mb-3 flex items-center gap-2 text-sm">
-                      <Package className="size-4 text-gold" />
-                      <span className="opacity-80">מוצר:</span>
-                      <span className="font-semibold">{lead.product_sku}</span>
-                    </div>
-                  )}
+                      {lead.product_sku && (
+                        <div className="mb-3 flex items-center gap-2 text-sm bg-black/30 p-3 rounded-lg">
+                          <Package className="size-4 text-gold" />
+                          <span className="opacity-80">מוצר:</span>
+                          <span className="font-semibold">{lead.product_sku}</span>
+                        </div>
+                      )}
 
-                  {lead.message && (
-                    <div className="mb-3 p-3 bg-black/30 rounded-lg">
-                      <div className="flex items-center gap-2 mb-1 text-sm opacity-70">
-                        <MessageSquare className="size-4" />
-                        הערות:
-                      </div>
-                      <p className="text-sm">{lead.message}</p>
-                    </div>
-                  )}
+                      {lead.message && (
+                        <div className="mb-3 p-3 bg-black/30 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1 text-sm opacity-70">
+                            <MessageSquare className="size-4" />
+                            הערות לקוח:
+                          </div>
+                          <p className="text-sm">{lead.message}</p>
+                        </div>
+                      )}
 
-                  {lead.notes && (
-                    <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-700">
-                      <div className="text-xs opacity-70 mb-1">הערות מנהל:</div>
-                      <p className="text-sm">{lead.notes}</p>
-                    </div>
+                      {lead.notes && (
+                        <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-700">
+                          <div className="text-xs opacity-70 mb-1">הערות מנהל:</div>
+                          <p className="text-sm">{lead.notes}</p>
+                        </div>
+                      )}
+                    </>
                   )}
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </>
+            </AnimatePresence>
+          </div>
         )}
       </div>
     </main>
   );
 }
-

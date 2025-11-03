@@ -10,19 +10,14 @@ function checkAuth(request: NextRequest): boolean {
   return providedPassword === ADMIN_PASSWORD;
 }
 
-// GET - קבלת כל המוצרים
+// GET - קבלת כל המוצרים (פתוח לכולם, לא רק אדמין)
 export async function GET(request: NextRequest) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json({ 
-        ok: false, 
-        error: 'Unauthorized - Invalid password',
-        requiresAuth: true
-      }, { status: 401 });
-    }
-
+    // Allow public access to products - no auth required
     const products = await sql`
-      SELECT * FROM products 
+      SELECT id, sku, name, price_regular, price_sale, currency, short_desc, category, tags, brand, stock, images, specs, created_at, updated_at 
+      FROM products 
+      WHERE stock IS NULL OR stock > 0
       ORDER BY created_at DESC
     `;
     

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { direction: rtl; }       /* RTL */
+body { @apply bg-charcoal text-[#ECECEC]; }
+a { @apply text-gold; }
+

@@ -61,7 +61,7 @@ export default function BlogPostPage() {
               </span>
               <span className="text-sm text-zinc-400 flex items-center gap-1">
                 <Clock className="size-4" />
-                {post.readTime} דק' קריאה
+                {post.readTime} דק&apos; קריאה
               </span>
               <span className="text-sm text-zinc-400 flex items-center gap-1">
                 <Eye className="size-4" />

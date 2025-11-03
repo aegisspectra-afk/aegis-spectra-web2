@@ -169,7 +169,7 @@ export default function TermsPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-green-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-zinc-300">אנחנו מספקים את השירות "כפי שהוא" ללא ערבויות</span>
+                  <span className="text-zinc-300">אנחנו מספקים את השירות &quot;כפי שהוא&quot; ללא ערבויות</span>
                 </li>
               </ul>
             </div>

@@ -45,6 +45,7 @@ export default function ProductsManagementPage() {
     } else {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchProducts() {

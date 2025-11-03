@@ -97,6 +97,7 @@ export default function BlogPage() {
               >
                 {post.image && (
                   <div className="h-48 bg-zinc-800 relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
                   </div>
                 )}
@@ -111,7 +112,7 @@ export default function BlogPage() {
                     </span>
                     <span className="text-xs text-zinc-400 flex items-center gap-1">
                       <Clock className="size-3" />
-                      {post.readTime} דק'
+                      {post.readTime} דק&apos;
                     </span>
                     <span className="text-xs text-zinc-400 flex items-center gap-1">
                       <Eye className="size-3" />

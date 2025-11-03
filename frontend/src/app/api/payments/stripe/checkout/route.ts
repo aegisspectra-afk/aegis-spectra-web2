@@ -13,26 +13,22 @@ export async function POST(req: NextRequest) {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     
     if (!stripeSecretKey) {
-      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
-    }
-
-    // In production, use Stripe SDK
-    // For now, return a checkout session URL
-    const stripe = await import('stripe').catch(() => null);
-    
-    if (!stripe) {
-      // Fallback: return mock checkout URL for development
+      // Fallback for development
       if (process.env.NODE_ENV === 'development') {
-        console.log('📧 Stripe checkout would be created:', { items, totalAmount });
+        console.log('📧 Stripe not configured, returning mock checkout:', { items, totalAmount });
         return NextResponse.json({ 
           checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout/success?session_id=mock_${Date.now()}`,
           sessionId: `mock_${Date.now()}`
         });
       }
-      return NextResponse.json({ error: 'Stripe SDK not available' }, { status: 500 });
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
     }
 
-    const stripeClient = new stripe.default(stripeSecretKey);
+    // Use Stripe SDK
+    const Stripe = (await import('stripe')).default;
+    const stripeClient = new Stripe(stripeSecretKey, {
+      apiVersion: '2024-06-20',
+    });
 
     const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -58,7 +54,15 @@ export async function POST(req: NextRequest) {
     });
   } catch (e: any) {
     console.error('Stripe checkout error:', e);
-    return NextResponse.json({ error: 'Checkout creation failed' }, { status: 500 });
+    // Fallback for development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📧 Stripe checkout fallback:', e.message);
+      return NextResponse.json({ 
+        checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout/success?session_id=mock_${Date.now()}`,
+        sessionId: `mock_${Date.now()}`
+      });
+    }
+    return NextResponse.json({ error: 'Checkout creation failed', details: e.message }, { status: 500 });
   }
 }
 

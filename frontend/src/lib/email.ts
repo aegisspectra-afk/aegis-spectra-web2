@@ -69,8 +69,8 @@ class EmailService {
     }
 
     try {
-      const resend = await import('resend');
-      const resendClient = new resend.Resend(process.env.RESEND_API_KEY);
+      const { Resend } = await import('resend');
+      const resendClient = new Resend(process.env.RESEND_API_KEY);
       
       const result = await resendClient.emails.send({
         from: template.from || this.fromEmail,

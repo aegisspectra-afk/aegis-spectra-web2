@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Shield, Camera, HardDrive, Smartphone, Wifi, Check, ArrowRight } from "lucide-react";
 
@@ -55,32 +59,54 @@ const PRODUCT_DETAILS: Record<string, {
   }
 };
 
-export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
-  const { sku } = await params;
+export default function ProductPage() {
+  const params = useParams();
+  const sku = params?.sku as string;
+  const [p, setP] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   
-  // נסה לטעון מה-API, אם זה נכשל - נשתמש ב-fallback
-  let p: Product | null = null;
-  
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+  useEffect(() => {
+    if (!sku) return;
     
-    const res = await fetch(`${apiUrl}/api/products/${sku}`, { 
-      cache: "no-store",
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (res.ok) {
-      p = await res.json();
-    } else {
-      p = FALLBACK_PRODUCTS[sku] || null;
-    }
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    p = FALLBACK_PRODUCTS[sku] || null;
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(`${apiUrl}/api/products/${sku}`, { 
+          cache: "no-store",
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (res.ok) {
+          const product = await res.json();
+          setP(product);
+        } else {
+          setP(FALLBACK_PRODUCTS[sku] || null);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setP(FALLBACK_PRODUCTS[sku] || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [sku, apiUrl]);
+
+  if (loading) {
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-10">
+        <div className="text-center">
+          <p className="opacity-70">טוען מוצר...</p>
+        </div>
+      </main>
+    );
   }
 
   if (!p) {

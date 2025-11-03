@@ -1,11 +1,26 @@
 import { neon } from '@netlify/neon';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const sql = neon();
 
-// GET - קבלת כל הלידים
-export async function GET() {
+// סיסמה להגנה - מומלץ לשנות ב-Netlify Environment Variables
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
+
+// GET - קבלת כל הלידים (מוגן בסיסמה)
+export async function GET(request: NextRequest) {
   try {
+    // בדיקת סיסמה
+    const authHeader = request.headers.get('authorization');
+    const providedPassword = authHeader?.replace('Bearer ', '');
+    
+    if (providedPassword !== ADMIN_PASSWORD) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Unauthorized - Invalid password',
+        requiresAuth: true
+      }, { status: 401 });
+    }
+
     const leads = await sql`
       SELECT * FROM leads 
       ORDER BY created_at DESC 

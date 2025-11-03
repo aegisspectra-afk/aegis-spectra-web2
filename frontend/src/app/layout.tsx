@@ -11,7 +11,17 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body className={heebo.className}>{children}</body>
+      <body className={heebo.className}>
+        {/* Hidden form for Netlify Forms detection at build time */}
+        <form name="lead-form" netlify netlify-honeypot="bot-field" hidden>
+          <input type="text" name="name" />
+          <input type="tel" name="phone" />
+          <input type="text" name="city" />
+          <input type="text" name="product_sku" />
+          <textarea name="message"></textarea>
+        </form>
+        {children}
+      </body>
     </html>
   );
 }

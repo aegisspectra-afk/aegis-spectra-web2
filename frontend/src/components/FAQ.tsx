@@ -40,7 +40,7 @@ export default function FAQ() {
   };
 
   return (
-    <section className="py-20 relative">
+    <section id="faq" className="py-20 relative">
       <div className="max-w-4xl mx-auto px-4">
         <ScrollReveal>
           <div className="text-center mb-16">

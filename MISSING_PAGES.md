@@ -74,14 +74,9 @@
    - Accordion/Collapsible sections
    - קישורים לנושאים קשורים
 
-### 🟢 עדיפות נמוכה:
+---
 
-8. **עמוד Gallery/Portfolio** (`/gallery` או `/portfolio`)
-   - תמונות פרויקטים
-   - Lightbox לתצוגה
-   - פילטר לפי סוג פרויקט
-   - לפני/אחרי
-   - Case studies
+**הערה:** עמוד Gallery/Portfolio הוסר מהרשימה - לא רלוונטי.
 
 ---
 

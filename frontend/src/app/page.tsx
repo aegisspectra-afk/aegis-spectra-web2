@@ -14,9 +14,27 @@ const currency = (n: number) =>
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`)
-      .then(r => r.json()).then(setProducts).catch(console.error);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    setLoading(true);
+    setError(null);
+    fetch(`${apiUrl}/api/products`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to fetch products');
+        return r.json();
+      })
+      .then(data => {
+        setProducts(data || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching products:', err);
+        setError('שגיאה בטעינת המוצרים. נסה לרענן את הדף.');
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -34,8 +52,25 @@ export default function Home() {
       <section className="mb-10">
         <div className="rounded-2xl bg-[#0B0B0D] p-8 border border-zinc-800">
           <h2 className="text-2xl font-bold mb-6">מוצרים מובילים</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {products.map(p => (
+          {loading && (
+            <div className="text-center py-8">
+              <p className="opacity-70">טוען מוצרים...</p>
+            </div>
+          )}
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-red-400 mb-4">{error}</p>
+              <p className="text-sm opacity-70">וודא שה-API זמין והמשתנה NEXT_PUBLIC_API_URL מוגדר נכון.</p>
+            </div>
+          )}
+          {!loading && !error && products.length === 0 && (
+            <div className="text-center py-8">
+              <p className="opacity-70">אין מוצרים זמינים כרגע.</p>
+            </div>
+          )}
+          {!loading && !error && products.length > 0 && (
+            <div className="grid md:grid-cols-2 gap-6">
+              {products.map(p => (
               <div key={p.sku} className="rounded-xl border border-zinc-800 p-6 bg-black/30">
                 <h3 className="text-xl font-semibold mb-2">{p.name}</h3>
                 <p className="text-sm opacity-80 mb-4">{p.short_desc}</p>
@@ -53,8 +88,9 @@ export default function Home() {
                   פרטים והזמנה
                 </a>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -75,10 +111,14 @@ function LeadForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    setStatus("idle");
     try {
-      const r = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lead`, { method: "POST", body: fd });
+      const r = await fetch(`${apiUrl}/api/lead`, { method: "POST", body: fd });
       setStatus(r.ok ? "ok" : "err");
-    } catch { setStatus("err"); }
+    } catch { 
+      setStatus("err"); 
+    }
   }
   return (
     <form onSubmit={onSubmit} className="grid md:grid-cols-2 gap-4">

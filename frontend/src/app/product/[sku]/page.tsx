@@ -7,9 +7,11 @@ const fmt = (n:number)=> new Intl.NumberFormat("he-IL",{style:"currency",currenc
 
 export default async function ProductPage({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${sku}`, { cache: "no-store" });
-  if (!res.ok) return <div className="p-10">לא נמצא</div>;
-  const p: Product = await res.json();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  try {
+    const res = await fetch(`${apiUrl}/api/products/${sku}`, { cache: "no-store" });
+    if (!res.ok) return <div className="p-10 text-center">לא נמצא</div>;
+    const p: Product = await res.json();
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-10">
@@ -20,6 +22,16 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
       </div>
       <a href="/#lead" className="rounded-xl border border-gold px-5 py-3 hover:bg-gold hover:text-black">בקשת הצעת מחיר</a>
     </main>
-  );
+    );
+  } catch (error) {
+    return (
+      <main className="max-w-4xl mx-auto px-4 py-10">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">שגיאה בטעינת המוצר</p>
+          <a href="/" className="text-gold">← חזרה לעמוד הבית</a>
+        </div>
+      </main>
+    );
+  }
 }
 

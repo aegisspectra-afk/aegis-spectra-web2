@@ -323,7 +323,7 @@ export default function Home() {
       </section>
 
       {/* WHY US */}
-      <WhyChooseUs />
+      <WhyChooseUs key="why-choose-us" />
 
       {/* PRODUCT HIGHLIGHT */}
       <section id="products" className="max-w-6xl mx-auto px-4 py-20 relative">
@@ -510,13 +510,13 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <FAQ />
+      <FAQ key="faq" />
 
       {/* TRUST */}
-      <Trust />
+      <Trust key="trust" />
 
       {/* CTA */}
-      <CTA />
+      <CTA key="cta" />
 
       {/* CONTACT / LEAD */}
       <section id="contact" className="max-w-6xl mx-auto px-4 py-20 relative">

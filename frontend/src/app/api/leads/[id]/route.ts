@@ -41,36 +41,63 @@ export async function PATCH(
     const values: any[] = [];
     let paramIndex = 1;
 
-    if (status !== undefined) {
-      updates.push(`status = $${paramIndex++}`);
-      values.push(status);
-    }
-    if (notes !== undefined) {
-      updates.push(`notes = $${paramIndex++}`);
-      values.push(notes);
-    }
-    if (score !== undefined) {
-      updates.push(`score = $${paramIndex++}`);
-      values.push(score);
-    }
-    if (tags !== undefined) {
-      updates.push(`tags = $${paramIndex++}`);
-      values.push(JSON.stringify(tags));
+    // Build update query - use conditional updates
+    let hasUpdate = false;
+    
+    if (status !== undefined && notes !== undefined && score !== undefined && tags !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET status = ${status}, notes = ${notes}, score = ${score}, tags = ${JSON.stringify(tags)}::jsonb, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
+    } else if (status !== undefined && notes !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET status = ${status}, notes = ${notes}, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
+    } else if (status !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET status = ${status}, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
+    } else if (notes !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET notes = ${notes}, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
+    } else if (score !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET score = ${score}, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
+    } else if (tags !== undefined) {
+      await sql`
+        UPDATE leads 
+        SET tags = ${JSON.stringify(tags)}::jsonb, updated_at = NOW()
+        WHERE id = ${id}
+      `;
+      hasUpdate = true;
     }
 
-    if (updates.length === 0) {
+    if (!hasUpdate) {
       return NextResponse.json({ 
         ok: false, 
         error: 'No fields to update' 
       }, { status: 400 });
     }
-
-    updates.push(`updated_at = NOW()`);
-    values.push(id);
-
-    const query = `UPDATE leads SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
     
-    const [updatedLead] = await sql.unsafe(query, values);
+    const [updatedLead] = await sql`
+      SELECT * FROM leads WHERE id = ${id}
+    `;
 
     return NextResponse.json({ ok: true, lead: updatedLead });
   } catch (error: any) {

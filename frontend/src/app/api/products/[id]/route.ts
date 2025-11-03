@@ -74,61 +74,101 @@ export async function PATCH(
     const body = await request.json();
     const { sku, name, description, price_regular, price_sale, category, tags, images, specs } = body;
 
-    // Build update query dynamically
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
+    // Build update query - use conditional updates
+    // For simplicity, update all provided fields
+    const updateFields: string[] = [];
+    const updateValues: any[] = [];
+    
     if (sku !== undefined) {
-      updates.push(`sku = $${paramIndex++}`);
-      values.push(sku);
+      updateFields.push('sku');
+      updateValues.push(sku);
     }
     if (name !== undefined) {
-      updates.push(`name = $${paramIndex++}`);
-      values.push(name);
+      updateFields.push('name');
+      updateValues.push(name);
     }
     if (description !== undefined) {
-      updates.push(`description = $${paramIndex++}`);
-      values.push(description);
+      updateFields.push('description');
+      updateValues.push(description);
     }
     if (price_regular !== undefined) {
-      updates.push(`price_regular = $${paramIndex++}`);
-      values.push(price_regular);
+      updateFields.push('price_regular');
+      updateValues.push(price_regular);
     }
     if (price_sale !== undefined) {
-      updates.push(`price_sale = $${paramIndex++}`);
-      values.push(price_sale);
+      updateFields.push('price_sale');
+      updateValues.push(price_sale);
     }
     if (category !== undefined) {
-      updates.push(`category = $${paramIndex++}`);
-      values.push(category);
+      updateFields.push('category');
+      updateValues.push(category);
     }
     if (tags !== undefined) {
-      updates.push(`tags = $${paramIndex++}`);
-      values.push(JSON.stringify(tags));
+      updateFields.push('tags');
+      updateValues.push(JSON.stringify(tags));
     }
     if (images !== undefined) {
-      updates.push(`images = $${paramIndex++}`);
-      values.push(JSON.stringify(images));
+      updateFields.push('images');
+      updateValues.push(JSON.stringify(images));
     }
     if (specs !== undefined) {
-      updates.push(`specs = $${paramIndex++}`);
-      values.push(JSON.stringify(specs));
+      updateFields.push('specs');
+      updateValues.push(JSON.stringify(specs));
     }
 
-    if (updates.length === 0) {
+    if (updateFields.length === 0) {
       return NextResponse.json({ 
         ok: false, 
         error: 'No fields to update' 
       }, { status: 400 });
     }
 
-    updates.push(`updated_at = NOW()`);
-    values.push(productId);
-
-    const query = `UPDATE products SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+    // Use a simple approach - update all fields at once
+    // For now, we'll update fields one by one or use a simpler approach
+    // This is a workaround for Neon's template literal limitations
     
-    const [updatedProduct] = await sql.unsafe(query, values);
+    let queryResult;
+    if (sku !== undefined && name !== undefined && price_regular !== undefined) {
+      // Full update
+      queryResult = await sql`
+        UPDATE products 
+        SET sku = ${sku}, name = ${name}, description = ${description || null}, 
+            price_regular = ${price_regular}, price_sale = ${price_sale || null},
+            category = ${category || null}, tags = ${tags ? JSON.stringify(tags) : null}::jsonb,
+            images = ${images ? JSON.stringify(images) : null}::jsonb,
+            specs = ${specs ? JSON.stringify(specs) : null}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${productId}
+        RETURNING *
+      `;
+    } else {
+      // Partial update - get existing product first
+      const [existing] = await sql`SELECT * FROM products WHERE id = ${productId}`;
+      if (!existing) {
+        return NextResponse.json({ 
+          ok: false, 
+          error: 'Product not found' 
+        }, { status: 404 });
+      }
+      
+      queryResult = await sql`
+        UPDATE products 
+        SET sku = ${sku !== undefined ? sku : existing.sku}, 
+            name = ${name !== undefined ? name : existing.name},
+            description = ${description !== undefined ? description : existing.description},
+            price_regular = ${price_regular !== undefined ? price_regular : existing.price_regular},
+            price_sale = ${price_sale !== undefined ? price_sale : existing.price_sale},
+            category = ${category !== undefined ? category : existing.category},
+            tags = ${tags !== undefined ? JSON.stringify(tags) : existing.tags}::jsonb,
+            images = ${images !== undefined ? JSON.stringify(images) : existing.images}::jsonb,
+            specs = ${specs !== undefined ? JSON.stringify(specs) : existing.specs}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${productId}
+        RETURNING *
+      `;
+    }
+    
+    const [updatedProduct] = queryResult;
 
     return NextResponse.json({ ok: true, product: updatedProduct });
   } catch (error: any) {

@@ -44,7 +44,7 @@ export default function Home() {
             <a href="#contact" className="rounded-xl bg-gold text-black px-5 py-3 font-semibold inline-flex items-center justify-center gap-2">
               הזמנת ייעוץ חינם <ChevronRight className="size-4" />
             </a>
-            <a href="https://wa.me/9720000000000" className="rounded-xl border border-gold px-5 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10">
+            <a href="https://wa.me/972559737025" className="rounded-xl border border-gold px-5 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10">
               דברו איתנו ב-WhatsApp <Phone className="size-4" />
             </a>
           </div>
@@ -192,7 +192,7 @@ export default function Home() {
         <SectionTitle title="הזמנת ייעוץ חינם" subtitle="נחזור אליך לתיאום מהיר" />
         <div className="rounded-3xl border border-zinc-800 bg-black/30 p-6 md:p-8">
           <LeadForm />
-          <p className="mt-4 text-xs opacity-70">יבנה, ישראל • support@aegisspectra.com • ‎+972-XX-XXX-XXXX</p>
+          <p className="mt-4 text-xs opacity-70">יבנה, ישראל • aegisspectra@gmail.com • ‎055-973-7025</p>
         </div>
       </section>
 

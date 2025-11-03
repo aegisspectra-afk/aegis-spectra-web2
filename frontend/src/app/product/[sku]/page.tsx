@@ -143,7 +143,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
               הזמנת ייעוץ חינם <ArrowRight className="size-4" />
             </Link>
             <Link 
-              href="https://wa.me/9720000000000" 
+              href="https://wa.me/972559737025" 
               className="rounded-xl border border-gold px-6 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10 transition"
             >
               שאלות ב-WhatsApp

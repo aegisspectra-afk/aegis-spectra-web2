@@ -208,15 +208,14 @@ export default function ProductsPage() {
               {filteredAndSortedProducts.map((product, i) => (
                 <ScrollReveal key={product.id} delay={i * 0.05}>
                   {viewMode === "grid" ? (
-                    <Link href={`/product/${product.sku}`}>
-                      <ProductCard
-                        sku={product.sku}
-                        name={product.name}
-                        price={product.price_sale || product.price_regular}
-                        originalPrice={product.price_sale ? product.price_regular : undefined}
-                        description={product.short_desc}
-                      />
-                    </Link>
+                    <ProductCard
+                      sku={product.sku}
+                      name={product.name}
+                      desc={product.short_desc || ""}
+                      priceRegular={product.price_regular}
+                      priceSale={product.price_sale}
+                      ctaHref={`/product/${product.sku}`}
+                    />
                   ) : (
                     <Link href={`/product/${product.sku}`}>
                       <motion.div

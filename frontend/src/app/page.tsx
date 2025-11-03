@@ -16,10 +16,10 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { TiltCard } from "@/components/TiltCard";
 import { StickyNav } from "@/components/StickyNav";
-import { WhyChooseUs } from "@/components/WhyChooseUs";
-import { Trust } from "@/components/Trust";
-import { FAQ } from "@/components/FAQ";
-import { CTA } from "@/components/CTA";
+import WhyChooseUs from "@/components/WhyChooseUs";
+import Trust from "@/components/Trust";
+import FAQ from "@/components/FAQ";
+import CTA from "@/components/CTA";
 
 export default function Home() {
   const { scrollYProgress } = useScroll();

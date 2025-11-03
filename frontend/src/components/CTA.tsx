@@ -6,7 +6,7 @@ import { ArrowRight, Phone, Mail } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 import { AnimatedCounter } from "./AnimatedCounter";
 
-export function CTA() {
+export default function CTA() {
   return (
     <section className="py-20 bg-gradient-to-b from-black/40 via-gold/5 to-black/40 relative">
       <div className="max-w-6xl mx-auto px-4">

@@ -28,7 +28,7 @@ const trustItems = [
   },
 ];
 
-export function Trust() {
+export default function Trust() {
   return (
     <section className="py-20 bg-gradient-to-b from-black/20 to-black/40 relative">
       <div className="max-w-6xl mx-auto px-4">

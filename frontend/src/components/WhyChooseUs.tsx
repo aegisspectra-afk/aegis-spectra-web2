@@ -28,7 +28,7 @@ const whyChooseUs = [
   },
 ];
 
-export function WhyChooseUs() {
+export default function WhyChooseUs() {
   return (
     <section className="py-20 bg-gradient-to-b from-transparent to-black/20 relative">
       <div className="max-w-6xl mx-auto px-4">

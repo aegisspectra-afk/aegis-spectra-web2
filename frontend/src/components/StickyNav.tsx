@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Shield, Menu, X } from "lucide-react";
+import { Shield, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function StickyNav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { scrollY } = useScroll();
+  const router = useRouter();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -28,6 +31,12 @@ export function StickyNav() {
   };
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("user_token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  useEffect(() => {
     // Prevent body scroll when mobile menu is open
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -39,11 +48,20 @@ export function StickyNav() {
     };
   }, [isOpen]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user_token");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("user_name");
+    setIsLoggedIn(false);
+    router.push("/");
+  };
+
   const navLinks = [
     { href: "/services", label: "שירותים" },
-    { href: "#products", label: "מוצרים" },
+    { href: "/products", label: "מוצרים" },
     { href: "/about", label: "אודות" },
-    { href: "#faq", label: "שאלות נפוצות" },
+    { href: "/blog", label: "בלוג" },
+    { href: "/contact", label: "צור קשר" },
   ];
 
   return (
@@ -68,16 +86,54 @@ export function StickyNav() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center gap-6 text-sm">
                 {navLinks.map((link) => (
-                  <a
+                  <Link
                     key={link.href}
                     href={link.href}
-                    onClick={(e) => handleSmoothScroll(e, link.href)}
                     className="hover:text-gold transition relative group"
                   >
                     {link.label}
                     <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
-                  </a>
+                  </Link>
                 ))}
+                {isLoggedIn ? (
+                  <div className="flex items-center gap-4">
+                    <Link
+                      href="/user"
+                      className="flex items-center gap-2 hover:text-gold transition"
+                    >
+                      <User className="size-4" />
+                      דשבורד
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition"
+                    >
+                      <LogOut className="size-4" />
+                      התנתק
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <Link
+                      href="/login"
+                      className="hover:text-gold transition"
+                    >
+                      התחברות
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                    >
+                      <span className="relative z-10">הרשמה</span>
+                      <motion.span
+                        className="absolute inset-0 bg-gold"
+                        initial={{ x: "-100%" }}
+                        whileHover={{ x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </Link>
+                  </div>
+                )}
                 <a
                   href="#contact"
                   onClick={(e) => handleSmoothScroll(e, "#contact")}
@@ -126,18 +182,60 @@ export function StickyNav() {
             >
               <div className="p-6 space-y-4">
                 {navLinks.map((link) => (
-                  <a
+                  <Link
                     key={link.href}
                     href={link.href}
-                    onClick={(e) => handleSmoothScroll(e, link.href)}
+                    onClick={() => setIsOpen(false)}
                     className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 ))}
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      href="/user"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2 block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
+                    >
+                      <User className="size-5" />
+                      דשבורד
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full text-right py-3 text-lg text-red-400 hover:text-red-300 transition border-b border-zinc-800"
+                    >
+                      <LogOut className="size-5" />
+                      התנתק
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="block mt-4 rounded-xl border border-zinc-700 bg-black/30 px-6 py-3 text-center font-semibold hover:bg-zinc-800 transition"
+                    >
+                      התחברות
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsOpen(false)}
+                      className="block rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
+                    >
+                      הרשמה
+                    </Link>
+                  </>
+                )}
                 <a
                   href="#contact"
-                  onClick={(e) => handleSmoothScroll(e, "#contact")}
+                  onClick={(e) => {
+                    handleSmoothScroll(e, "#contact");
+                    setIsOpen(false);
+                  }}
                   className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
                 >
                   הזמנת ייעוץ חינם

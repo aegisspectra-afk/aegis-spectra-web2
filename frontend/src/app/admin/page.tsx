@@ -101,7 +101,7 @@ export default function AdminPage() {
           <>
             <div className="mb-6 flex items-center justify-between">
               <div className="text-sm opacity-70">
-                סה"כ {leads.length} לידים
+                סה&ldquo;כ {leads.length} לידים
               </div>
               <button 
                 onClick={fetchLeads}

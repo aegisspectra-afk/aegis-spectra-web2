@@ -498,7 +498,7 @@ export default function Home() {
                       <span className="text-zinc-300 font-bold">{t.a.split(" • ")[0][0]}</span>
                     </div>
                     <div>
-                      <div className="font-semibold text-gold">{t.a.split(" • ")[0]}</div>
+                      <div className="font-semibold text-white">{t.a.split(" • ")[0]}</div>
                       <div className="text-xs opacity-70">{t.a.split(" • ")[1]}</div>
                     </div>
                   </div>

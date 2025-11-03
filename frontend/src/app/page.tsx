@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { 
   Shield, Camera, Lock, Zap, Phone, Star, ChevronRight, Check,
-  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers
+  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers, Mail
 } from "lucide-react";
 import LeadForm from "@/components/LeadForm";
 import ProductCard from "@/components/ProductCard";
@@ -319,34 +319,7 @@ export default function Home() {
       </section>
 
       {/* WHY US */}
-      <section className="max-w-6xl mx-auto px-4 py-20 relative">
-        <ScrollReveal>
-          <SectionTitle title="למה Aegis Spectra?" subtitle="דיסקרטיות, טכנולוגיה ודיוק צבאי" />
-        </ScrollReveal>
-        <div className="grid md:grid-cols-4 gap-6">
-          {[
-            { h: "דיסקרטיות זה ה-DNA", p: "עובדים נקי ושקט. אתם ישנים רגוע.", icon: Shield },
-            { h: "טכנולוגיה פרימיום", p: "מצלמות AI, אזעקות חכמות, אפליקציות בעברית.", icon: Layers },
-            { h: "תכנון כמו מבצע", p: "סיור, תרשים, פריסה, הדרכה. תיעוד מלא.", icon: TrendingUp },
-            { h: "אחריות ושירות", p: "12 ח׳ ציוד, SLA לפי רמה, תמיכה אישית.", icon: Award },
-          ].map((c, i) => (
-            <ScrollReveal key={i} delay={i * 0.1} direction="up">
-              <TiltCard intensity={12}>
-                <motion.div
-                  className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 hover:border-gold/50 transition-all group h-full"
-                  whileHover={{ y: -8, scale: 1.02 }}
-                >
-                  <div className="size-14 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center mb-4 group-hover:bg-gold/20 transition-colors">
-                    <c.icon className="size-7 text-gold" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3 text-gold group-hover:text-gold/80 transition">{c.h}</h3>
-                  <p className="text-sm opacity-90 leading-relaxed">{c.p}</p>
-                </motion.div>
-              </TiltCard>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
+      <WhyChooseUs />
 
       {/* PRODUCT HIGHLIGHT */}
       <section id="products" className="max-w-6xl mx-auto px-4 py-20 relative">
@@ -533,36 +506,13 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <ScrollReveal>
-          <SectionTitle title="שאלות נפוצות" subtitle="קצר ולעניין" />
-        </ScrollReveal>
-        <div className="grid md:grid-cols-2 gap-6">
-          {[
-            { q: "תוך כמה זמן מתקינים?", a: "בדרך כלל בתוך 1–3 ימי עסקים מרגע אישור ההצעה." },
-            { q: "האם יש אחריות?", a: "כן. 12 חודשים לציוד ולעבודה, עם אפשרות הארכה." },
-            { q: "אפשר צפייה מהנייד?", a: "כן. אפליקציה בעברית, הרשאות משתמשים והקשחה." },
-            { q: "מה לגבי פרטיות?", a: "מתקינים שילוט, מגבילים צילום לשטח פרטי ומסבירים ללקוח." },
-          ].map((f, i) => (
-            <ScrollReveal key={i} delay={i * 0.1} direction="up">
-              <motion.div
-                className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6 hover:border-gold/50 transition-all group"
-                whileHover={{ y: -4, scale: 1.02 }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="size-8 rounded-lg bg-gold/10 border border-gold/30 flex items-center justify-center flex-shrink-0 group-hover:bg-gold/20 transition-colors">
-                    <span className="text-gold font-bold text-sm">?</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold mb-2 text-lg group-hover:text-gold transition">{f.q}</h3>
-                    <p className="opacity-90 leading-relaxed">{f.a}</p>
-                  </div>
-                </div>
-              </motion.div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
+      <FAQ />
+
+      {/* TRUST */}
+      <Trust />
+
+      {/* CTA */}
+      <CTA />
 
       {/* CONTACT / LEAD */}
       <section id="contact" className="max-w-6xl mx-auto px-4 py-20 relative">
@@ -587,19 +537,82 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-zinc-800/50 mt-20 bg-black/30 backdrop-blur-sm">
+      <footer className="border-t border-zinc-800/50 mt-20 bg-black/40 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <Shield className="text-gold size-8" />
-              <div>
-                <div className="font-bold text-gold text-lg">Aegis Spectra Security</div>
-                <div className="text-sm opacity-70">© {new Date().getFullYear()} כל הזכויות שמורות</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Logo and Description */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="text-gold size-8" />
+                <span className="font-bold text-gold text-xl">Aegis Spectra Security</span>
               </div>
+              <p className="max-w-md text-zinc-400 text-sm leading-relaxed">
+                אבטחה חכמה לבית ולעסק — מצלמות, בקרת כניסה וניהול מרחוק. 
+                שירותי התקנה מקצועיים ותמיכה מקוונת.
+              </p>
             </div>
-            <div className="flex gap-6 opacity-80">
-              <a href="/legal" className="hover:text-gold transition">מדיניות פרטיות</a>
-              <a href="/terms" className="hover:text-gold transition">תנאי שימוש</a>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold mb-4 text-gold">קישורים מהירים</h3>
+              <ul className="space-y-2 text-sm">
+                {[
+                  { href: "/", label: "דף הבית" },
+                  { href: "#products", label: "מוצרים" },
+                  { href: "#packages", label: "חבילות" },
+                  { href: "#contact", label: "צור קשר" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} className="text-zinc-400 hover:text-gold transition">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h3 className="font-semibold mb-4 text-gold">מידע משפטי</h3>
+              <ul className="space-y-2 text-sm">
+                {[
+                  { href: "/privacy", label: "מדיניות פרטיות" },
+                  { href: "/terms", label: "תנאי שירות" },
+                  { href: "https://wa.me/972559737025", label: "WhatsApp" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className="text-zinc-400 hover:text-gold transition"
+                      {...(link.href.startsWith("http") && {
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                      })}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-zinc-800/50">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="text-zinc-400 text-sm">
+                © {new Date().getFullYear()} Aegis Spectra Security — כל הזכויות שמורות
+              </div>
+              <div className="flex items-center gap-4 text-sm text-zinc-400">
+                <a href="tel:+972559737025" className="hover:text-gold transition flex items-center gap-2">
+                  <Phone className="size-4 text-gold" />
+                  <span>055-973-7025</span>
+                </a>
+                <a href="mailto:aegisspectra@gmail.com" className="hover:text-gold transition flex items-center gap-2">
+                  <Mail className="size-4 text-gold" />
+                  <span>aegisspectra@gmail.com</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

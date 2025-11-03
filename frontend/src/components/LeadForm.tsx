@@ -91,7 +91,7 @@ export default function LeadForm() {
 
       <div className="relative">
         <input 
-          className={`${base} ${touched.name && !form.getFieldValue?.("name") ? errorClass : ""}`}
+          className={base}
           name="name" 
           type="text"
           required 

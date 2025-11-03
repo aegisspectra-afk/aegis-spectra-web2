@@ -102,8 +102,14 @@ export default function ProductPage() {
   if (loading) {
     return (
       <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="text-center">
-          <p className="opacity-70">טוען מוצר...</p>
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-zinc-800 rounded-lg w-1/2"></div>
+          <div className="h-4 bg-zinc-800 rounded-lg w-3/4"></div>
+          <div className="h-10 bg-zinc-800 rounded-lg w-1/3"></div>
+          <div className="grid md:grid-cols-2 gap-4 mt-8">
+            <div className="h-24 bg-zinc-800 rounded-lg"></div>
+            <div className="h-24 bg-zinc-800 rounded-lg"></div>
+          </div>
         </div>
       </main>
     );

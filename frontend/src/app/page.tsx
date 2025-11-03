@@ -15,17 +15,17 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
 
       {/* NAV */}
-      <nav className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Shield className="text-gold" />
+      <nav className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between" role="navigation" aria-label="ניווט ראשי">
+        <Link href="/" className="flex items-center gap-2" aria-label="Aegis Spectra - דף הבית">
+          <Shield className="text-gold" aria-hidden="true" />
           <span className="font-bold text-gold">Aegis Spectra</span>
         </Link>
         <div className="hidden md:flex items-center gap-6 text-sm">
-          <a href="#products" className="hover:text-gold">מוצרים</a>
-          <a href="#packages" className="hover:text-gold">חבילות</a>
-          <a href="#process" className="hover:text-gold">תהליך</a>
-          <a href="#faq" className="hover:text-gold">שאלות נפוצות</a>
-          <a href="#contact" className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition">הזמנת ייעוץ חינם</a>
+          <a href="#products" className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1" aria-label="מוצרים">מוצרים</a>
+          <a href="#packages" className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1" aria-label="חבילות">חבילות</a>
+          <a href="#process" className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1" aria-label="תהליך עבודה">תהליך</a>
+          <a href="#faq" className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1" aria-label="שאלות נפוצות">שאלות נפוצות</a>
+          <a href="#contact" className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal" aria-label="הזמנת ייעוץ חינם">הזמנת ייעוץ חינם</a>
         </div>
       </nav>
 

@@ -1,2 +1,14 @@
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Environment Variables Example
 
+# API URL (Backend)
+NEXT_PUBLIC_API_URL=http://localhost:8000
+# In production, set to your backend URL (e.g., https://your-backend.onrender.com)
+
+# Google Analytics 4
+# Get your GA4 Measurement ID from Google Analytics
+# Format: G-XXXXXXXXXX
+NEXT_PUBLIC_GA_ID=
+
+# Admin Password (for /admin page)
+# Set this in Netlify Environment Variables
+ADMIN_PASSWORD=aegis2024

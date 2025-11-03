@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check if user is logged in
@@ -17,16 +18,42 @@ export function Navbar() {
     setIsLoggedIn(!!token);
   }, []);
 
+  useEffect(() => {
+    // Prevent body scroll when mobile menu is open
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Smooth scroll handler
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        setIsOpen(false);
+      }
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user_token");
     localStorage.removeItem("user_email");
     localStorage.removeItem("user_name");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("user_role");
     setIsLoggedIn(false);
     router.push("/");
   };
 
   const navLinks = [
-    { href: "/", label: "דף הבית" },
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },
     { href: "/about", label: "אודות" },
@@ -36,7 +63,7 @@ export function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-charcoal/95 backdrop-blur-md border-b border-zinc-800/50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
             <Shield className="text-gold size-6 group-hover:text-gold/80 transition" />
@@ -83,11 +110,33 @@ export function Navbar() {
               </Link>
               <Link
                 href="/register"
-                className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition"
+                className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
               >
-                הרשמה
+                <span className="relative z-10">הרשמה</span>
+                <motion.span
+                  className="absolute inset-0 bg-gold"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
               </Link>
             </div>
+          )}
+          {/* Show "הזמנת ייעוץ חינם" only on homepage */}
+          {pathname === '/' && (
+            <a
+              href="#contact"
+              onClick={(e) => handleSmoothScroll(e, "#contact")}
+              className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+            >
+              <span className="relative z-10">הזמנת ייעוץ חינם</span>
+              <motion.span
+                className="absolute inset-0 bg-gold"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </a>
           )}
         </div>
 
@@ -168,6 +217,19 @@ export function Navbar() {
                       הרשמה
                     </Link>
                   </>
+                )}
+                {/* Show "הזמנת ייעוץ חינם" only on homepage */}
+                {pathname === '/' && (
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      handleSmoothScroll(e, "#contact");
+                      setIsOpen(false);
+                    }}
+                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
+                  >
+                    הזמנת ייעוץ חינם
+                  </a>
                 )}
               </div>
             </motion.div>

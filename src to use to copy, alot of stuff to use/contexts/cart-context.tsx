@@ -1,0 +1,150 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+// Cart item interface
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+// Cart context interface
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: any) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotal: () => number;
+  getCartItemCount: () => number;
+  isCartOpen: boolean;
+  setIsCartOpen: (open: boolean) => void;
+}
+
+// Create context
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+// Cart provider component
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem('aegis-cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Optional: react to cross-tab changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handler = (e: StorageEvent) => {
+        if (e.key === 'aegis-cart' && e.newValue) {
+          try { setCart(JSON.parse(e.newValue)); } catch {}
+        }
+      };
+      window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
+    }
+  }, []);
+
+  // Persist cart
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('aegis-cart', JSON.stringify(cart));
+    }
+  }, [cart]);
+
+  const addToCart = (product: any) => {
+    console.log('Adding to cart:', product);
+    console.log('Current cart before adding:', cart);
+    
+    // For builder, we always add new items since we use random UUIDs
+    // For store, we check by name to avoid duplicates
+    const existingItem = cart.find(item => item.name === product.name);
+    
+    if (existingItem) {
+      console.log('Item already exists, updating quantity');
+      setCart(prev => {
+        const newCart = prev.map(item => 
+          item.name === product.name 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+        console.log('Updated cart (existing item):', newCart);
+        return newCart;
+      });
+    } else {
+      console.log('Adding new item to cart');
+      setCart(prev => {
+        const newCart = [...prev, {
+          id: product.id || Math.random().toString(36).substr(2, 9),
+          name: product.name,
+          price: product.minPrice || product.price || 0,
+          quantity: 1,
+          image: product.image || '/api/placeholder/300/200'
+        }];
+        console.log('Updated cart (new item):', newCart);
+        return newCart;
+      });
+    }
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart(prev => prev.map(item => 
+      item.id === productId ? { ...item, quantity } : item
+    ));
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getCartItemCount = () => {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
+  const value: CartContextType = {
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getCartTotal,
+    getCartItemCount,
+    isCartOpen,
+    setIsCartOpen
+  };
+
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+// Custom hook to use cart context
+export function useCart() {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+}

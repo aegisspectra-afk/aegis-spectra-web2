@@ -39,7 +39,7 @@ export default function LeadForm() {
       name="lead-form" 
       method="POST" 
       data-netlify="true" 
-      netlify-honeypot="bot-field"
+      data-netlify-honeypot="bot-field"
       onSubmit={onSubmit}
       className="grid md:grid-cols-2 gap-4"
     >

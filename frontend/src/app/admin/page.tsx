@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, Phone, MapPin, Package, MessageSquare, Calendar, 
   CheckCircle, XCircle, Lock, Search, Filter, RefreshCw, 
   TrendingUp, Users, Clock, Edit2, Save, X, Download,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, CheckSquare, Square, BarChart3, FileText, Bell
 } from "lucide-react";
+import { ToastContainer, useToast, ToastType } from "@/components/Toast";
+import { BarChart, PieChart } from "@/components/Chart";
 
 type Lead = {
   id: number;
@@ -48,6 +50,22 @@ export default function AdminPage() {
   const [editingLead, setEditingLead] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState<string>("");
   const [editNotes, setEditNotes] = useState<string>("");
+  
+  // Toast notifications
+  const { toasts, showToast, closeToast } = useToast();
+  
+  // Bulk actions
+  const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<string>("");
+  const [bulkNotes, setBulkNotes] = useState<string>("");
+  
+  // Charts & views
+  const [showCharts, setShowCharts] = useState(false);
+  
+  // New leads tracking
+  const lastLeadCountRef = useRef<number>(0);
+  const lastFetchTimeRef = useRef<number>(Date.now());
 
   // בדיקה אם כבר מאומת
   useEffect(() => {
@@ -103,7 +121,7 @@ export default function AdminPage() {
     setPassword("");
   }
 
-  async function fetchLeads() {
+  async function fetchLeads(showNotification = false) {
     setLoading(true);
     setError(null);
     try {
@@ -126,7 +144,18 @@ export default function AdminPage() {
       const data = await res.json();
       
       if (data.ok && data.leads) {
-        setLeads(data.leads);
+        const newLeads = data.leads;
+        const currentCount = newLeads.length;
+        
+        // בדיקת לידים חדשים
+        if (showNotification && lastLeadCountRef.current > 0 && currentCount > lastLeadCountRef.current) {
+          const newCount = currentCount - lastLeadCountRef.current;
+          showToast(`לידים חדשים: ${newCount}`, "info");
+        }
+        
+        setLeads(newLeads);
+        lastLeadCountRef.current = currentCount;
+        lastFetchTimeRef.current = Date.now();
       } else if (data.requiresAuth) {
         setIsAuthenticated(false);
         localStorage.removeItem("admin_auth");
@@ -138,10 +167,22 @@ export default function AdminPage() {
     } catch (err) {
       console.error("Error:", err);
       setError("שגיאה בטעינת הלידים");
+      showToast("שגיאה בטעינת הלידים", "error");
     } finally {
       setLoading(false);
     }
   }
+  
+  // Auto-refresh כל 30 שניות
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const interval = setInterval(() => {
+      fetchLeads(true);
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   async function updateLead(id: number, status: string, notes: string) {
     try {
@@ -162,12 +203,102 @@ export default function AdminPage() {
       if (data.ok && data.lead) {
         setLeads(leads.map(l => l.id === id ? data.lead : l));
         setEditingLead(null);
+        showToast("ליד עודכן בהצלחה", "success");
       } else {
-        alert("שגיאה בעדכון הליד");
+        showToast("שגיאה בעדכון הליד", "error");
       }
     } catch (err) {
       console.error("Error updating lead:", err);
-      alert("שגיאה בעדכון הליד");
+      showToast("שגיאה בעדכון הליד", "error");
+    }
+  }
+  
+  // CSV Export
+  function exportToCSV() {
+    const headers = ["ID", "שם", "טלפון", "עיר", "מוצר", "סטטוס", "הערות לקוח", "הערות מנהל", "תאריך יצירה"];
+    const rows = filteredLeads.map(lead => [
+      lead.id,
+      lead.name,
+      lead.phone,
+      lead.city || "",
+      lead.product_sku || "",
+      lead.status || "new",
+      lead.message || "",
+      lead.notes || "",
+      new Date(lead.created_at).toLocaleString("he-IL")
+    ]);
+    
+    const csv = [headers.join(","), ...rows.map(row => row.map(cell => `"${cell}"`).join(","))].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `leads_${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("CSV יוצא בהצלחה", "success");
+  }
+  
+  // Bulk actions
+  function toggleSelectLead(id: number) {
+    setSelectedLeads(prev => 
+      prev.includes(id) 
+        ? prev.filter(leadId => leadId !== id)
+        : [...prev, id]
+    );
+  }
+  
+  function selectAll() {
+    if (selectedLeads.length === filteredLeads.length) {
+      setSelectedLeads([]);
+    } else {
+      setSelectedLeads(filteredLeads.map(l => l.id));
+    }
+  }
+  
+  async function bulkUpdate() {
+    if (selectedLeads.length === 0) {
+      showToast("אנא בחר לידים לעדכון", "warning");
+      return;
+    }
+    
+    try {
+      const savedPassword = localStorage.getItem("admin_password");
+      if (!savedPassword) return;
+      
+      const res = await fetch("/api/leads/bulk", {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${savedPassword}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ids: selectedLeads,
+          status: bulkStatus || undefined,
+          notes: bulkNotes || undefined
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.ok && data.leads) {
+        setLeads(leads.map(l => {
+          const updated = data.leads.find((ul: Lead) => ul.id === l.id);
+          return updated || l;
+        }));
+        setSelectedLeads([]);
+        setShowBulkActions(false);
+        setBulkStatus("");
+        setBulkNotes("");
+        showToast(`${data.count} לידים עודכנו בהצלחה`, "success");
+      } else {
+        showToast("שגיאה בעדכון הלידים", "error");
+      }
+    } catch (err) {
+      console.error("Error bulk updating:", err);
+      showToast("שגיאה בעדכון הלידים", "error");
     }
   }
 
@@ -293,13 +424,23 @@ export default function AdminPage() {
     );
   }
 
+  // Charts data
+  const chartData = useMemo(() => {
+    return [
+      { label: "חדש", value: stats.new, color: "#D4AF37" },
+      { label: "נוצר קשר", value: stats.contacted, color: "#10B981" },
+      { label: "סגור", value: stats.closed, color: "#3B82F6" },
+    ];
+  }, [stats]);
+
   return (
     <main className="relative min-h-screen">
+      <ToastContainer toasts={toasts} onClose={closeToast} />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <Shield className="text-gold size-8" />
             <div>
@@ -307,9 +448,24 @@ export default function AdminPage() {
               <p className="text-zinc-400 text-sm mt-1">Aegis Spectra - Admin Dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={fetchLeads}
+              onClick={() => setShowCharts(!showCharts)}
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+            >
+              <BarChart3 className="size-4" />
+              {showCharts ? "הסתר גרפים" : "הצג גרפים"}
+            </button>
+            <button
+              onClick={exportToCSV}
+              disabled={filteredLeads.length === 0}
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm disabled:opacity-50"
+            >
+              <Download className="size-4" />
+              ייצוא CSV
+            </button>
+            <button
+              onClick={() => fetchLeads(false)}
               disabled={loading}
               className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm disabled:opacity-50"
             >
@@ -380,6 +536,92 @@ export default function AdminPage() {
             <div className="text-3xl font-extrabold text-zinc-400">{stats.closed}</div>
           </motion.div>
         </div>
+
+        {/* Charts */}
+        {showCharts && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="grid md:grid-cols-2 gap-6 mb-8"
+          >
+            <BarChart data={chartData} title="לידים לפי סטטוס" />
+            <PieChart data={chartData} title="התפלגות לידים" />
+          </motion.div>
+        )}
+
+        {/* Bulk Actions */}
+        {selectedLeads.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-gold/50 bg-gold/10 p-6 mb-6 backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <CheckSquare className="text-gold size-5" />
+                <span className="font-semibold">נבחרו {selectedLeads.length} לידים</span>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedLeads([]);
+                  setShowBulkActions(false);
+                }}
+                className="text-sm opacity-70 hover:opacity-100 transition"
+              >
+                ביטול
+              </button>
+            </div>
+            {showBulkActions ? (
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm opacity-70 mb-2">סטטוס</label>
+                  <select
+                    value={bulkStatus}
+                    onChange={(e) => setBulkStatus(e.target.value)}
+                    className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                  >
+                    <option value="">לא לשנות</option>
+                    <option value="new">חדש</option>
+                    <option value="contacted">נוצר קשר</option>
+                    <option value="closed">סגור</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm opacity-70 mb-2">הערות</label>
+                  <input
+                    type="text"
+                    value={bulkNotes}
+                    onChange={(e) => setBulkNotes(e.target.value)}
+                    placeholder="הערות מנהל..."
+                    className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                  />
+                </div>
+                <div className="flex items-end gap-2">
+                  <button
+                    onClick={bulkUpdate}
+                    className="flex-1 rounded-lg bg-gold text-black font-semibold py-2 hover:bg-gold/90 transition"
+                  >
+                    עדכן
+                  </button>
+                  <button
+                    onClick={() => setShowBulkActions(false)}
+                    className="px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition"
+                  >
+                    ביטול
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowBulkActions(true)}
+                className="rounded-lg border border-gold px-4 py-2 hover:bg-gold/20 transition"
+              >
+                עדכן לידים נבחרים
+              </button>
+            )}
+          </motion.div>
+        )}
 
         {/* חיפוש וסינון */}
         <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 mb-6 backdrop-blur-sm">
@@ -452,7 +694,7 @@ export default function AdminPage() {
             </div>
             <p className="text-sm opacity-90 mb-4">{error}</p>
             <button 
-              onClick={fetchLeads}
+              onClick={() => fetchLeads(false)}
               className="mt-4 rounded-lg border border-red-500 px-4 py-2 hover:bg-red-500/20 transition"
             >
               נסה שוב
@@ -470,8 +712,26 @@ export default function AdminPage() {
 
         {!loading && !error && filteredLeads.length > 0 && (
           <div className="space-y-4">
-            <div className="text-sm opacity-70 mb-4">
-              מציג {filteredLeads.length} מתוך {leads.length} לידים
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm opacity-70">
+                מציג {filteredLeads.length} מתוך {leads.length} לידים
+              </div>
+              <button
+                onClick={selectAll}
+                className="flex items-center gap-2 text-sm rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition"
+              >
+                {selectedLeads.length === filteredLeads.length ? (
+                  <>
+                    <CheckSquare className="size-4" />
+                    בטל בחירה
+                  </>
+                ) : (
+                  <>
+                    <Square className="size-4" />
+                    בחר הכל
+                  </>
+                )}
+              </button>
             </div>
             
             <AnimatePresence>
@@ -482,8 +742,24 @@ export default function AdminPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.05 }}
-                  className="rounded-2xl border border-zinc-800 bg-black/30 p-6 hover:border-zinc-700 transition backdrop-blur-sm"
+                  className={`rounded-2xl border p-6 hover:border-zinc-700 transition backdrop-blur-sm ${
+                    selectedLeads.includes(lead.id) 
+                      ? "border-gold bg-gold/10" 
+                      : "border-zinc-800 bg-black/30"
+                  }`}
                 >
+                  <div className="flex items-start gap-3 mb-4">
+                    <button
+                      onClick={() => toggleSelectLead(lead.id)}
+                      className="mt-1"
+                    >
+                      {selectedLeads.includes(lead.id) ? (
+                        <CheckSquare className="size-5 text-gold" />
+                      ) : (
+                        <Square className="size-5 text-zinc-600" />
+                      )}
+                    </button>
+                    <div className="flex-1">
                   {editingLead === lead.id ? (
                     // מצב עריכה
                     <div className="space-y-4">
@@ -607,6 +883,8 @@ export default function AdminPage() {
                       )}
                     </>
                   )}
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>

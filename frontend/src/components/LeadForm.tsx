@@ -62,7 +62,7 @@ export default function LeadForm() {
         
         // Track conversion
         trackEvent("form_submit", "lead", "contact_form");
-        trackConversion();
+        trackConversion("lead_form");
       } else {
         setStatus("err");
         trackEvent("form_error", "lead", "contact_form_error");

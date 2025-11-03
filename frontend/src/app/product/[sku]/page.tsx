@@ -140,7 +140,7 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
               href="/#contact" 
               className="rounded-xl bg-gold text-black px-6 py-3 font-semibold inline-flex items-center justify-center gap-2 hover:bg-gold/90 transition"
             >
-              קבעו סקר אתר <ArrowRight className="size-4" />
+              הזמנת ייעוץ חינם <ArrowRight className="size-4" />
             </Link>
             <Link 
               href="https://wa.me/9720000000000" 
@@ -221,12 +221,12 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
         {/* CTA אחרון */}
         <div className="rounded-2xl border border-gold/50 bg-black/30 p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">מוכן להתחיל?</h2>
-          <p className="opacity-80 mb-6">קבעו סקר אתר חינם וקבלו הצעת מחיר תוך 24 שעות</p>
+          <p className="opacity-80 mb-6">הזמינו ייעוץ חינם וקבלו הצעת מחיר תוך 24 שעות</p>
           <Link 
             href="/#contact" 
             className="inline-flex rounded-xl bg-gold text-black px-8 py-3 font-semibold hover:bg-gold/90 transition"
           >
-            קבעו סקר אתר עכשיו
+            הזמנת ייעוץ חינם עכשיו
           </Link>
         </div>
       </div>

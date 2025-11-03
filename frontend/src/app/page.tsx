@@ -25,7 +25,7 @@ export default function Home() {
           <a href="#packages" className="hover:text-gold">חבילות</a>
           <a href="#process" className="hover:text-gold">תהליך</a>
           <a href="#faq" className="hover:text-gold">שאלות נפוצות</a>
-          <a href="#contact" className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition">קביעת סקר אתר</a>
+          <a href="#contact" className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition">הזמנת ייעוץ חינם</a>
         </div>
       </nav>
 
@@ -42,7 +42,7 @@ export default function Home() {
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <a href="#contact" className="rounded-xl bg-gold text-black px-5 py-3 font-semibold inline-flex items-center justify-center gap-2">
-              קבעו סקר אתר <ChevronRight className="size-4" />
+              הזמנת ייעוץ חינם <ChevronRight className="size-4" />
             </a>
             <a href="https://wa.me/9720000000000" className="rounded-xl border border-gold px-5 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10">
               דברו איתנו ב-WhatsApp <Phone className="size-4" />
@@ -138,7 +138,7 @@ export default function Home() {
         <SectionTitle title="תהליך עבודה" subtitle="שקיפות, סדר ודיוק בכל שלב" />
         <div className="grid md:grid-cols-4 gap-4 text-sm">
           {[
-            {n:"01", h:"שיחה וסקר אתר", p:"קובעים מועד, מגיעים וממפים נקודות."},
+            {n:"01", h:"שיחה ופגישה באתר", p:"קובעים מועד, מגיעים וממפים נקודות."},
             {n:"02", h:"תרשים והצעה", p:"סקיצה + עלויות שקופות וחבילות שדרוג."},
             {n:"03", h:"התקנה נקייה", p:"תיוג כבלים, PoE, הקשחת NVR, הדרכה."},
             {n:"04", h:"מסירה ו-SLA", p:"דוח תקינות, אחריות 12 ח׳, תחזוקה תקופתית."},
@@ -189,7 +189,7 @@ export default function Home() {
 
       {/* CONTACT / LEAD */}
       <section id="contact" className="max-w-6xl mx-auto px-4 py-10">
-        <SectionTitle title="קביעת סקר אתר" subtitle="נחזור אליך לתיאום מהיר" />
+        <SectionTitle title="הזמנת ייעוץ חינם" subtitle="נחזור אליך לתיאום מהיר" />
         <div className="rounded-3xl border border-zinc-800 bg-black/30 p-6 md:p-8">
           <LeadForm />
           <p className="mt-4 text-xs opacity-70">יבנה, ישראל • support@aegisspectra.com • ‎+972-XX-XXX-XXXX</p>

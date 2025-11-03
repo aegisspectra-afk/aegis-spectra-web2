@@ -172,7 +172,7 @@ export default function Home() {
             {q:"מוצר מעולה ותמיכה בעברית, מומלץ לעסקים.", a:"שירה • ראשון לציון"},
           ].map((t,i)=>(
             <div key={i} className="rounded-2xl border border-zinc-800 bg-black/30 p-6">
-              <p className="mb-3">"{t.q}"</p>
+              <p className="mb-3">&ldquo;{t.q}&rdquo;</p>
               <div className="text-gold text-xs">{t.a}</div>
             </div>
           ))}

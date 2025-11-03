@@ -452,16 +452,16 @@ export default function Home() {
             <ScrollReveal key={i} delay={i * 0.15} direction="up">
               <TiltCard intensity={10}>
                 <motion.div
-                  className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 hover:border-gold/50 transition-all relative group"
+                  className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 hover:border-zinc-600 transition-all relative group"
                   whileHover={{ y: -8 }}
                 >
-                  <div className="absolute -top-4 right-8 size-12 rounded-full bg-gold border-4 border-charcoal flex items-center justify-center text-black font-bold text-lg group-hover:scale-110 transition-transform">
+                  <div className="absolute -top-4 right-8 size-12 rounded-full bg-zinc-700 border-4 border-charcoal flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform">
                     {s.n}
                   </div>
-                  <div className="size-16 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center mb-6 mt-4 group-hover:bg-gold/20 transition-colors">
-                    <s.icon className="size-8 text-gold" />
+                  <div className="size-16 rounded-xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center mb-6 mt-4 group-hover:bg-zinc-700/50 transition-colors">
+                    <s.icon className="size-8 text-zinc-300" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-gold transition">{s.h}</h3>
+                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-zinc-200 transition">{s.h}</h3>
                   <p className="text-sm opacity-90 leading-relaxed">{s.p}</p>
                 </motion.div>
               </TiltCard>
@@ -484,18 +484,18 @@ export default function Home() {
             <ScrollReveal key={i} delay={i * 0.1} direction="up">
               <TiltCard intensity={8}>
                 <motion.div
-                  className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 hover:border-gold/50 transition-all h-full group"
+                  className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 hover:border-zinc-600 transition-all h-full group"
                   whileHover={{ y: -8 }}
                 >
                   <div className="flex gap-1 mb-4">
                     {[...Array(t.rating)].map((_, j) => (
-                      <Star key={j} className="size-4 fill-gold text-gold" />
+                      <Star key={j} className="size-4 fill-zinc-400 text-zinc-400" />
                     ))}
                   </div>
-                  <p className="text-lg mb-6 leading-relaxed">&ldquo;{t.q}&rdquo;</p>
+                  <p className="text-lg mb-6 leading-relaxed text-zinc-200">&ldquo;{t.q}&rdquo;</p>
                   <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
-                    <div className="size-10 rounded-full bg-gold/20 flex items-center justify-center">
-                      <span className="text-gold font-bold">{t.a.split(" • ")[0][0]}</span>
+                    <div className="size-10 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                      <span className="text-zinc-300 font-bold">{t.a.split(" • ")[0][0]}</span>
                     </div>
                     <div>
                       <div className="font-semibold text-gold">{t.a.split(" • ")[0]}</div>

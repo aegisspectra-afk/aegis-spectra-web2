@@ -40,9 +40,9 @@ export function StickyNav() {
   }, [isOpen]);
 
   const navLinks = [
+    { href: "/services", label: "שירותים" },
     { href: "#products", label: "מוצרים" },
-    { href: "#packages", label: "חבילות" },
-    { href: "#process", label: "תהליך" },
+    { href: "/about", label: "אודות" },
     { href: "#faq", label: "שאלות נפוצות" },
   ];
 

@@ -21,6 +21,9 @@ type Lead = {
   created_at: string;
   status: string | null;
   notes: string | null;
+  score?: number | null;
+  tags?: string[] | null;
+  updated_at?: string | null;
 };
 
 type StatusCounts = {
@@ -50,6 +53,9 @@ export default function AdminPage() {
   const [editingLead, setEditingLead] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState<string>("");
   const [editNotes, setEditNotes] = useState<string>("");
+  const [editScore, setEditScore] = useState<number>(0);
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState<string>("");
   
   // Toast notifications
   const { toasts, showToast, closeToast } = useToast();
@@ -185,18 +191,18 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  async function updateLead(id: number, status: string, notes: string) {
+  async function updateLead(id: number, status: string, notes: string, score?: number, tags?: string[]) {
     try {
       const savedPassword = localStorage.getItem("admin_password");
       if (!savedPassword) return;
-
+      
       const res = await fetch(`/api/leads/${id}`, {
         method: "PATCH",
         headers: {
           "Authorization": `Bearer ${savedPassword}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ status, notes })
+        body: JSON.stringify({ status, notes, score, tags })
       });
 
       const data = await res.json();
@@ -212,6 +218,46 @@ export default function AdminPage() {
       console.error("Error updating lead:", err);
       showToast("שגיאה בעדכון הליד", "error");
     }
+  }
+
+  // Calculate lead score automatically
+  function calculateLeadScore(lead: Lead): number {
+    let score = 0;
+    
+    // Base score
+    score += 10;
+    
+    // Has product interest
+    if (lead.product_sku) score += 20;
+    
+    // Has message
+    if (lead.message && lead.message.length > 10) score += 15;
+    
+    // Has city
+    if (lead.city) score += 5;
+    
+    // Time-based (newer = higher score)
+    const daysSinceCreation = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceCreation < 1) score += 30;
+    else if (daysSinceCreation < 3) score += 20;
+    else if (daysSinceCreation < 7) score += 10;
+    
+    // Status-based
+    if (lead.status === "new") score += 25;
+    else if (lead.status === "contacted") score += 10;
+    
+    return Math.min(score, 100); // Max 100
+  }
+
+  function addTag(tag: string) {
+    if (tag.trim() && !editTags.includes(tag.trim())) {
+      setEditTags([...editTags, tag.trim()]);
+      setTagInput("");
+    }
+  }
+
+  function removeTag(tag: string) {
+    setEditTags(editTags.filter(t => t !== tag));
   }
   
   // CSV Export
@@ -307,6 +353,9 @@ export default function AdminPage() {
     setEditingLead(lead.id);
     setEditStatus(lead.status || "new");
     setEditNotes(lead.notes || "");
+    setEditScore(lead.score || calculateLeadScore(lead));
+    setEditTags(lead.tags || []);
+    setTagInput("");
   }
 
   function cancelEdit() {
@@ -450,6 +499,13 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
+            <a
+              href="/admin/products"
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+            >
+              <Package className="size-4" />
+              ניהול מוצרים
+            </a>
             <button
               onClick={() => setShowCharts(!showCharts)}
               className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm"
@@ -768,7 +824,7 @@ export default function AdminPage() {
                         <h3 className="text-xl font-bold text-gold">{lead.name}</h3>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => updateLead(lead.id, editStatus, editNotes)}
+                            onClick={() => updateLead(lead.id, editStatus, editNotes, editScore, editTags)}
                             className="p-2 rounded-lg bg-gold text-black hover:bg-gold/90 transition"
                           >
                             <Save className="size-4" />
@@ -796,6 +852,71 @@ export default function AdminPage() {
                           </select>
                         </div>
                         <div>
+                          <label className="block text-sm opacity-70 mb-2">ציון (Score)</label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={editScore}
+                              onChange={(e) => setEditScore(parseInt(e.target.value) || 0)}
+                              min="0"
+                              max="100"
+                              className="flex-1 bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setEditScore(calculateLeadScore(lead))}
+                              className="px-3 py-2 bg-zinc-700 rounded-lg hover:bg-zinc-600 transition text-sm"
+                              title="חשב אוטומטית"
+                            >
+                              אוטו
+                            </button>
+                          </div>
+                          <div className="mt-2 w-full bg-zinc-800 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${
+                                editScore >= 70 ? "bg-green-500" :
+                                editScore >= 40 ? "bg-yellow-500" :
+                                "bg-red-500"
+                              }`}
+                              style={{ width: `${editScore}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm opacity-70 mb-2">תגיות</label>
+                          <div className="flex gap-2 mb-2">
+                            <input
+                              type="text"
+                              value={tagInput}
+                              onChange={(e) => setTagInput(e.target.value)}
+                              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag(tagInput))}
+                              placeholder="הוסף תגית..."
+                              className="flex-1 bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => addTag(tagInput)}
+                              className="px-4 py-2 bg-zinc-700 rounded-lg hover:bg-zinc-600 transition"
+                            >
+                              הוסף
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {editTags.map((tag, i) => (
+                              <span key={i} className="flex items-center gap-2 px-3 py-1 bg-zinc-800 rounded-full text-sm">
+                                {tag}
+                                <button
+                                  type="button"
+                                  onClick={() => removeTag(tag)}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="md:col-span-2">
                           <label className="block text-sm opacity-70 mb-2">הערות</label>
                           <textarea
                             value={editNotes}

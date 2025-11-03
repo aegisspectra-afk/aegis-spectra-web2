@@ -117,9 +117,9 @@ export default function Home() {
             className="hidden md:flex items-center gap-6 text-sm"
           >
             {[
+              { href: "/services", label: "שירותים" },
               { href: "#products", label: "מוצרים" },
-              { href: "#packages", label: "חבילות" },
-              { href: "#process", label: "תהליך" },
+              { href: "/about", label: "אודות" },
               { href: "#faq", label: "שאלות נפוצות" },
             ].map((item, i) => (
               <motion.a

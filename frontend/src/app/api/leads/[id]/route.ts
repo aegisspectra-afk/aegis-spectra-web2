@@ -3,17 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const sql = neon();
 
-// סיסמה להגנה - מומלץ לשנות ב-Netlify Environment Variables
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
 
-// Helper function לבדיקת סיסמה
 function checkAuth(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
   const providedPassword = authHeader?.replace('Bearer ', '');
   return providedPassword === ADMIN_PASSWORD;
 }
 
-// PATCH - עדכון ליד
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -29,7 +26,7 @@ export async function PATCH(
 
     const { id: idParam } = await params;
     const body = await request.json();
-    const { status, notes } = body;
+    const { status, notes, score, tags } = body;
     const id = parseInt(idParam);
 
     if (isNaN(id)) {
@@ -39,36 +36,41 @@ export async function PATCH(
       }, { status: 400 });
     }
 
-    // עדכון רק השדות שצוינו
-    if (status !== undefined && notes !== undefined) {
-      await sql`
-        UPDATE leads 
-        SET status = ${status}, notes = ${notes}
-        WHERE id = ${id}
-      `;
-    } else if (status !== undefined) {
-      await sql`
-        UPDATE leads 
-        SET status = ${status}
-        WHERE id = ${id}
-      `;
-    } else if (notes !== undefined) {
-      await sql`
-        UPDATE leads 
-        SET notes = ${notes}
-        WHERE id = ${id}
-      `;
-    } else {
+    // Build update query
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+
+    if (status !== undefined) {
+      updates.push(`status = $${paramIndex++}`);
+      values.push(status);
+    }
+    if (notes !== undefined) {
+      updates.push(`notes = $${paramIndex++}`);
+      values.push(notes);
+    }
+    if (score !== undefined) {
+      updates.push(`score = $${paramIndex++}`);
+      values.push(score);
+    }
+    if (tags !== undefined) {
+      updates.push(`tags = $${paramIndex++}`);
+      values.push(JSON.stringify(tags));
+    }
+
+    if (updates.length === 0) {
       return NextResponse.json({ 
         ok: false, 
         error: 'No fields to update' 
       }, { status: 400 });
     }
 
-    // קבלת הליד המעודכן
-    const [updatedLead] = await sql`
-      SELECT * FROM leads WHERE id = ${id}
-    `;
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const query = `UPDATE leads SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+    
+    const [updatedLead] = await sql.unsafe(query, values);
 
     return NextResponse.json({ ok: true, lead: updatedLead });
   } catch (error: any) {
@@ -79,4 +81,3 @@ export async function PATCH(
     }, { status: 500 });
   }
 }
-

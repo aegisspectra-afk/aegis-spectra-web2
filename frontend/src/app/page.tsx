@@ -30,8 +30,8 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <header className="max-w-6xl mx-auto px-4 pt-6 pb-10 md:pb-20 grid md:grid-cols-2 gap-10 items-center">
-        <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:.6}}>
+      <header className="max-w-6xl mx-auto px-4 pt-6 pb-10 md:pb-20">
+        <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:.6}} className="max-w-3xl">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
             אבטחה חכמה. <span className="text-gold">נוכחות שקטה.</span><br />
             התקנה מדויקת לבית ולעסק.
@@ -61,16 +61,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </motion.div>
-
-        <motion.div className="relative" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:.7, delay:.1}}>
-          <div className="rounded-3xl border border-zinc-800 bg-black/30 p-6">
-            <div className="rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 aspect-[4/3] flex items-center justify-center text-zinc-600 relative overflow-hidden">
-              <Camera className="size-24 opacity-30" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.1),transparent)]" />
-            </div>
-          </div>
-          <div className="absolute -top-4 -left-4 w-28 h-28 rounded-full bg-gold/20 blur-2xl" />
         </motion.div>
       </header>
 

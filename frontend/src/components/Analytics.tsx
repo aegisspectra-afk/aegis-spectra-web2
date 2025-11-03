@@ -3,17 +3,6 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-declare global {
-  interface Window {
-    gtag: (
-      command: string,
-      targetId: string,
-      config?: Record<string, any>
-    ) => void;
-    dataLayer: any[];
-  }
-}
-
 export function GoogleAnalytics({ gaId }: { gaId?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -42,10 +31,10 @@ export function GoogleAnalytics({ gaId }: { gaId?: string }) {
   }, [gaId]);
 
   useEffect(() => {
-    if (!gaId || !window.gtag) return;
+    if (!gaId || !(window as any).gtag) return;
 
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "");
-    window.gtag("config", gaId, {
+    (window as any).gtag("config", gaId, {
       page_path: url,
     });
   }, [pathname, searchParams, gaId]);

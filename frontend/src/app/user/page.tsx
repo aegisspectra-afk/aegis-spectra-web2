@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Shield, User, Phone, Mail, Calendar, Package, 
-  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle
+  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
@@ -163,32 +163,59 @@ export default function UserDashboardPage() {
 
           {activeTab === "orders" && (
             <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-white mb-6">הזמנות שלי</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">הזמנות שלי</h2>
+                <button className="px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition text-sm">
+                  הזמנה חדשה
+                </button>
+              </div>
               {orders.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="size-12 mx-auto mb-4 text-zinc-400" />
-                  <p className="text-zinc-400">אין הזמנות</p>
+                  <p className="text-zinc-400 mb-4">אין הזמנות עדיין</p>
+                  <a
+                    href="/#contact"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
+                  >
+                    הזמינו ייעוץ חינם
+                  </a>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {orders.map((order) => (
-                    <div key={order.id} className="rounded-xl border border-zinc-800 bg-black/30 p-6">
+                    <div key={order.id} className="rounded-xl border border-zinc-800 bg-black/30 p-6 hover:border-zinc-600 transition">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex-1">
                           <div className="font-semibold text-white mb-1">{order.product_sku}</div>
-                          <div className="text-sm text-zinc-400">
-                            {new Date(order.created_at).toLocaleDateString("he-IL")}
+                          <div className="text-sm text-zinc-400 mb-2">
+                            {new Date(order.created_at).toLocaleDateString("he-IL", {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <a
+                              href={`/order/${order.id}`}
+                              className="text-sm text-gold hover:text-gold/80 transition"
+                            >
+                              צפה בפרטים
+                            </a>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-bold text-gold mb-1">{order.total} ₪</div>
-                          <span className={`px-3 py-1 rounded-full text-xs ${
+                        <div className="text-right ml-6">
+                          <div className="font-bold text-gold mb-1 text-xl">{order.total} ₪</div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             order.status === "completed" ? "bg-green-500/20 text-green-400" :
                             order.status === "pending" ? "bg-yellow-500/20 text-yellow-400" :
+                            order.status === "processing" ? "bg-blue-500/20 text-blue-400" :
                             "bg-zinc-800 text-zinc-400"
                           }`}>
                             {order.status === "completed" ? "הושלם" :
-                             order.status === "pending" ? "ממתין" : "בטיפול"}
+                             order.status === "pending" ? "ממתין" :
+                             order.status === "processing" ? "בטיפול" : "בטיפול"}
                           </span>
                         </div>
                       </div>
@@ -205,33 +232,80 @@ export default function UserDashboardPage() {
               <div className="space-y-6">
                 <div className="rounded-xl border border-zinc-800 bg-black/30 p-6">
                   <h3 className="font-semibold text-white mb-4">פתח קריאת שירות</h3>
-                  <form className="space-y-4">
+                  <form className="space-y-4" onSubmit={(e) => {
+                    e.preventDefault();
+                    // Handle form submission
+                    alert('קריאת שירות נשלחה! נחזור אליך בהקדם.');
+                  }}>
                     <div>
-                      <label className="block text-sm mb-2">נושא</label>
+                      <label className="block text-sm mb-2 text-zinc-300">נושא</label>
                       <input
                         type="text"
-                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70 transition"
+                        required
+                        placeholder="לדוגמה: בעיה במצלמה, תיקון נדרש..."
+                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-gold/70 transition text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2">תיאור הבעיה</label>
+                      <label className="block text-sm mb-2 text-zinc-300">תיאור הבעיה</label>
                       <textarea
                         rows={4}
-                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:border-gold/70 transition"
+                        required
+                        placeholder="תאר את הבעיה בפירוט..."
+                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-gold/70 transition text-white"
                       />
                     </div>
-                    <button
-                      type="submit"
-                      className="rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
-                    >
-                      שלח קריאה
-                    </button>
+                    <div className="flex gap-4">
+                      <button
+                        type="submit"
+                        className="flex-1 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
+                      >
+                        שלח קריאה
+                      </button>
+                      <a
+                        href="https://wa.me/972559737025"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition inline-flex items-center gap-2"
+                      >
+                        <Phone className="size-4" />
+                        WhatsApp
+                      </a>
+                    </div>
                   </form>
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-4">קריאות קודמות</h3>
-                  <div className="text-center py-8 text-zinc-400">
-                    אין קריאות פתוחות
+                  <div className="space-y-3">
+                    <div className="text-center py-8 text-zinc-400 rounded-xl border border-zinc-800 bg-black/30">
+                      אין קריאות פתוחות
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-black/30 p-6">
+                  <h3 className="font-semibold text-white mb-4">דרכי יצירת קשר</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <Phone className="size-4 text-zinc-400" />
+                      <a href="tel:+972559737025" className="text-zinc-300 hover:text-gold transition">
+                        +972-55-973-7025
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="size-4 text-zinc-400" />
+                      <a href="https://wa.me/972559737025" target="_blank" rel="noopener noreferrer" className="text-zinc-300 hover:text-gold transition">
+                        WhatsApp
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Mail className="size-4 text-zinc-400" />
+                      <a href="mailto:aegisspectra@gmail.com" className="text-zinc-300 hover:text-gold transition">
+                        aegisspectra@gmail.com
+                      </a>
+                    </div>
+                    <div className="text-zinc-400 text-xs mt-4">
+                      שעות פעילות: א׳-ה׳ 09:00-18:00
+                    </div>
                   </div>
                 </div>
               </div>
@@ -241,9 +315,44 @@ export default function UserDashboardPage() {
           {activeTab === "reports" && (
             <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
               <h2 className="text-2xl font-bold text-white mb-6">דוחות וסטטיסטיקות</h2>
-              <div className="text-center py-12 text-zinc-400">
-                <FileText className="size-12 mx-auto mb-4 opacity-50" />
-                <p>דוחות יופיעו כאן בעתיד</p>
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="rounded-xl border border-zinc-800 bg-black/30 p-6 text-center">
+                    <div className="text-3xl font-bold text-white mb-2">
+                      {orders.length}
+                    </div>
+                    <div className="text-sm text-zinc-400">הזמנות</div>
+                  </div>
+                  <div className="rounded-xl border border-zinc-800 bg-black/30 p-6 text-center">
+                    <div className="text-3xl font-bold text-green-400 mb-2">
+                      {orders.filter(o => o.status === 'completed').length}
+                    </div>
+                    <div className="text-sm text-zinc-400">הושלמו</div>
+                  </div>
+                  <div className="rounded-xl border border-zinc-800 bg-black/30 p-6 text-center">
+                    <div className="text-3xl font-bold text-gold mb-2">
+                      {orders.reduce((sum, o) => sum + o.total, 0)} ₪
+                    </div>
+                    <div className="text-sm text-zinc-400">סה״כ הוצאות</div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-black/30 p-6">
+                  <h3 className="font-semibold text-white mb-4">דוחות זמינים</h3>
+                  <div className="space-y-3">
+                    <button className="w-full text-right p-4 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition">
+                      <div className="font-semibold text-white">דוח הזמנות</div>
+                      <div className="text-sm text-zinc-400">צפייה והורדה של כל ההזמנות</div>
+                    </button>
+                    <button className="w-full text-right p-4 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition">
+                      <div className="font-semibold text-white">דוח תחזוקה</div>
+                      <div className="text-sm text-zinc-400">היסטוריית תחזוקה ותיקונים</div>
+                    </button>
+                    <button className="w-full text-right p-4 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition">
+                      <div className="font-semibold text-white">דוח ביצועים</div>
+                      <div className="text-sm text-zinc-400">סטטיסטיקות ביצועי מערכת</div>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

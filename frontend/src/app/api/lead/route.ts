@@ -1,5 +1,6 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { emailService } from '@/lib/email';
 
 const sql = neon();
 
@@ -23,6 +24,21 @@ export async function POST(request: NextRequest) {
       INSERT INTO leads (name, phone, city, message, product_sku, created_at)
       VALUES (${name}, ${phone}, ${city}, ${message}, ${product_sku}, NOW())
     `;
+
+    // Send email notification to admin (async, don't wait)
+    emailService.sendLeadNotification({
+      lead: {
+        name,
+        phone,
+        city,
+        message,
+        product_sku,
+        source: 'website'
+      }
+    }).catch(err => console.error('Failed to send email notification:', err));
+
+    // Send confirmation email to customer (if email provided in future)
+    // For now, we only have phone, so we skip customer email
 
     return NextResponse.json({ ok: true, msg: 'Lead saved successfully' });
   } catch (error: any) {

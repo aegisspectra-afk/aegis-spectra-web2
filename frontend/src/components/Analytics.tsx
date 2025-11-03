@@ -53,31 +53,23 @@ export function GoogleAnalytics({ gaId }: { gaId?: string }) {
   return null;
 }
 
-// Helper function to track events
-export function trackEvent(
-  action: string,
-  category: string,
-  label?: string,
-  value?: number
-) {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", action, {
-      event_category: category,
-      event_label: label,
-      value: value,
-    });
-  }
-}
-
-// Helper function to track conversions (leads)
-export function trackConversion(leadId?: string) {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", "conversion", {
-      send_to: "AW-CONVERSION_ID/CONVERSION_LABEL",
-      value: 1.0,
-      currency: "ILS",
-      transaction_id: leadId,
-    });
-  }
-}
+// Re-export from lib/analytics for backward compatibility
+export { 
+  trackGAEvent as trackEvent, 
+  trackConversion,
+  trackPageView,
+  trackContactForm,
+  trackProductView,
+  trackPurchase,
+  trackBlogView,
+  trackPhoneCall,
+  trackWhatsAppClick,
+  trackError,
+  trackScrollDepth,
+  trackTimeOnPage,
+  trackSearch,
+  trackFormSubmission,
+  trackLeadGeneration,
+  trackButtonClick
+} from '@/lib/analytics';
 

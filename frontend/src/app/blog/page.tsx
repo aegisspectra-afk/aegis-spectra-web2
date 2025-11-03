@@ -1,77 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Tag, User, Search, Filter, ChevronRight } from "lucide-react";
+import { Calendar, Tag, User, Search, Filter, ChevronRight, Clock, Eye } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import Link from "next/link";
-
-type BlogPost = {
-  id: number;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  published_at: string;
-  category: string;
-  tags: string[];
-  image?: string;
-};
-
-const mockPosts: BlogPost[] = [
-  {
-    id: 1,
-    title: "כיצד לבחור מערכת אבטחה לבית",
-    excerpt: "מדריך מקיף לבחירת מערכת אבטחה מתאימה לבית, כולל המלצות על ציוד מוביל (Provision, Hikvision) ותכונות חשובות",
-    content: "",
-    author: "Aegis Spectra",
-    published_at: new Date().toISOString(),
-    category: "אבטחה",
-    tags: ["בית", "מצלמות", "CCTV"]
-  },
-  {
-    id: 2,
-    title: "יתרונות AI באבטחה",
-    excerpt: "כיצד בינה מלאכותית משפרת את יכולות האבטחה - זיהוי איומים, ניתוח התנהגות ותגובה אוטומטית",
-    content: "",
-    author: "Aegis Spectra",
-    published_at: new Date().toISOString(),
-    category: "סייבר",
-    tags: ["AI", "בינה מלאכותית", "אבטחה"]
-  },
-  {
-    id: 3,
-    title: "מיגון פיזי לעסקים",
-    excerpt: "מדריך להתקנת מערכות מיגון פיזי לעסקים - מצלמות, חיישנים, בקרת כניסה ואינטגרציה עם מערכת הסייבר",
-    content: "",
-    author: "Aegis Spectra",
-    published_at: new Date().toISOString(),
-    category: "עסקים",
-    tags: ["עסקים", "מיגון", "IoT"]
-  }
-];
+import { getBlogPosts, getCategories, getTags, type BlogPost } from "@/lib/blog-posts";
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
 
-  const categories = Array.from(new Set(mockPosts.map(p => p.category)));
-  const allTags = Array.from(new Set(mockPosts.flatMap(p => p.tags)));
+  const categories = getCategories();
+  const allTags = getTags();
 
-  const filteredPosts = mockPosts.filter(post => {
-    if (searchQuery && !post.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (categoryFilter !== "all" && post.category !== categoryFilter) {
-      return false;
-    }
-    if (tagFilter && !post.tags.includes(tagFilter)) {
-      return false;
-    }
-    return true;
-  });
+  const filteredPosts = useMemo(() => {
+    return getBlogPosts({
+      category: categoryFilter !== "all" ? categoryFilter : undefined,
+      search: searchQuery || undefined,
+    }).filter(post => {
+      if (tagFilter && !post.tags.includes(tagFilter)) {
+        return false;
+      }
+      return true;
+    });
+  }, [searchQuery, categoryFilter, tagFilter]);
 
   return (
     <main className="relative min-h-screen">
@@ -147,28 +101,46 @@ export default function BlogPage() {
                   </div>
                 )}
                 <div className="p-6 flex-grow flex flex-col">
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <span className="px-3 py-1 bg-zinc-800 rounded-full text-xs text-zinc-300">
                       {post.category}
                     </span>
                     <span className="text-xs text-zinc-400 flex items-center gap-1">
                       <Calendar className="size-3" />
-                      {new Date(post.published_at).toLocaleDateString("he-IL")}
+                      {new Date(post.publishedAt).toLocaleDateString("he-IL")}
+                    </span>
+                    <span className="text-xs text-zinc-400 flex items-center gap-1">
+                      <Clock className="size-3" />
+                      {post.readTime} דק'
+                    </span>
+                    <span className="text-xs text-zinc-400 flex items-center gap-1">
+                      <Eye className="size-3" />
+                      {post.views}
                     </span>
                   </div>
+                  {post.featured && (
+                    <span className="inline-block px-2 py-1 bg-gold/20 text-gold rounded text-xs mb-2 w-fit">
+                      מומלץ
+                    </span>
+                  )}
                   <h2 className="text-xl font-bold text-white mb-3">{post.title}</h2>
                   <p className="text-zinc-300 text-sm leading-relaxed mb-4 flex-grow">
                     {post.excerpt}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags.map((tag, ti) => (
+                    {post.tags.slice(0, 3).map((tag, ti) => (
                       <span key={ti} className="px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
                         {tag}
                       </span>
                     ))}
+                    {post.tags.length > 3 && (
+                      <span className="px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400">
+                        +{post.tags.length - 3}
+                      </span>
+                    )}
                   </div>
                   <Link
-                    href={`/blog/${post.id}`}
+                    href={`/blog/${post.slug}`}
                     className="flex items-center gap-2 text-gold hover:text-gold/80 transition text-sm font-semibold"
                   >
                     קרא עוד

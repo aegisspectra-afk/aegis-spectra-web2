@@ -2,41 +2,35 @@
 
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Calendar, Tag, User, ChevronRight } from "lucide-react";
+import { Calendar, Tag, User, ChevronRight, Clock, Eye } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import Link from "next/link";
+import { getBlogPost } from "@/lib/blog-posts";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function BlogPostPage() {
   const params = useParams();
-  const postId = params?.id as string;
+  const slug = params?.id as string;
+  const [post, setPost] = useState(getBlogPost(slug));
 
-  // Mock post - in real app, fetch from API
-  const post = {
-    id: parseInt(postId),
-    title: "כיצד לבחור מערכת אבטחה לבית",
-    content: `מדריך מקיף לבחירת מערכת אבטחה מתאימה לבית.
+  useEffect(() => {
+    setPost(getBlogPost(slug));
+  }, [slug]);
 
-בחירת מערכת אבטחה לבית היא החלטה חשובה שדורשת הבנה של הצרכים והאפשרויות הקיימות.
-
-## נקודות חשובות לבחירה:
-
-1. **סוג המצלמות** - מצלמות IP, PoE, WiFi
-2. **איכות הצילום** - רזולוציה, ראיית לילה
-3. **אחסון** - NVR, HDD, Cloud
-4. **אפליקציה** - תמיכה בעברית, גישה מרחוק
-5. **מותג** - Provision, Hikvision ועוד מובילים בשוק
-
-## המלצות שלנו:
-
-אנו ממליצים על ציוד מוביל מהשוק כמו Provision, Hikvision ומותגים מובילים אחרים,
-עם התקנה מקצועית ותמיכה מלאה.
-
-צרו קשר לפרטים נוספים!`,
-    author: "Aegis Spectra",
-    published_at: new Date().toISOString(),
-    category: "אבטחה",
-    tags: ["בית", "מצלמות", "CCTV"]
-  };
+  if (!post) {
+    return (
+      <main className="relative min-h-screen">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(113,113,122,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
+        <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-3xl font-bold text-white mb-4">פוסט לא נמצא</h1>
+          <Link href="/blog" className="text-gold hover:text-gold/80">
+            חזור לבלוג
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-screen">
@@ -57,13 +51,21 @@ export default function BlogPostPage() {
         {/* Post Header */}
         <ScrollReveal delay={0.1}>
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
               <span className="px-3 py-1 bg-zinc-800 rounded-full text-xs text-zinc-300">
                 {post.category}
               </span>
               <span className="text-sm text-zinc-400 flex items-center gap-1">
                 <Calendar className="size-4" />
-                {new Date(post.published_at).toLocaleDateString("he-IL")}
+                {new Date(post.publishedAt).toLocaleDateString("he-IL")}
+              </span>
+              <span className="text-sm text-zinc-400 flex items-center gap-1">
+                <Clock className="size-4" />
+                {post.readTime} דק' קריאה
+              </span>
+              <span className="text-sm text-zinc-400 flex items-center gap-1">
+                <Eye className="size-4" />
+                {post.views} צפיות
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6">
@@ -72,7 +74,7 @@ export default function BlogPostPage() {
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <User className="size-4" />
-                {post.author}
+                {post.author.name}
               </div>
             </div>
           </div>
@@ -82,8 +84,23 @@ export default function BlogPostPage() {
         <ScrollReveal delay={0.2}>
           <article className="rounded-2xl border border-zinc-800 bg-black/30 p-8 md:p-12 backdrop-blur-sm mb-8">
             <div className="prose prose-invert max-w-none">
-              <div className="text-zinc-300 leading-relaxed whitespace-pre-line">
-                {post.content}
+              <div className="text-zinc-300 leading-relaxed">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-3xl font-bold text-white mb-4 mt-8">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-2xl font-bold text-white mb-3 mt-6">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-xl font-bold text-white mb-2 mt-4">{children}</h3>,
+                    p: ({ children }) => <p className="mb-4">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
+                    li: ({ children }) => <li className="ml-4">{children}</li>,
+                    strong: ({ children }) => <strong className="text-white font-bold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    code: ({ children }) => <code className="bg-zinc-800 px-2 py-1 rounded text-sm">{children}</code>,
+                  }}
+                >
+                  {post.content}
+                </ReactMarkdown>
               </div>
             </div>
           </article>

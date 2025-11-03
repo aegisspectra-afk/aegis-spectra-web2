@@ -35,10 +35,17 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save auth token
+        // Save auth token (JWT)
         localStorage.setItem("user_token", data.token);
         localStorage.setItem("user_email", formData.email);
-        localStorage.setItem("user_name", data.name || formData.email);
+        localStorage.setItem("user_name", data.user.name || formData.email);
+        localStorage.setItem("user_id", data.user.id.toString());
+        localStorage.setItem("user_role", data.user.role || "customer");
+        
+        // Show warning if email not verified
+        if (data.message && !data.user.emailVerified) {
+          alert(data.message);
+        }
         
         // Redirect to user dashboard
         router.push("/user");

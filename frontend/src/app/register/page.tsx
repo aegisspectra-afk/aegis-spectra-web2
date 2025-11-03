@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, Phone, Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff, Shield, CheckCircle, Copy } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -38,8 +38,10 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("הסיסמה חייבת להכיל לפחות 6 תווים");
+    // Password validation is now done on server side with stronger requirements
+    // But we can do basic validation here too
+    if (formData.password.length < 8) {
+      setError("הסיסמה חייבת להכיל לפחות 8 תווים");
       return;
     }
 
@@ -65,10 +67,16 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.ok) {
+        // Save API key if provided (only shown once!)
+        if (data.apiKey) {
+          localStorage.setItem('new_api_key', data.apiKey);
+          localStorage.setItem('api_key_saved', 'false');
+        }
         setSuccess(true);
+        // Show API key for 10 seconds before redirecting
         setTimeout(() => {
           router.push("/login?registered=true");
-        }, 2000);
+        }, 10000);
       } else {
         setError(data.error || "שגיאה בהרשמה");
       }
@@ -80,12 +88,23 @@ export default function RegisterPage() {
     }
   };
 
+  const [apiKey, setApiKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (success) {
+      const savedApiKey = localStorage.getItem('new_api_key');
+      if (savedApiKey) {
+        setApiKey(savedApiKey);
+      }
+    }
+  }, [success]);
+
   if (success) {
     return (
       <main className="min-h-screen bg-charcoal text-white">
         <Navbar />
         <div className="pt-24 pb-20">
-          <div className="max-w-md mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto px-4 text-center">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -95,7 +114,40 @@ export default function RegisterPage() {
               <CheckCircle className="size-10 text-green-400" />
             </motion.div>
             <h2 className="text-2xl font-bold mb-4">ההרשמה הושלמה בהצלחה!</h2>
-            <p className="text-zinc-400 mb-6">מעבירים אותך לעמוד ההתחברות...</p>
+            
+            {apiKey && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 p-6 rounded-2xl border-2 border-yellow-500/50 bg-yellow-500/10 backdrop-blur-sm"
+              >
+                <h3 className="text-lg font-bold mb-4 text-yellow-400">⚠️ שמור את ה-API Key שלך!</h3>
+                <p className="text-sm text-zinc-300 mb-4">
+                  ה-API Key הזה יוצג רק פעם אחת. אנא שמור אותו במקום בטוח!
+                </p>
+                <div className="bg-black/50 rounded-lg p-4 mb-4">
+                  <code className="text-gold font-mono text-sm break-all">{apiKey}</code>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(apiKey);
+                    alert('ה-API Key הועתק ללוח!');
+                    localStorage.setItem('api_key_saved', 'true');
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
+                >
+                  <Copy className="size-5" />
+                  העתק API Key
+                </button>
+                <p className="text-xs text-zinc-400 mt-4">
+                  ה-API Key הזה מאפשר גישה לחשבון שלך. אל תשתף אותו עם אחרים!
+                </p>
+              </motion.div>
+            )}
+            
+            <p className="text-zinc-400 mb-6 mt-8">
+              {apiKey ? 'מעבירים אותך לעמוד ההתחברות בעוד מספר שניות...' : 'מעבירים אותך לעמוד ההתחברות...'}
+            </p>
           </div>
         </div>
         <Footer />

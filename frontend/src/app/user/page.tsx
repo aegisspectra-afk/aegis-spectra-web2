@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Shield, User, Phone, Mail, Calendar, Package, 
-  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download
+  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
@@ -353,6 +353,34 @@ export default function UserDashboardPage() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "api-keys" && (
+            <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Key className="size-6 text-gold" />
+                  API Keys שלי
+                </h2>
+                <Link
+                  href="/user/api-keys"
+                  className="px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 transition text-sm"
+                >
+                  ניהול מלא
+                </Link>
+              </div>
+              <div className="text-center py-12">
+                <Key className="size-16 mx-auto mb-6 text-zinc-600" />
+                <p className="text-zinc-400 mb-4">ניהול API Keys מלא</p>
+                <Link
+                  href="/user/api-keys"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
+                >
+                  <Key className="size-5" />
+                  עבור לניהול API Keys
+                </Link>
               </div>
             </div>
           )}

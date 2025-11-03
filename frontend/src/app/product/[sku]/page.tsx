@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Shield, Camera, HardDrive, Smartphone, Wifi, Check, ArrowRight } from "lucide-react";
+import { ProductJSONLD } from "@/components/JSONLDSchema";
 
 type Product = {
   sku: string; name: string; price_regular: number; price_sale?: number;
@@ -130,6 +131,7 @@ export default function ProductPage() {
 
   return (
     <main className="relative">
+      <ProductJSONLD product={p} />
       {/* רקע גרעיני */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
       

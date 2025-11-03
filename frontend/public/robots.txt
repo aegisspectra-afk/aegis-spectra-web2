@@ -1,0 +1,13 @@
+# robots.txt for Aegis Spectra Security
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://aegis-spectra.netlify.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+

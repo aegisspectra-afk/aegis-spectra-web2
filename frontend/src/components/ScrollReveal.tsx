@@ -58,6 +58,9 @@ export function ScrollRevealAdvanced({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const currentRef = ref.current;
+    if (!currentRef) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -67,14 +70,10 @@ export function ScrollRevealAdvanced({
       { threshold, rootMargin: "50px" }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    observer.observe(currentRef);
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
+      observer.unobserve(currentRef);
     };
   }, [delay, threshold]);
 

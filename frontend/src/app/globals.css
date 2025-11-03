@@ -2,8 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-html { direction: rtl; }       /* RTL */
-body { @apply bg-charcoal text-[#ECECEC]; }
-a { @apply text-gold; }
+:root { 
+  color-scheme: dark; 
+}
+
+html { 
+  direction: rtl; 
+}
+
+body { 
+  @apply bg-charcoal text-[#ECECEC]; 
+}
+
+a { 
+  @apply text-gold transition-colors; 
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(212, 175, 55, 0.3);
+  color: #fff;
+}
 

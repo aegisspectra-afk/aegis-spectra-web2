@@ -35,7 +35,7 @@ export default function WhyChooseUs() {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-              <span className="text-gold">למה לבחור בנו?</span>
+              <span className="text-white">למה לבחור בנו?</span>
             </h2>
             <p className="text-xl text-zinc-300 max-w-3xl mx-auto">
               אנחנו מביאים ניסיון צבאי ומקצועי להתקנות אבטחה מדויקות ואמינות
@@ -50,13 +50,13 @@ export default function WhyChooseUs() {
               <ScrollReveal key={item.title} delay={index * 0.1} direction="up">
                 <TiltCard intensity={10}>
                   <motion.div
-                    className="text-center p-8 rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm hover:border-gold/50 transition-all group h-full"
+                    className="text-center p-8 rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm hover:border-zinc-600 transition-all group h-full"
                     whileHover={{ y: -8, scale: 1.02 }}
                   >
-                    <div className="inline-flex items-center justify-center size-16 bg-gold/10 border border-gold/30 rounded-full mb-6 group-hover:bg-gold/20 transition-colors">
-                      <Icon className="size-8 text-gold" />
+                    <div className="inline-flex items-center justify-center size-16 bg-zinc-800/50 border border-zinc-700/50 rounded-full mb-6 group-hover:bg-zinc-700/50 transition-colors">
+                      <Icon className="size-8 text-zinc-300" />
                     </div>
-                    <h3 className="text-xl font-bold mb-4 group-hover:text-gold transition">
+                    <h3 className="text-xl font-bold mb-4 text-white group-hover:text-zinc-200 transition">
                       {item.title}
                     </h3>
                     <p className="text-zinc-300 leading-relaxed">{item.description}</p>

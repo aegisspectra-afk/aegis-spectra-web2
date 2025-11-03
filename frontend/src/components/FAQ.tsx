@@ -45,7 +45,7 @@ export default function FAQ() {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-              <span className="text-gold">שאלות נפוצות</span>
+              <span className="text-white">שאלות נפוצות</span>
             </h2>
             <p className="text-xl text-zinc-300 max-w-3xl mx-auto">
               התשובות לשאלות הכי נפוצות על התקנות אבטחה
@@ -64,11 +64,11 @@ export default function FAQ() {
                   onClick={() => toggleFAQ(index)}
                   className="w-full text-right p-6 flex items-center justify-between hover:bg-zinc-900/50 transition-colors group"
                 >
-                  <h3 className="text-lg font-bold text-zinc-100 group-hover:text-gold transition">
+                  <h3 className="text-lg font-bold text-zinc-100 group-hover:text-white transition">
                     {item.question}
                   </h3>
                   <ChevronDown
-                    className={`size-5 text-gold transition-transform duration-300 flex-shrink-0 ${
+                    className={`size-5 text-zinc-400 transition-transform duration-300 flex-shrink-0 ${
                       openIndex === index ? "rotate-180" : ""
                     }`}
                   />

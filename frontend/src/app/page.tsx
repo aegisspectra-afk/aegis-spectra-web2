@@ -105,9 +105,9 @@ export default function Home() {
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Shield className="text-gold size-8 group-hover:text-gold/80 transition" aria-hidden="true" />
+                <Shield className="text-white size-8 group-hover:text-zinc-300 transition" aria-hidden="true" />
               </motion.div>
-              <span className="font-bold text-gold text-xl group-hover:text-gold/80 transition">Aegis Spectra</span>
+              <span className="font-bold text-white text-xl group-hover:text-zinc-300 transition">Aegis Spectra</span>
             </Link>
           </motion.div>
           <motion.div 
@@ -125,12 +125,12 @@ export default function Home() {
               <motion.a
                 key={i}
                 href={item.href}
-                className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1 transition relative group"
+                className="hover:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1 transition relative group"
                 aria-label={item.label}
                 whileHover={{ y: -2 }}
               >
                 {item.label}
-                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-zinc-400 transition-all group-hover:w-full" />
               </motion.a>
             ))}
             <motion.a
@@ -164,10 +164,10 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gold/30 bg-gold/10 backdrop-blur-sm mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zinc-700/50 bg-zinc-800/50 backdrop-blur-sm mb-6"
             >
-              <Sparkles className="size-4 text-gold" />
-              <span className="text-sm text-gold font-semibold">המיגון המתקדם ביותר בישראל</span>
+              <Sparkles className="size-4 text-zinc-300" />
+              <span className="text-sm text-zinc-300 font-semibold">המיגון המתקדם ביותר בישראל</span>
             </motion.div>
 
             {/* Main Heading */}
@@ -179,14 +179,14 @@ export default function Home() {
             >
               <span className="block">אבטחה חכמה.</span>
               <motion.span
-                className="block text-gold relative inline-block"
+                className="block text-white relative inline-block"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
               >
                 נוכחות שקטה.
                 <motion.span
-                  className="absolute -bottom-2 right-0 w-full h-1 bg-gold/50"
+                  className="absolute -bottom-2 right-0 w-full h-0.5 bg-zinc-600/50"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 0.6, delay: 1.2 }}
@@ -236,7 +236,7 @@ export default function Home() {
               </motion.a>
               <motion.a
                 href="https://wa.me/972559737025"
-                className="group rounded-xl border-2 border-gold px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-gold/10 backdrop-blur-sm relative overflow-hidden"
+                className="group rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 backdrop-blur-sm relative overflow-hidden"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -266,11 +266,11 @@ export default function Home() {
               ].map((stat, i) => (
                 <TiltCard key={i} intensity={10}>
                   <motion.div
-                    className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6 hover:border-gold/50 transition-all group"
+                    className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6 hover:border-zinc-600 transition-all group"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <stat.icon className="size-8 text-gold mb-3 group-hover:scale-110 transition-transform" />
-                    <div className="text-2xl font-bold text-gold mb-1">{stat.value}</div>
+                    <stat.icon className="size-8 text-zinc-300 mb-3 group-hover:scale-110 transition-transform" />
+                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
                     <div className="text-sm opacity-80">{stat.label}</div>
                   </motion.div>
                 </TiltCard>
@@ -290,7 +290,7 @@ export default function Home() {
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
-              <ArrowDown className="size-6 text-gold/60" />
+              <ArrowDown className="size-6 text-zinc-400" />
             </motion.div>
           </motion.div>
         </div>
@@ -366,7 +366,7 @@ export default function Home() {
               price: "החל מ-₪ 5,990",
               bullets: ["5–8 מצלמות 4K/Color", "NVR 8–16", "UPS + VLAN", "אינטרקום שער"],
               featured: true,
-              gradient: "from-gold/20 to-gold/10"
+              gradient: "from-zinc-700/50 to-zinc-800/50"
             },
             {
               title: "Business Suite",
@@ -381,7 +381,7 @@ export default function Home() {
                 <motion.div
                   className={`rounded-3xl border p-8 bg-gradient-to-br ${p.gradient} backdrop-blur-sm relative overflow-hidden group ${
                     p.featured
-                      ? "border-gold shadow-[0_0_40px_rgba(212,175,55,0.3)] ring-2 ring-gold/20"
+                      ? "border-zinc-600 shadow-[0_0_20px_rgba(113,113,122,0.2)] ring-2 ring-zinc-700/30"
                       : "border-zinc-800/50"
                   }`}
                   whileHover={{ y: -12, scale: 1.03 }}
@@ -389,7 +389,7 @@ export default function Home() {
                 >
                   {p.featured && (
                     <motion.div
-                      className="absolute top-0 right-0 bg-gold text-black px-4 py-1 rounded-bl-xl text-xs font-bold"
+                      className="absolute top-0 right-0 bg-zinc-700 text-white px-4 py-1 rounded-bl-xl text-xs font-bold"
                       initial={{ opacity: 0, scale: 0 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3 }}
@@ -397,8 +397,8 @@ export default function Home() {
                       מומלץ
                     </motion.div>
                   )}
-                  <h3 className="text-2xl font-bold mb-3 group-hover:text-gold transition">{p.title}</h3>
-                  <div className="text-3xl font-extrabold text-gold mb-6">{p.price}</div>
+                  <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-zinc-200 transition">{p.title}</h3>
+                  <div className="text-3xl font-extrabold text-white mb-6">{p.price}</div>
                   <ul className="space-y-3 mb-8">
                     {p.bullets.map((b, bi) => (
                       <motion.li
@@ -408,14 +408,14 @@ export default function Home() {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ delay: bi * 0.1 }}
                       >
-                        <Check className="size-5 text-gold flex-shrink-0" />
+                        <Check className="size-5 text-zinc-300 flex-shrink-0" />
                         <span>{b}</span>
                       </motion.li>
                     ))}
                   </ul>
                   <motion.a
                     href="#contact"
-                    className="block w-full rounded-xl border-2 border-gold px-6 py-3 text-center font-semibold hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                    className="block w-full rounded-xl border-2 border-zinc-600 px-6 py-3 text-center font-semibold hover:bg-zinc-700 hover:text-white transition relative overflow-hidden group"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -441,7 +441,7 @@ export default function Home() {
         </ScrollReveal>
         <div className="grid md:grid-cols-4 gap-6 relative">
           {/* Connection Line */}
-          <div className="hidden md:block absolute top-20 right-0 left-0 h-0.5 bg-gradient-to-l from-gold/30 via-gold/50 to-gold/30" />
+          <div className="hidden md:block absolute top-20 right-0 left-0 h-0.5 bg-gradient-to-l from-zinc-700/30 via-zinc-600/50 to-zinc-700/30" />
           
           {[
             { n: "01", h: "שיחה ופגישה באתר", p: "קובעים מועד, מגיעים וממפים נקודות.", icon: Phone },

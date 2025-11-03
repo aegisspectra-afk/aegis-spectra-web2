@@ -8,12 +8,12 @@ import { AnimatedCounter } from "./AnimatedCounter";
 
 export default function CTA() {
   return (
-    <section className="py-20 bg-gradient-to-b from-black/40 via-gold/5 to-black/40 relative">
+    <section className="py-20 bg-gradient-to-b from-black/40 via-zinc-900/30 to-black/40 relative">
       <div className="max-w-6xl mx-auto px-4">
         <ScrollReveal>
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-              <span className="text-gold">הגיע הזמן שלך להצטרף אליהם</span>
+              <span className="text-white">הגיע הזמן שלך להצטרף אליהם</span>
             </h2>
             <p className="text-xl text-zinc-300 mb-8 max-w-2xl mx-auto">
               השאר את הפרטים שלך ונחזור אליך עם הצעה מותאמת אישית לאבטחה מתקדמת.
@@ -37,7 +37,7 @@ export default function CTA() {
               </motion.a>
               <motion.a
                 href="https://wa.me/972559737025"
-                className="rounded-xl border-2 border-gold px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-gold/10 backdrop-blur-sm transition relative overflow-hidden group"
+                className="rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 backdrop-blur-sm transition relative overflow-hidden group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -59,7 +59,7 @@ export default function CTA() {
                     { value: 24, suffix: "h", label: "זמן תגובה" },
                   ].map((stat, i) => (
                     <div key={i} className="text-center">
-                      <div className="text-2xl font-bold text-gold mb-2">
+                      <div className="text-2xl font-bold text-white mb-2">
                         <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                       </div>
                       <div className="text-sm text-zinc-400">{stat.label}</div>
@@ -74,16 +74,16 @@ export default function CTA() {
               <div className="flex flex-col sm:flex-row gap-8 justify-center items-center text-zinc-400">
                 <a
                   href="tel:+972559737025"
-                  className="flex items-center gap-2 hover:text-gold transition-colors"
+                  className="flex items-center gap-2 hover:text-zinc-300 transition-colors"
                 >
-                  <Phone className="size-5 text-gold" />
+                  <Phone className="size-5 text-zinc-300" />
                   <span>055-973-7025</span>
                 </a>
                 <a
                   href="mailto:aegisspectra@gmail.com"
-                  className="flex items-center gap-2 hover:text-gold transition-colors"
+                  className="flex items-center gap-2 hover:text-zinc-300 transition-colors"
                 >
-                  <Mail className="size-5 text-gold" />
+                  <Mail className="size-5 text-zinc-300" />
                   <span>aegisspectra@gmail.com</span>
                 </a>
               </div>

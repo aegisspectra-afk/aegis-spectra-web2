@@ -25,11 +25,15 @@ export default async function ProductPage({ params }: { params: Promise<{ sku: s
   let p: Product | null = null;
   
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
     const res = await fetch(`${apiUrl}/api/products/${sku}`, { 
       cache: "no-store",
-      // timeout אחרי 3 שניות
-      signal: AbortSignal.timeout(3000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (res.ok) {
       p = await res.json();

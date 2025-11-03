@@ -362,10 +362,8 @@ Aegis Spectra היא מערכת מקיפה המשלבת:
 
 #### ד. Payment Gateways
 - **Options:**
-  - Stripe
-  - PayPal
-  - Square
-  - Local Payment Providers
+  - PayPal (מאושר בישראל)
+  - שירותי תשלום מקומיים (Shufersal, Bit, או אחרים)
 
 ---
 

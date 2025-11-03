@@ -562,8 +562,10 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 {[
                   { href: "/", label: "דף הבית" },
+                  { href: "/services", label: "שירותים" },
+                  { href: "/about", label: "אודות" },
+                  { href: "/blog", label: "בלוג" },
                   { href: "#products", label: "מוצרים" },
-                  { href: "#packages", label: "חבילות" },
                   { href: "#contact", label: "צור קשר" },
                 ].map((link) => (
                   <li key={link.href}>

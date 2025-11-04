@@ -8,10 +8,12 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useToastContext } from "@/components/ToastProvider";
+import { trackRegister } from "@/lib/analytics";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { showToast } = useToastContext();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,6 +25,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
 
   const validatePhone = (phone: string) => {

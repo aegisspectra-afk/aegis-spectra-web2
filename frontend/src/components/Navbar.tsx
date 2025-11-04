@@ -53,7 +53,7 @@ export function Navbar() {
     router.push("/");
   };
 
-  // Navigation links - same as StickyNav
+  // Navigation links - same as StickyNav (updated to match)
   const navLinks = [
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },

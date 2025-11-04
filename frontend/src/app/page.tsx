@@ -29,6 +29,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // Set mounted state immediately to trigger re-render
     setIsMounted(true);
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -37,29 +38,21 @@ export default function Home() {
     
     if (typeof window !== 'undefined') {
       window.addEventListener("mousemove", handleMouseMove);
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
+      // Force a re-render after a short delay to fix caching issues
+      const timer = setTimeout(() => {
+        setIsMounted(false);
+        setTimeout(() => setIsMounted(true), 10);
+      }, 100);
+      
+      return () => {
         window.removeEventListener("mousemove", handleMouseMove);
-      }
-    };
+        clearTimeout(timer);
+      };
+    }
   }, []);
 
   const parallaxX = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  
-  // Force re-render on mount to fix caching issues
-  useEffect(() => {
-    // Trigger a re-render to ensure animations restart
-    if (isMounted) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        setIsMounted(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isMounted]);
 
   return (
     <main className="relative overflow-hidden">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Shield, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function StickyNav() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,6 +12,7 @@ export function StickyNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { scrollY } = useScroll();
   const router = useRouter();
+  const pathname = usePathname();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -134,19 +135,35 @@ export function StickyNav() {
                     </Link>
                   </div>
                 )}
-                <a
-                  href="#contact"
-                  onClick={(e) => handleSmoothScroll(e, "#contact")}
-                  className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
-                >
-                  <span className="relative z-10">הזמנת ייעוץ חינם</span>
-                  <motion.span
-                    className="absolute inset-0 bg-gold"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </a>
+                {/* Show "הזמנת ייעוץ חינם" - same as Navbar */}
+                {pathname === '/' ? (
+                  <a
+                    href="#contact"
+                    onClick={(e) => handleSmoothScroll(e, "#contact")}
+                    className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                  >
+                    <span className="relative z-10">הזמנת ייעוץ חינם</span>
+                    <motion.span
+                      className="absolute inset-0 bg-gold"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </a>
+                ) : (
+                  <Link
+                    href="/#contact"
+                    className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                  >
+                    <span className="relative z-10">הזמנת ייעוץ חינם</span>
+                    <motion.span
+                      className="absolute inset-0 bg-gold"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: 0 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </Link>
+                )}
               </div>
 
               {/* Mobile Menu Button */}
@@ -230,16 +247,27 @@ export function StickyNav() {
                     </Link>
                   </>
                 )}
-                <a
-                  href="#contact"
-                  onClick={(e) => {
-                    handleSmoothScroll(e, "#contact");
-                    setIsOpen(false);
-                  }}
-                  className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
-                >
-                  הזמנת ייעוץ חינם
-                </a>
+                {/* Show "הזמנת ייעוץ חינם" - same as Navbar */}
+                {pathname === '/' ? (
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      handleSmoothScroll(e, "#contact");
+                      setIsOpen(false);
+                    }}
+                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
+                  >
+                    הזמנת ייעוץ חינם
+                  </a>
+                ) : (
+                  <Link
+                    href="/#contact"
+                    onClick={() => setIsOpen(false)}
+                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
+                  >
+                    הזמנת ייעוץ חינם
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>

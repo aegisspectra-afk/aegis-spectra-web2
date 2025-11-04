@@ -136,8 +136,3 @@ export function getApiKeyFromRequest(request: Request): string | null {
   return apiKeyHeader || null;
 }
 
-// Validate API key format
-export function isValidApiKeyFormat(apiKey: string): boolean {
-  return apiKey.startsWith('aegis_') && apiKey.length === 70; // 6 + 1 + 64 hex chars
-}
-

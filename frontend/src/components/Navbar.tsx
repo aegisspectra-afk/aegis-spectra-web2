@@ -203,27 +203,6 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
-                {/* Show "הזמנת ייעוץ חינם" - same as StickyNav */}
-                {pathname === '/' ? (
-                  <a
-                    href="#contact"
-                    onClick={(e) => {
-                      handleSmoothScroll(e, "#contact");
-                      setIsOpen(false);
-                    }}
-                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
-                  >
-                    הזמנת ייעוץ חינם
-                  </a>
-                ) : (
-                  <Link
-                    href="/#contact"
-                    onClick={() => setIsOpen(false)}
-                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
-                  >
-                    הזמנת ייעוץ חינם
-                  </Link>
-                )}
               </div>
             </motion.div>
           </>

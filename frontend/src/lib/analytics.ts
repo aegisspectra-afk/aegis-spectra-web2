@@ -126,6 +126,50 @@ export const trackButtonClick = (buttonName: string, location: string) => {
   trackFBEvent('CustomEvent', { event_name: 'Button Click', button_name: buttonName, location: location });
 };
 
+// Authentication tracking
+export const trackLogin = (method: string = 'email') => {
+  trackGAEvent('login', 'Authentication', method);
+  trackFBEvent('CompleteRegistration', { content_name: 'Login', method: method });
+};
+
+export const trackRegister = () => {
+  trackGAEvent('sign_up', 'Authentication', 'email');
+  trackFBEvent('CompleteRegistration', { content_name: 'Registration' });
+};
+
+export const trackLogout = () => {
+  trackGAEvent('logout', 'Authentication', 'user');
+  trackFBEvent('CustomEvent', { event_name: 'Logout' });
+};
+
+export const trackPasswordReset = () => {
+  trackGAEvent('password_reset', 'Authentication', 'forgot_password');
+  trackFBEvent('CustomEvent', { event_name: 'Password Reset Request' });
+};
+
+export const trackEmailVerification = () => {
+  trackGAEvent('email_verification', 'Authentication', 'verify_email');
+  trackFBEvent('CustomEvent', { event_name: 'Email Verification' });
+};
+
+// Profile tracking
+export const trackProfileUpdate = () => {
+  trackGAEvent('profile_update', 'User', 'edit_profile');
+  trackFBEvent('CustomEvent', { event_name: 'Profile Update' });
+};
+
+// API tracking
+export const trackApiKeyGeneration = () => {
+  trackGAEvent('api_key_generate', 'API', 'generate_key');
+  trackFBEvent('CustomEvent', { event_name: 'API Key Generated' });
+};
+
+// Performance tracking
+export const trackPageLoad = (pageName: string, loadTime: number) => {
+  trackGAEvent('timing_complete', 'Performance', pageName, loadTime);
+  trackFBEvent('CustomEvent', { event_name: 'Page Load', page_name: pageName, load_time: loadTime });
+};
+
 // Export existing functions for backward compatibility
 export const trackEvent = trackGAEvent;
 

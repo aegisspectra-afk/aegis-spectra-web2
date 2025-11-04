@@ -7,10 +7,13 @@ import { Mail, Lock, LogIn, Eye, EyeOff, Shield } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useToastContext } from "@/components/ToastProvider";
+import { trackLogin } from "@/lib/analytics";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { showToast } = useToastContext();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,6 +22,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,17 +55,24 @@ export default function LoginPage() {
         
         // Show warning if email not verified
         if (data.message && !data.user.emailVerified) {
-          alert(data.message);
+          showToast(data.message, "warning");
         }
+        
+        showToast("התחברת בהצלחה!", "success");
+        trackLogin("email");
         
         // Check for redirect parameter
         const urlParams = new URLSearchParams(window.location.search);
         const redirect = urlParams.get("redirect") || "/user";
         
         // Redirect to user dashboard or requested page
-        router.push(redirect);
+        setTimeout(() => {
+          router.push(redirect);
+        }, 500);
       } else {
-        setError(data.error || "שגיאה בהתחברות");
+        const errorMsg = data.error || "שגיאה בהתחברות";
+        setError(errorMsg);
+        showToast(errorMsg, "error");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -76,7 +87,7 @@ export default function LoginPage() {
       <Navbar />
       
       <div className="pt-24 pb-20">
-        <div className="max-w-md mx-auto px-4">
+        <div className="max-w-md mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <div className="text-center mb-8">
               <div className="size-16 rounded-2xl bg-zinc-800 border border-zinc-700 flex items-center justify-center mx-auto mb-6">
@@ -111,10 +122,26 @@ export default function LoginPage() {
                       id="email"
                       required
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-black/30 border border-zinc-700 rounded-lg px-12 py-3 focus:outline-none focus:border-gold/70 transition text-white"
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (errors.email) setErrors({ ...errors, email: "" });
+                      }}
+                      onBlur={(e) => {
+                        const email = e.target.value;
+                        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                          setErrors({ ...errors, email: "אימייל לא תקין" });
+                        } else {
+                          setErrors({ ...errors, email: "" });
+                        }
+                      }}
+                      className={`w-full bg-black/30 border rounded-lg px-12 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                        errors.email ? "border-red-500 focus:border-red-500" : "border-zinc-700 focus:border-gold/70"
+                      }`}
                       placeholder="your@email.com"
                     />
+                    {errors.email && (
+                      <p className="text-red-400 text-xs mt-1" role="alert">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -129,8 +156,13 @@ export default function LoginPage() {
                       id="password"
                       required
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full bg-black/30 border border-zinc-700 rounded-lg px-12 py-3 focus:outline-none focus:border-gold/70 transition text-white"
+                      onChange={(e) => {
+                        setFormData({ ...formData, password: e.target.value });
+                        if (errors.password) setErrors({ ...errors, password: "" });
+                      }}
+                      className={`w-full bg-black/30 border rounded-lg px-12 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                        errors.password ? "border-red-500 focus:border-red-500" : "border-zinc-700 focus:border-gold/70"
+                      }`}
                       placeholder="הכנס סיסמה"
                     />
                     <button
@@ -140,6 +172,9 @@ export default function LoginPage() {
                     >
                       {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                     </button>
+                    {errors.password && (
+                      <p className="text-red-400 text-xs mt-1" role="alert">{errors.password}</p>
+                    )}
                   </div>
                 </div>
 
@@ -155,7 +190,7 @@ export default function LoginPage() {
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-gold hover:text-gold/80 transition"
+                    className="text-gold hover:text-gold/80 transition text-sm sm:text-base"
                   >
                     שכחת סיסמה?
                   </Link>

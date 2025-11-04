@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { 
   Shield, User, Phone, Mail, Calendar, Package, 
-  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key
+  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key, Save, Edit, X
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useToastContext } from "@/components/ToastProvider";
+import { trackProfileUpdate } from "@/lib/analytics";
 
 type UserProfile = {
   id: number;
@@ -26,6 +28,230 @@ type Order = {
   created_at: string;
   total: number;
 };
+
+function ProfileEditor({ user, onUpdate }: { user: UserProfile; onUpdate: (user: UserProfile) => void }) {
+  const { showToast } = useToastContext();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user.name,
+    email: user.email || "",
+    phone: user.phone || "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validatePhone = (phone: string) => {
+    if (!phone) return null;
+    const phoneRegex = /^0[2-9]\d{7,8}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
+      return "מספר טלפון לא תקין";
+    }
+    return null;
+  };
+
+  const validateEmail = (email: string) => {
+    if (!email) return null;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "אימייל לא תקין";
+    }
+    return null;
+  };
+
+  const handleSave = async () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "שם מלא נדרש";
+    }
+
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+
+    const phoneError = validatePhone(formData.phone);
+    if (phoneError) {
+      newErrors.phone = phoneError;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("user_token");
+      const response = await fetch("/api/auth/update-profile", {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      if (data.ok && data.user) {
+        onUpdate({
+          ...user,
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+        });
+        setIsEditing(false);
+        setErrors({});
+        showToast("פרופיל עודכן בהצלחה", "success");
+        trackProfileUpdate();
+        // Update localStorage
+        if (data.user.name) localStorage.setItem("user_name", data.user.name);
+        if (data.user.email) localStorage.setItem("user_email", data.user.email);
+        if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
+      } else {
+        showToast(data.error || "שגיאה בעדכון פרופיל", "error");
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+      showToast("שגיאה בעדכון פרופיל", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 sm:p-8 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white">פרטים אישיים</h2>
+        {!isEditing ? (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm sm:text-base"
+          >
+            <Edit className="size-4" />
+            ערוך
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-lg bg-gold text-black px-4 py-2 hover:bg-gold/90 transition disabled:opacity-50 text-sm sm:text-base"
+            >
+              <Save className="size-4" />
+              {saving ? "שומר..." : "שמור"}
+            </button>
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                setFormData({
+                  name: user.name,
+                  email: user.email || "",
+                  phone: user.phone || "",
+                });
+                setErrors({});
+              }}
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition text-sm sm:text-base"
+            >
+              <X className="size-4" />
+              ביטול
+            </button>
+          </div>
+        )}
+      </div>
+
+      {isEditing ? (
+        <div className="space-y-4 sm:space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-zinc-300">שם מלא *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => {
+                setFormData({ ...formData, name: e.target.value });
+                if (errors.name) setErrors({ ...errors, name: "" });
+              }}
+              className={`w-full bg-black/30 border rounded-lg px-4 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                errors.name ? "border-red-500" : "border-zinc-700 focus:border-gold/70"
+              }`}
+            />
+            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-zinc-300">אימייל</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                if (errors.email) setErrors({ ...errors, email: "" });
+              }}
+              className={`w-full bg-black/30 border rounded-lg px-4 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                errors.email ? "border-red-500" : "border-zinc-700 focus:border-gold/70"
+              }`}
+            />
+            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-zinc-300">טלפון</label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => {
+                setFormData({ ...formData, phone: e.target.value });
+                if (errors.phone) setErrors({ ...errors, phone: "" });
+              }}
+              className={`w-full bg-black/30 border rounded-lg px-4 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                errors.phone ? "border-red-500" : "border-zinc-700 focus:border-gold/70"
+              }`}
+              placeholder="050-123-4567"
+            />
+            {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="flex items-center gap-4">
+            <User className="size-5 text-zinc-400 flex-shrink-0" />
+            <div>
+              <div className="text-sm text-zinc-400">שם מלא</div>
+              <div className="text-white font-semibold text-sm sm:text-base">{user.name}</div>
+            </div>
+          </div>
+          {user.email && (
+            <div className="flex items-center gap-4">
+              <Mail className="size-5 text-zinc-400 flex-shrink-0" />
+              <div>
+                <div className="text-sm text-zinc-400">אימייל</div>
+                <div className="text-white font-semibold text-sm sm:text-base break-all">{user.email}</div>
+              </div>
+            </div>
+          )}
+          {user.phone && (
+            <div className="flex items-center gap-4">
+              <Phone className="size-5 text-zinc-400 flex-shrink-0" />
+              <div>
+                <div className="text-sm text-zinc-400">טלפון</div>
+                <div className="text-white font-semibold text-sm sm:text-base">{user.phone}</div>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            <Calendar className="size-5 text-zinc-400 flex-shrink-0" />
+            <div>
+              <div className="text-sm text-zinc-400">תאריך הצטרפות</div>
+              <div className="text-white font-semibold text-sm sm:text-base">
+                {new Date(user.created_at).toLocaleDateString("he-IL")}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function UserDashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -114,7 +340,7 @@ export default function UserDashboardPage() {
       <Navbar />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(113,113,122,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
       
-      <div className="max-w-6xl mx-auto px-4 pt-24 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 md:pb-20">
         {/* Header */}
         <ScrollReveal>
           <div className="flex items-center justify-between mb-12">
@@ -166,45 +392,7 @@ export default function UserDashboardPage() {
         {/* Tab Content */}
         <ScrollReveal delay={0.2}>
           {activeTab === "profile" && user && (
-            <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-white mb-6">פרטים אישיים</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="flex items-center gap-4">
-                  <User className="size-5 text-zinc-400" />
-                  <div>
-                    <div className="text-sm text-zinc-400">שם מלא</div>
-                    <div className="text-white font-semibold">{user.name}</div>
-                  </div>
-                </div>
-                {user.email && (
-                  <div className="flex items-center gap-4">
-                    <Mail className="size-5 text-zinc-400" />
-                    <div>
-                      <div className="text-sm text-zinc-400">אימייל</div>
-                      <div className="text-white font-semibold">{user.email}</div>
-                    </div>
-                  </div>
-                )}
-                {user.phone && (
-                  <div className="flex items-center gap-4">
-                    <Phone className="size-5 text-zinc-400" />
-                    <div>
-                      <div className="text-sm text-zinc-400">טלפון</div>
-                      <div className="text-white font-semibold">{user.phone}</div>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-4">
-                  <Calendar className="size-5 text-zinc-400" />
-                  <div>
-                    <div className="text-sm text-zinc-400">תאריך הצטרפות</div>
-                    <div className="text-white font-semibold">
-                      {new Date(user.created_at).toLocaleDateString("he-IL")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ProfileEditor user={user} onUpdate={setUser} />
           )}
 
           {activeTab === "orders" && (

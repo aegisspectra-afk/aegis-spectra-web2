@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { trackLogout } from "@/lib/analytics";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,6 +84,7 @@ export function Navbar() {
       localStorage.removeItem("user_id");
       localStorage.removeItem("user_role");
       setIsLoggedIn(false);
+      trackLogout();
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -93,6 +95,7 @@ export function Navbar() {
       localStorage.removeItem("user_id");
       localStorage.removeItem("user_role");
       setIsLoggedIn(false);
+      trackLogout();
       router.push("/");
     }
   };

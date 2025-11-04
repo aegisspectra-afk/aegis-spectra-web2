@@ -5,9 +5,9 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-800/50 mt-20 bg-black/40 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+    <footer className="border-t border-zinc-800/50 mt-12 sm:mt-16 md:mt-20 bg-black/40 backdrop-blur-sm">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
@@ -48,10 +48,11 @@ export function Footer() {
               {[
                 { href: "/privacy", label: "מדיניות פרטיות" },
                 { href: "/terms", label: "תנאי שירות" },
+                { href: "/legal-disclaimer", label: "הצהרת אחריות" },
                 { href: "https://wa.me/972559737025", label: "WhatsApp" },
               ].map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-zinc-400 hover:text-gold transition"
                     {...(link.href.startsWith("http") && {
@@ -60,7 +61,7 @@ export function Footer() {
                     })}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

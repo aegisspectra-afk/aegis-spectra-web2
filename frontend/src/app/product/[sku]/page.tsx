@@ -114,8 +114,44 @@ export default function ProductPage() {
     if (!p) return;
     
     setPurchasing(true);
+    
+    // Save product to cart in localStorage before redirecting
+    const cartItem = {
+      sku: p.sku,
+      name: p.name,
+      price: p.price_sale || p.price_regular,
+      quantity: 1,
+    };
+    
+    // Get existing cart or create new one
+    const existingCart = localStorage.getItem("cart");
+    let cart: typeof cartItem[] = [];
+    
+    if (existingCart) {
+      try {
+        cart = JSON.parse(existingCart);
+        // Check if product already exists in cart
+        const existingIndex = cart.findIndex(item => item.sku === p.sku);
+        if (existingIndex >= 0) {
+          // Update quantity if exists
+          cart[existingIndex].quantity += 1;
+        } else {
+          // Add new item
+          cart.push(cartItem);
+        }
+      } catch (e) {
+        console.error("Error parsing cart:", e);
+        cart = [cartItem];
+      }
+    } else {
+      cart = [cartItem];
+    }
+    
+    // Save to localStorage
+    localStorage.setItem("cart", JSON.stringify(cart));
+    
     // Redirect to checkout with product SKU
-    window.location.href = `/checkout?sku=${p.sku}&quantity=1`;
+    window.location.href = `/checkout?sku=${encodeURIComponent(p.sku)}&quantity=1`;
   };
 
   if (loading) {

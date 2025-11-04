@@ -6,7 +6,8 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { 
   Shield, Camera, Lock, Zap, Phone, Star, ChevronRight, Check,
-  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers, Mail, User, LogOut
+  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers, Mail, User, LogOut,
+  MessageSquare
 } from "lucide-react";
 import LeadForm from "@/components/LeadForm";
 import ProductCard from "@/components/ProductCard";
@@ -108,7 +109,7 @@ export default function Home() {
         </div>
 
         {/* NAV */}
-        <nav className="absolute top-0 left-0 right-0 z-40 max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
+        <nav className="absolute top-0 left-0 right-0 z-40 max-w-6xl mx-auto px-4 py-4 sm:py-5 hidden md:flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -205,7 +206,7 @@ export default function Home() {
         </nav>
 
         {/* Hero Content */}
-        <div className="max-w-6xl mx-auto px-4 pt-20 pb-20 md:pb-32 relative z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-12 sm:pb-16 md:pb-20 lg:pb-32 relative z-30">
           <motion.div
             key="hero-content"
             initial={{ opacity: 0, y: 50 }}
@@ -229,7 +230,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-5xl md:text-7xl font-extrabold leading-tight mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold leading-tight mb-4 md:mb-6"
             >
               <span className="block">אבטחה חכמה.</span>
               <motion.span
@@ -260,7 +261,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.2 }}
-              className="text-xl md:text-2xl text-zinc-300 mb-8 leading-relaxed"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-300 mb-6 md:mb-8 leading-relaxed"
             >
               Aegis Spectra Security – מיגון מתקדם בסגנון Noir: מצלמות AI, אזעקות ובקרת כניסה,
               תיעוד מלא ותמיכה אישית בעברית. כל התקנה – כמו שעון שוויצרי.
@@ -275,7 +276,7 @@ export default function Home() {
             >
               <motion.a
                 href="#contact"
-                className="group relative rounded-xl bg-gold text-black px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 overflow-hidden"
+                className="group relative rounded-xl bg-gold text-black px-4 sm:px-6 md:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base md:text-lg inline-flex items-center justify-center gap-2 overflow-hidden w-full sm:w-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -290,7 +291,7 @@ export default function Home() {
               </motion.a>
               <motion.a
                 href="https://wa.me/972559737025"
-                className="group rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 backdrop-blur-sm relative overflow-hidden"
+                className="group rounded-xl border-2 border-zinc-600 px-4 sm:px-6 md:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base md:text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 backdrop-blur-sm relative overflow-hidden w-full sm:w-auto"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -310,7 +311,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.6 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
             >
               {[
                 { icon: Camera, label: "CCTV פרימיום", value: "4K+" },
@@ -320,12 +321,12 @@ export default function Home() {
               ].map((stat, i) => (
                 <TiltCard key={i} intensity={10}>
                   <motion.div
-                    className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6 hover:border-zinc-600 transition-all group"
+                    className="rounded-xl sm:rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-4 sm:p-5 md:p-6 hover:border-zinc-600 transition-all group"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <stat.icon className="size-8 text-zinc-300 mb-3 group-hover:scale-110 transition-transform" />
-                    <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-sm opacity-80">{stat.label}</div>
+                    <stat.icon className="size-6 sm:size-7 md:size-8 text-zinc-300 mb-2 sm:mb-3 group-hover:scale-110 transition-transform" />
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-1">{stat.value}</div>
+                    <div className="text-xs sm:text-sm opacity-80">{stat.label}</div>
                   </motion.div>
                 </TiltCard>
               ))}
@@ -351,9 +352,9 @@ export default function Home() {
       </motion.header>
 
       {/* Statistics Section */}
-      <section className="relative py-20 bg-gradient-to-b from-transparent to-black/30">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="relative py-12 sm:py-16 md:py-20 bg-gradient-to-b from-transparent to-black/30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {[
               { value: 500, suffix: "+", label: "לקוחות מרוצים", icon: Users },
               { value: 98, suffix: "%", label: "שיעור שביעות רצון", icon: Award },
@@ -362,12 +363,12 @@ export default function Home() {
             ].map((stat, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
                 <TiltCard intensity={8}>
-                  <div className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-8 text-center hover:border-gold/50 transition-all group">
-                    <stat.icon className="size-10 text-gold mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                    <div className="text-4xl font-extrabold text-gold mb-2">
+                  <div className="rounded-xl sm:rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-4 sm:p-6 md:p-8 text-center hover:border-gold/50 transition-all group">
+                    <stat.icon className="size-8 sm:size-9 md:size-10 text-gold mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gold mb-1 sm:mb-2">
                       <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                     </div>
-                    <div className="text-sm opacity-80">{stat.label}</div>
+                    <div className="text-xs sm:text-sm opacity-80">{stat.label}</div>
                   </div>
                 </TiltCard>
               </ScrollReveal>
@@ -380,7 +381,7 @@ export default function Home() {
       <WhyChooseUs key="why-choose-us" />
 
       {/* PRODUCT HIGHLIGHT */}
-      <section id="products" className="max-w-6xl mx-auto px-4 py-20 relative">
+      <section id="products" className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
           <SectionTitle title="מוצר דגל" subtitle="מערכת מוכנה להתקנה – בדוקה ומוגדרת" />
         </ScrollReveal>
@@ -402,11 +403,11 @@ export default function Home() {
       </section>
 
       {/* PACKAGES */}
-      <section id="packages" className="max-w-6xl mx-auto px-4 py-20 relative">
+      <section id="packages" className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
           <SectionTitle title="חבילות מותאמות" subtitle="Apartment / House / Business" />
         </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {[
             {
               title: "Apartment Basic",
@@ -489,11 +490,11 @@ export default function Home() {
       </section>
 
       {/* PROCESS */}
-      <section id="process" className="max-w-6xl mx-auto px-4 py-20 relative">
+      <section id="process" className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
           <SectionTitle title="תהליך עבודה" subtitle="שקיפות, סדר ודיוק בכל שלב" />
         </ScrollReveal>
-        <div className="grid md:grid-cols-4 gap-6 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 md:gap-6 relative">
           {/* Connection Line */}
           <div className="hidden md:block absolute top-20 right-0 left-0 h-0.5 bg-gradient-to-l from-zinc-700/30 via-zinc-600/50 to-zinc-700/30" />
           
@@ -525,11 +526,11 @@ export default function Home() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="max-w-6xl mx-auto px-4 py-20 relative">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
           <SectionTitle title="מה לקוחות אומרים" subtitle="אמון שנבנה בשטח" />
         </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {[
             { q: "התקנה נקייה ומדויקת. סוף סוף מרגישים בטוח בבית.", a: "דנה • רחובות", rating: 5 },
             { q: "גישה שקטה ומקצועית – כמו יחידה מיוחדת.", a: "אלכס • יבנה", rating: 5 },
@@ -573,31 +574,110 @@ export default function Home() {
       <CTA key="cta" />
 
       {/* CONTACT / LEAD */}
-      <section id="contact" className="max-w-6xl mx-auto px-4 py-20 relative">
+      <section id="contact" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
-          <SectionTitle title="הזמנת ייעוץ חינם" subtitle="נחזור אליך לתיאום מהיר" />
+          <div className="text-center mb-12 sm:mb-16">
+            <SectionTitle title="צור איתנו קשר" subtitle="נחזור אליך בהקדם לתיאום" />
+            <p className="text-zinc-400 text-sm sm:text-base mt-4 max-w-2xl mx-auto">
+              אנחנו כאן כדי לעזור לך. צור איתנו קשר בכל נושא ונחזור אליך בהקדם
+            </p>
+          </div>
         </ScrollReveal>
-        <ScrollReveal delay={0.2}>
-          <motion.div
-            className="rounded-3xl border border-zinc-800/50 bg-gradient-to-br from-black/60 to-zinc-900/40 backdrop-blur-sm p-8 md:p-12 relative overflow-hidden"
-            whileHover={{ scale: 1.01 }}
-          >
-            {/* Background glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-gold/20 via-gold/10 to-transparent opacity-50 blur-2xl" />
-            <div className="relative z-10">
-              <LeadForm />
-              <p className="mt-6 text-sm opacity-70 text-center">
-                יבנה, ישראל • aegisspectra@gmail.com • 055-973-7025
-              </p>
+
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12">
+          {/* Contact Info */}
+          <ScrollReveal delay={0.1}>
+            <div className="space-y-6 sm:space-y-8">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold mb-6">פרטי יצירת קשר</h2>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex items-start gap-4 p-4 sm:p-6 rounded-xl border border-zinc-800 bg-black/30 hover:bg-black/50 transition">
+                    <div className="size-10 sm:size-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                      <Phone className="size-5 sm:size-6 text-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1 text-sm sm:text-base">טלפון</h3>
+                      <a 
+                        href="tel:+972559737025" 
+                        className="text-zinc-300 hover:text-gold transition text-sm sm:text-base"
+                      >
+                        +972-55-973-7025
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 sm:p-6 rounded-xl border border-zinc-800 bg-black/30 hover:bg-black/50 transition">
+                    <div className="size-10 sm:size-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                      <Mail className="size-5 sm:size-6 text-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1 text-sm sm:text-base">אימייל</h3>
+                      <a 
+                        href="mailto:aegisspectra@gmail.com" 
+                        className="text-zinc-300 hover:text-gold transition text-sm sm:text-base break-all"
+                      >
+                        aegisspectra@gmail.com
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 sm:p-6 rounded-xl border border-zinc-800 bg-black/30 hover:bg-black/50 transition">
+                    <div className="size-10 sm:size-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="size-5 sm:size-6 text-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1 text-sm sm:text-base">WhatsApp</h3>
+                      <a 
+                        href="https://wa.me/972559737025" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-300 hover:text-gold transition inline-flex items-center gap-2 text-sm sm:text-base"
+                      >
+                        שלח הודעה
+                        <MessageSquare className="size-4" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 sm:p-6 rounded-xl border border-zinc-800 bg-black/30 hover:bg-black/50 transition">
+                    <div className="size-10 sm:size-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                      <Clock className="size-5 sm:size-6 text-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1 text-sm sm:text-base">שעות פעילות</h3>
+                      <p className="text-zinc-300 text-sm sm:text-base">
+                        א׳-ה׳: 09:00-18:00<br />
+                        ו׳: 09:00-13:00<br />
+                        ש׳: סגור
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </motion.div>
-        </ScrollReveal>
+          </ScrollReveal>
+
+          {/* Contact Form */}
+          <ScrollReveal delay={0.2}>
+            <motion.div
+              className="rounded-2xl border border-zinc-800 bg-black/30 backdrop-blur-sm p-6 sm:p-8 relative overflow-hidden"
+              whileHover={{ scale: 1.01 }}
+            >
+              {/* Background glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-gold/20 via-gold/10 to-transparent opacity-50 blur-2xl" />
+              <div className="relative z-10">
+                <h2 className="text-xl sm:text-2xl font-bold mb-6">הזמנת ייעוץ חינם</h2>
+                <LeadForm />
+              </div>
+            </motion.div>
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* FOOTER */}
       <footer className="border-t border-zinc-800/50 mt-20 bg-black/40 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
             {/* Logo and Description */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
@@ -638,19 +718,24 @@ export default function Home() {
                 {[
                   { href: "/privacy", label: "מדיניות פרטיות" },
                   { href: "/terms", label: "תנאי שירות" },
+                  { href: "/legal-disclaimer", label: "הצהרת אחריות" },
                   { href: "https://wa.me/972559737025", label: "WhatsApp" },
                 ].map((link) => (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-zinc-400 hover:text-gold transition"
-                      {...(link.href.startsWith("http") && {
-                        target: "_blank",
-                        rel: "noopener noreferrer",
-                      })}
-                    >
-                      {link.label}
-                    </a>
+                    {link.href.startsWith("http") ? (
+                      <a
+                        href={link.href}
+                        className="text-zinc-400 hover:text-gold transition"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="text-zinc-400 hover:text-gold transition">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

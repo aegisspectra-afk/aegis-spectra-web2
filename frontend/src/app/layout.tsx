@@ -4,6 +4,8 @@ import { GoogleAnalytics } from "@/components/Analytics";
 import { JSONLDSchema } from "@/components/JSONLDSchema";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import { ToastProvider } from "@/components/ToastProvider";
+import { CartProvider } from "@/contexts/cart-context";
 
 const heebo = Heebo({ subsets: ["hebrew"], weight: ["400","700"] });
 
@@ -57,10 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={heebo.className}>
         <ErrorBoundary>
-          <ServiceWorker />
-          <JSONLDSchema />
-          {gaId && <GoogleAnalytics gaId={gaId} />}
-          {children}
+          <ToastProvider>
+            <CartProvider>
+              <ServiceWorker />
+              <JSONLDSchema />
+              {gaId && <GoogleAnalytics gaId={gaId} />}
+              {children}
+            </CartProvider>
+          </ToastProvider>
         </ErrorBoundary>
       </body>
     </html>

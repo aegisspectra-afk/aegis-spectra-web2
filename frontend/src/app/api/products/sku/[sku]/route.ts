@@ -18,24 +18,56 @@ export async function GET(
       }, { status: 400 });
     }
 
-    // Decode SKU if it's URL encoded
-    const decodedSku = decodeURIComponent(sku);
+    // Decode SKU if it's URL encoded and trim whitespace
+    let decodedSku = decodeURIComponent(sku).trim();
+    
+    // Try multiple SKU formats (with/without dashes, case insensitive)
+    const skuVariations = [
+      decodedSku,
+      decodedSku.toUpperCase(),
+      decodedSku.toLowerCase(),
+      decodedSku.replace(/-/g, ''),
+      decodedSku.replace(/-/g, '_'),
+    ];
 
-    // Try to get product from database
-    const products = await sql`
-      SELECT * FROM products 
-      WHERE sku = ${decodedSku} 
-      AND (stock IS NULL OR stock > 0)
-      LIMIT 1
-    `.catch((error) => {
-      console.error('Database error:', error);
-      return [];
-    });
+    // Try to get product from database - try exact match first, then case-insensitive
+    let products: any[] = [];
+    
+    for (const skuVar of skuVariations) {
+      products = await sql`
+        SELECT * FROM products 
+        WHERE UPPER(TRIM(sku)) = UPPER(TRIM(${skuVar}))
+        AND (stock IS NULL OR stock > 0)
+        LIMIT 1
+      `.catch((error) => {
+        console.error('Database error:', error);
+        return [];
+      });
+      
+      if (products.length > 0) {
+        break;
+      }
+    }
+
+    // If still not found, try case-insensitive search without stock check
+    if (products.length === 0) {
+      products = await sql`
+        SELECT * FROM products 
+        WHERE UPPER(TRIM(sku)) = UPPER(TRIM(${decodedSku}))
+        LIMIT 1
+      `.catch((error) => {
+        console.error('Database error (fallback):', error);
+        return [];
+      });
+    }
 
     if (products.length === 0 || !products[0]) {
+      console.log(`Product not found for SKU: ${decodedSku} (original: ${sku})`);
       return NextResponse.json({ 
         ok: false, 
-        error: 'Product not found' 
+        error: `Product not found for SKU: ${decodedSku}`,
+        searchedSku: decodedSku,
+        variations: skuVariations
       }, { status: 404 });
     }
 

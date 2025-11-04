@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-
 import { Shield, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { trackLogout } from "@/lib/analytics";
 
 export function StickyNav() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -74,6 +75,7 @@ export function StickyNav() {
       localStorage.removeItem("user_id");
       localStorage.removeItem("user_role");
       setIsLoggedIn(false);
+      trackLogout();
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -84,6 +86,7 @@ export function StickyNav() {
       localStorage.removeItem("user_id");
       localStorage.removeItem("user_role");
       setIsLoggedIn(false);
+      trackLogout();
       router.push("/");
     }
   };

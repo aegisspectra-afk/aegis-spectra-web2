@@ -47,7 +47,7 @@ function ToastComponent({ toast, onClose }: ToastProps) {
       initial={{ opacity: 0, y: -20, x: 20 }}
       animate={{ opacity: 1, y: 0, x: 0 }}
       exit={{ opacity: 0, y: -20, x: 20 }}
-      className={`rounded-lg border ${colors[toast.type]} p-4 flex items-center gap-3 min-w-[300px] backdrop-blur-sm`}
+      className={`rounded-lg border ${colors[toast.type]} p-3 sm:p-4 flex items-center gap-2 sm:gap-3 min-w-[280px] sm:min-w-[300px] max-w-[90vw] sm:max-w-none backdrop-blur-sm shadow-lg pointer-events-auto`}
     >
       {icons[toast.type]}
       <p className="flex-1 text-sm">{toast.message}</p>
@@ -68,7 +68,7 @@ type ToastContainerProps = {
 
 export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 left-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-4 left-4 right-4 sm:right-auto z-50 flex flex-col gap-2 pointer-events-none">
       <AnimatePresence>
         {toasts.map((toast) => (
           <ToastComponent key={toast.id} toast={toast} onClose={onClose} />

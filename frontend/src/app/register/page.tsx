@@ -7,6 +7,7 @@ import { Mail, Lock, User, Phone, Eye, EyeOff, Shield, CheckCircle, Copy } from 
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useToastContext } from "@/components/ToastProvider";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -82,12 +83,26 @@ export default function RegisterPage() {
           localStorage.setItem('api_key_saved', 'false');
         }
         setSuccess(true);
+        showToast("הרשמה הושלמה בהצלחה!", "success");
+        trackRegister();
+        
+        // Show API key once (only time it will be shown)
+        if (data.apiKey) {
+          showToast(`API Key שלך: ${data.apiKey} - אנא שמור אותו, הוא יוצג רק פעם אחת`, "info", 10000);
+        }
+        
+        if (data.message) {
+          showToast(data.message, "warning");
+        }
+        
         // Show API key for 10 seconds before redirecting
         setTimeout(() => {
           router.push("/login?registered=true");
         }, 10000);
       } else {
-        setError(data.error || "שגיאה בהרשמה");
+        const errorMsg = data.error || "שגיאה בהרשמה";
+        setError(errorMsg);
+        showToast(errorMsg, "error");
       }
     } catch (error) {
       console.error("Register error:", error);
@@ -204,10 +219,25 @@ export default function RegisterPage() {
                       id="name"
                       required
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-black/30 border border-zinc-700 rounded-lg px-12 py-3 focus:outline-none focus:border-gold/70 transition text-white"
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors({ ...errors, name: "" });
+                      }}
+                      onBlur={(e) => {
+                        if (!e.target.value.trim()) {
+                          setErrors({ ...errors, name: "שם מלא נדרש" });
+                        } else {
+                          setErrors({ ...errors, name: "" });
+                        }
+                      }}
+                      className={`w-full bg-black/30 border rounded-lg px-12 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                        errors.name ? "border-red-500 focus:border-red-500" : "border-zinc-700 focus:border-gold/70"
+                      }`}
                       placeholder="הכנס שם מלא"
                     />
+                    {errors.name && (
+                      <p className="text-red-400 text-xs mt-1" role="alert">{errors.name}</p>
+                    )}
                   </div>
                 </div>
 
@@ -222,10 +252,26 @@ export default function RegisterPage() {
                       id="email"
                       required
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-black/30 border border-zinc-700 rounded-lg px-12 py-3 focus:outline-none focus:border-gold/70 transition text-white"
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (errors.email) setErrors({ ...errors, email: "" });
+                      }}
+                      onBlur={(e) => {
+                        const email = e.target.value;
+                        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                          setErrors({ ...errors, email: "אימייל לא תקין" });
+                        } else {
+                          setErrors({ ...errors, email: "" });
+                        }
+                      }}
+                      className={`w-full bg-black/30 border rounded-lg px-12 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                        errors.email ? "border-red-500 focus:border-red-500" : "border-zinc-700 focus:border-gold/70"
+                      }`}
                       placeholder="your@email.com"
                     />
+                    {errors.email && (
+                      <p className="text-red-400 text-xs mt-1" role="alert">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -240,10 +286,27 @@ export default function RegisterPage() {
                       id="phone"
                       required
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-black/30 border border-zinc-700 rounded-lg px-12 py-3 focus:outline-none focus:border-gold/70 transition text-white"
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: e.target.value });
+                        if (errors.phone) setErrors({ ...errors, phone: "" });
+                      }}
+                      onBlur={(e) => {
+                        const phone = e.target.value;
+                        const phoneRegex = /^0[2-9]\d{7,8}$/;
+                        if (phone && !phoneRegex.test(phone.replace(/\s/g, ""))) {
+                          setErrors({ ...errors, phone: "מספר טלפון לא תקין" });
+                        } else {
+                          setErrors({ ...errors, phone: "" });
+                        }
+                      }}
+                      className={`w-full bg-black/30 border rounded-lg px-12 py-3 focus:outline-none transition text-white text-sm sm:text-base ${
+                        errors.phone ? "border-red-500 focus:border-red-500" : "border-zinc-700 focus:border-gold/70"
+                      }`}
                       placeholder="050-123-4567"
                     />
+                    {errors.phone && (
+                      <p className="text-red-400 text-xs mt-1" role="alert">{errors.phone}</p>
+                    )}
                   </div>
                 </div>
 

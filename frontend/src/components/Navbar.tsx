@@ -84,36 +84,66 @@ export function Navbar() {
                 <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
               </Link>
             ))}
-          {isLoggedIn ? (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/user"
-                className="flex items-center gap-2 hover:text-gold transition"
-              >
-                <User className="size-4" />
-                דשבורד
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition"
-              >
-                <LogOut className="size-4" />
-                התנתק
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="hover:text-gold transition"
-              >
-                התחברות
-              </Link>
-              <Link
-                href="/register"
+            {isLoggedIn ? (
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/user"
+                  className="flex items-center gap-2 hover:text-gold transition"
+                >
+                  <User className="size-4" />
+                  דשבורד
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition"
+                >
+                  <LogOut className="size-4" />
+                  התנתק
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/login"
+                  className="hover:text-gold transition"
+                >
+                  התחברות
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                >
+                  <span className="relative z-10">הרשמה</span>
+                  <motion.span
+                    className="absolute inset-0 bg-gold"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </Link>
+              </div>
+            )}
+            {/* Show "הזמנת ייעוץ חינם" - same as StickyNav */}
+            {pathname === '/' ? (
+              <a
+                href="#contact"
+                onClick={(e) => handleSmoothScroll(e, "#contact")}
                 className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
               >
-                <span className="relative z-10">הרשמה</span>
+                <span className="relative z-10">הזמנת ייעוץ חינם</span>
+                <motion.span
+                  className="absolute inset-0 bg-gold"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </a>
+            ) : (
+              <Link
+                href="/#contact"
+                className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+              >
+                <span className="relative z-10">הזמנת ייעוץ חינם</span>
                 <motion.span
                   className="absolute inset-0 bg-gold"
                   initial={{ x: "-100%" }}
@@ -121,38 +151,8 @@ export function Navbar() {
                   transition={{ duration: 0.3 }}
                 />
               </Link>
-            </div>
-          )}
-          {/* Show "הזמנת ייעוץ חינם" - same as StickyNav */}
-          {pathname === '/' ? (
-            <a
-              href="#contact"
-              onClick={(e) => handleSmoothScroll(e, "#contact")}
-              className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
-            >
-              <span className="relative z-10">הזמנת ייעוץ חינם</span>
-              <motion.span
-                className="absolute inset-0 bg-gold"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ duration: 0.3 }}
-              />
-            </a>
-          ) : (
-            <Link
-              href="/#contact"
-              className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
-            >
-              <span className="relative z-10">הזמנת ייעוץ חינם</span>
-              <motion.span
-                className="absolute inset-0 bg-gold"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ duration: 0.3 }}
-              />
-            </Link>
-          )}
-        </div>
+            )}
+          </div>
 
         {/* Mobile Menu Button */}
         <button

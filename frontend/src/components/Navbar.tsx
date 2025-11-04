@@ -14,9 +14,24 @@ export function Navbar() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem("user_token");
-    setIsLoggedIn(!!token);
-  }, []);
+    const checkAuth = () => {
+      const token = localStorage.getItem("user_token");
+      setIsLoggedIn(!!token);
+    };
+
+    // Check immediately
+    checkAuth();
+
+    // Listen for storage changes (e.g., logout from another tab)
+    window.addEventListener('storage', checkAuth);
+
+    // Also check on pathname change (navigation)
+    checkAuth();
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     // Prevent body scroll when mobile menu is open
@@ -43,14 +58,43 @@ export function Navbar() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_name");
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("user_role");
-    setIsLoggedIn(false);
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("user_token");
+      
+      // Call logout API to clear server-side session
+      if (token) {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }).catch(() => {
+          // Ignore errors - clear client-side anyway
+        });
+      }
+      
+      // Clear client-side storage
+      localStorage.removeItem("user_token");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_role");
+      setIsLoggedIn(false);
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Clear client-side even if API call fails
+      localStorage.removeItem("user_token");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_role");
+      setIsLoggedIn(false);
+      router.push("/");
+    }
   };
 
   // Navigation links - same as StickyNav (updated to match)

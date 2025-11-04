@@ -35,19 +35,35 @@ export default function ApiKeysPage() {
     try {
       const token = localStorage.getItem("user_token");
       if (!token) {
-        window.location.href = "/login";
+        window.location.href = "/login?redirect=/user/api-keys";
         return;
       }
 
       const response = await fetch("/api/auth/api-key", {
+        credentials: "include",
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       });
+
+      if (response.status === 401) {
+        // Invalid token - clear and redirect
+        localStorage.removeItem("user_token");
+        window.location.href = "/login?redirect=/user/api-keys";
+        return;
+      }
 
       const data = await response.json();
       if (data.ok && data.apiKeys) {
         setApiKeys(data.apiKeys);
+      } else if (!data.ok) {
+        // Handle error
+        console.error("Error fetching API keys:", data.error);
+        if (data.error?.includes("לא מאומת") || data.error?.includes("Token")) {
+          localStorage.removeItem("user_token");
+          window.location.href = "/login?redirect=/user/api-keys";
+        }
       }
     } catch (error) {
       console.error("Error fetching API keys:", error);

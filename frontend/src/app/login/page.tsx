@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,13 +30,18 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          rememberMe: formData.rememberMe,
+        }),
       });
 
       const data = await response.json();
 
       if (data.ok) {
         // Save auth token (JWT) and all user data
+        // Note: Cookie is set automatically by server, but we also save to localStorage for client-side checks
         localStorage.setItem("user_token", data.token);
         localStorage.setItem("user_id", data.user.id.toString());
         localStorage.setItem("user_name", data.user.name || formData.email);
@@ -48,8 +54,12 @@ export default function LoginPage() {
           alert(data.message);
         }
         
-        // Redirect to user dashboard
-        router.push("/user");
+        // Check for redirect parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get("redirect") || "/user";
+        
+        // Redirect to user dashboard or requested page
+        router.push(redirect);
       } else {
         setError(data.error || "שגיאה בהתחברות");
       }
@@ -137,6 +147,8 @@ export default function LoginPage() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
+                      checked={formData.rememberMe}
+                      onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                       className="rounded border-zinc-700 bg-black/30 text-gold focus:ring-gold"
                     />
                     <span className="text-zinc-400">זכור אותי</span>

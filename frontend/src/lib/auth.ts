@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'aegis-spectra-secret-key-change-in-production';
-const JWT_EXPIRES_IN = '7d'; // 7 days
+const JWT_EXPIRES_IN = '7d'; // 7 days (for "remember me")
+const JWT_EXPIRES_IN_SHORT = '24h'; // 24 hours (for normal login)
 
 // Password hashing
 export async function hashPassword(password: string): Promise<string> {
@@ -29,24 +30,30 @@ export function hashApiKey(apiKey: string): string {
   return crypto.createHash('sha256').update(apiKey).digest('hex');
 }
 
-// JWT Token generation
-export function generateToken(userId: number, email: string, role: string): string {
+// Generate session ID
+export function generateSessionId(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// JWT Token generation with session ID
+export function generateToken(userId: number, email: string, role: string, sessionId: string, rememberMe: boolean = false): string {
   return jwt.sign(
     { 
       userId, 
       email, 
       role,
+      sessionId, // Critical: Each token has unique session ID
       iat: Math.floor(Date.now() / 1000)
     },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    { expiresIn: rememberMe ? JWT_EXPIRES_IN : JWT_EXPIRES_IN_SHORT }
   );
 }
 
 // Verify JWT token
-export function verifyToken(token: string): { userId: number; email: string; role: string } | null {
+export function verifyToken(token: string): { userId: number; email: string; role: string; sessionId?: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; email: string; role: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; email: string; role: string; sessionId?: string };
     return decoded;
   } catch (error) {
     return null;

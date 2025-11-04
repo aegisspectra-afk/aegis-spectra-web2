@@ -6,6 +6,7 @@ import {
   generateApiKey, 
   hashApiKey, 
   generateToken,
+  generateSessionId,
   isValidEmail, 
   isValidPhone, 
   isStrongPassword,
@@ -156,8 +157,49 @@ export async function POST(request: NextRequest) {
       console.warn('API keys table not found, will be created on next request');
     });
 
-    // Generate JWT token
-    const token = generateToken(user.id, email, user.role);
+    // Generate unique session ID for this registration
+    const sessionId = generateSessionId();
+    
+    // Get client IP and user agent for session tracking
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    // Generate JWT token with session ID (default to 24 hours for new registrations)
+    const token = generateToken(user.id, email, user.role, sessionId, false);
+
+    // Create session in database with IP tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(255) UNIQUE NOT NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        ip_address VARCHAR(45) NOT NULL,
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        expires_at TIMESTAMP NOT NULL,
+        last_used TIMESTAMP DEFAULT NOW(),
+        is_active BOOLEAN DEFAULT true
+      )
+    `.catch(() => {
+      // Table might already exist
+    });
+
+    // Insert session into database (24 hours for new registrations)
+    const maxAge = 60 * 60 * 24; // 24 hours
+    const expiresAt = new Date(Date.now() + maxAge * 1000);
+    await sql`
+      INSERT INTO sessions (session_id, user_id, ip_address, user_agent, expires_at, created_at, last_used, is_active)
+      VALUES (${sessionId}, ${user.id}, ${clientIp}, ${userAgent}, ${expiresAt.toISOString()}, NOW(), NOW(), true)
+      ON CONFLICT (session_id) DO UPDATE SET
+        last_used = NOW(),
+        is_active = true,
+        expires_at = ${expiresAt.toISOString()}
+    `.catch((error) => {
+      console.error('Error creating session:', error);
+      // Continue anyway - session might exist
+    });
 
     // Send verification email (async, don't wait)
     if (email) {
@@ -182,8 +224,8 @@ export async function POST(request: NextRequest) {
       }).catch(err => console.error('Failed to send verification email:', err));
     }
 
-    // Return user data and API key (API key shown only once!)
-    return NextResponse.json({ 
+    // Create response with JSON data
+    const response = NextResponse.json({ 
       ok: true, 
       user: {
         id: user.id,
@@ -197,6 +239,18 @@ export async function POST(request: NextRequest) {
       apiKey, // Return API key only once - user must save it!
       message: 'הרשמה הושלמה בהצלחה! אנא שמור את ה-API Key שלך - הוא יוצג רק פעם אחת.'
     });
+
+    // Set httpOnly cookie for security (server-side only)
+    // New registrations get 24 hours (not 7 days) - they can login again with "remember me"
+    response.cookies.set('user_token', token, {
+      maxAge: 60 * 60 * 24, // 24 hours for new registrations
+      path: '/',
+      httpOnly: true, // Prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+      sameSite: 'lax', // CSRF protection
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Registration error:', error);
     

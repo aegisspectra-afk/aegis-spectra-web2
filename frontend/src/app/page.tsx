@@ -29,7 +29,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Set mounted state immediately to trigger re-render
+    // Set mounted state immediately - no delay needed
     setIsMounted(true);
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -38,15 +38,9 @@ export default function Home() {
     
     if (typeof window !== 'undefined') {
       window.addEventListener("mousemove", handleMouseMove);
-      // Force a re-render after a short delay to fix caching issues
-      const timer = setTimeout(() => {
-        setIsMounted(false);
-        setTimeout(() => setIsMounted(true), 10);
-      }, 100);
       
       return () => {
         window.removeEventListener("mousemove", handleMouseMove);
-        clearTimeout(timer);
       };
     }
   }, []);
@@ -89,11 +83,10 @@ export default function Home() {
         animate={{ opacity: 1 }}
       >
         {/* Floating particles */}
-        {isMounted && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={`particle-${i}-${isMounted}`}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {isMounted && [...Array(20)].map((_, i) => (
+            <motion.div
+              key={`particle-${i}`}
                 className="absolute w-2 h-2 rounded-full bg-gold/30"
                 initial={{
                   x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
@@ -111,9 +104,8 @@ export default function Home() {
                   ease: "easeInOut",
                 }}
               />
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
 
         {/* NAV */}
         <nav className="absolute top-0 left-0 right-0 z-40 max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
@@ -213,15 +205,14 @@ export default function Home() {
         </nav>
 
         {/* Hero Content */}
-        {isMounted && (
-          <div className="max-w-6xl mx-auto px-4 pt-20 pb-20 md:pb-32 relative z-30">
-            <motion.div
-              key="hero-content"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="max-w-4xl"
-            >
+        <div className="max-w-6xl mx-auto px-4 pt-20 pb-20 md:pb-32 relative z-30">
+          <motion.div
+            key="hero-content"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="max-w-4xl"
+          >
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -355,9 +346,8 @@ export default function Home() {
             >
               <ArrowDown className="size-6 text-zinc-400" />
             </motion.div>
-            </motion.div>
-          </div>
-        )}
+          </motion.div>
+        </div>
       </motion.header>
 
       {/* Statistics Section */}

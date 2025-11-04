@@ -1,6 +1,6 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyPassword, generateToken, isValidEmail, checkRateLimit } from '@/lib/auth';
+import { verifyPassword, generateToken, generateSessionId, isValidEmail, checkRateLimit } from '@/lib/auth';
 
 const sql = neon();
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, rememberMe } = body;
 
     if (!email || !password) {
       return NextResponse.json({ 
@@ -24,6 +24,12 @@ export async function POST(request: NextRequest) {
         error: 'אימייל וסיסמה נדרשים' 
       }, { status: 400 });
     }
+
+    // Get client IP and user agent for session tracking
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Validate email format
     if (!isValidEmail(email)) {
@@ -87,10 +93,49 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Generate secure JWT token
-    const token = generateToken(user.id, user.email, user.role);
+    // Generate unique session ID for this login
+    const sessionId = generateSessionId();
+    
+    // Calculate expiration time based on "remember me"
+    const rememberMeBool = rememberMe === true || rememberMe === 'true';
+    const maxAge = rememberMeBool ? 60 * 60 * 24 * 7 : 60 * 60 * 24; // 7 days or 24 hours
 
-    return NextResponse.json({ 
+    // Generate secure JWT token with session ID
+    const token = generateToken(user.id, user.email, user.role, sessionId, rememberMeBool);
+
+    // Create session in database with IP tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(255) UNIQUE NOT NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        ip_address VARCHAR(45) NOT NULL,
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        expires_at TIMESTAMP NOT NULL,
+        last_used TIMESTAMP DEFAULT NOW(),
+        is_active BOOLEAN DEFAULT true
+      )
+    `.catch(() => {
+      // Table might already exist
+    });
+
+    // Insert session into database
+    const expiresAt = new Date(Date.now() + maxAge * 1000);
+    await sql`
+      INSERT INTO sessions (session_id, user_id, ip_address, user_agent, expires_at, created_at, last_used, is_active)
+      VALUES (${sessionId}, ${user.id}, ${clientIp}, ${userAgent}, ${expiresAt.toISOString()}, NOW(), NOW(), true)
+      ON CONFLICT (session_id) DO UPDATE SET
+        last_used = NOW(),
+        is_active = true,
+        expires_at = ${expiresAt.toISOString()}
+    `.catch((error) => {
+      console.error('Error creating session:', error);
+      // Continue anyway - session might exist
+    });
+
+    // Create response with JSON data
+    const response = NextResponse.json({ 
       ok: true, 
       user: {
         id: user.id,
@@ -103,6 +148,17 @@ export async function POST(request: NextRequest) {
       token,
       message: user.email_verified ? undefined : 'אנא אמת את האימייל שלך'
     });
+
+    // Set httpOnly cookie for security (server-side only)
+    response.cookies.set('user_token', token, {
+      maxAge: maxAge, // Based on "remember me" selection
+      path: '/',
+      httpOnly: true, // Prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+      sameSite: 'lax', // CSRF protection
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Login error:', error);
     // Don't leak error details

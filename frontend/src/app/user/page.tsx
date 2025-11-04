@@ -34,58 +34,68 @@ export default function UserDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load user data from localStorage (saved during login/registration)
+    // Verify authentication with server
     const token = localStorage.getItem("user_token");
-    const userId = localStorage.getItem("user_id");
-    const userName = localStorage.getItem("user_name");
-    const userEmail = localStorage.getItem("user_email");
-    const userPhone = localStorage.getItem("user_phone");
-    const userRole = localStorage.getItem("user_role");
     
     if (!token) {
       // Redirect to login if not authenticated
-      window.location.href = "/login";
+      window.location.href = "/login?redirect=/user";
       return;
     }
-    
-    if (userId && userName) {
-      setUser({
-        id: parseInt(userId),
-        name: userName,
-        email: userEmail || undefined,
-        phone: userPhone || undefined,
-        created_at: new Date().toISOString() // TODO: Load from API
-      });
-    } else {
-      // If no user data, try to fetch from API
-      fetch("/api/auth/me", {
-        headers: {
-          "Authorization": `Bearer ${token}`
+
+    // Always verify token with server
+    fetch("/api/auth/me", {
+      method: "GET",
+      credentials: "include", // Include cookies
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (res.status === 401) {
+          // Invalid token - clear localStorage and redirect
+          localStorage.removeItem("user_token");
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("user_name");
+          localStorage.removeItem("user_email");
+          localStorage.removeItem("user_phone");
+          localStorage.removeItem("user_role");
+          window.location.href = "/login?redirect=/user";
+          return null;
         }
+        return res.json();
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok && data.user) {
-            setUser({
-              id: data.user.id,
-              name: data.user.name,
-              email: data.user.email,
-              phone: data.user.phone,
-              created_at: data.user.created_at || new Date().toISOString()
-            });
-            // Save to localStorage
-            localStorage.setItem("user_id", data.user.id.toString());
-            localStorage.setItem("user_name", data.user.name);
-            if (data.user.email) localStorage.setItem("user_email", data.user.email);
-            if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
-          }
-        })
-        .catch(err => {
-          console.error("Error fetching user data:", err);
-        });
-    }
-    
-    setLoading(false);
+      .then(data => {
+        if (data && data.ok && data.user) {
+          setUser({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone,
+            created_at: data.user.createdAt || new Date().toISOString()
+          });
+          // Update localStorage with verified data
+          localStorage.setItem("user_id", data.user.id.toString());
+          localStorage.setItem("user_name", data.user.name);
+          if (data.user.email) localStorage.setItem("user_email", data.user.email);
+          if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
+          if (data.user.role) localStorage.setItem("user_role", data.user.role);
+        } else if (data && !data.ok) {
+          // Authentication failed - redirect to login
+          localStorage.removeItem("user_token");
+          window.location.href = "/login?redirect=/user";
+          return;
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching user data:", err);
+        setLoading(false);
+        // On error, redirect to login
+        localStorage.removeItem("user_token");
+        window.location.href = "/login?redirect=/user";
+      });
   }, []);
 
   if (loading) {

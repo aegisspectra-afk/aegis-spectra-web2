@@ -18,23 +18,35 @@ export async function GET(
       }, { status: 400 });
     }
 
-    const [product] = await sql`
-      SELECT * FROM products WHERE sku = ${sku} AND (stock IS NULL OR stock > 0)
-    `;
+    // Decode SKU if it's URL encoded
+    const decodedSku = decodeURIComponent(sku);
 
-    if (!product) {
+    // Try to get product from database
+    const products = await sql`
+      SELECT * FROM products 
+      WHERE sku = ${decodedSku} 
+      AND (stock IS NULL OR stock > 0)
+      LIMIT 1
+    `.catch((error) => {
+      console.error('Database error:', error);
+      return [];
+    });
+
+    if (products.length === 0 || !products[0]) {
       return NextResponse.json({ 
         ok: false, 
         error: 'Product not found' 
       }, { status: 404 });
     }
 
+    const product = products[0];
     return NextResponse.json({ ok: true, product });
   } catch (error: any) {
     console.error('Error fetching product by SKU:', error);
     return NextResponse.json({ 
       ok: false, 
-      error: 'Failed to fetch product' 
+      error: 'Failed to fetch product',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }

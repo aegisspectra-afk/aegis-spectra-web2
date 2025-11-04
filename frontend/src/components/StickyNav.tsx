@@ -49,12 +49,43 @@ export function StickyNav() {
     };
   }, [isOpen]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_name");
-    setIsLoggedIn(false);
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("user_token");
+      
+      // Call logout API to clear server-side session
+      if (token) {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }).catch(() => {
+          // Ignore errors - clear client-side anyway
+        });
+      }
+      
+      // Clear client-side storage
+      localStorage.removeItem("user_token");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_role");
+      setIsLoggedIn(false);
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Clear client-side even if API call fails
+      localStorage.removeItem("user_token");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_role");
+      setIsLoggedIn(false);
+      router.push("/");
+    }
   };
 
   const navLinks = [

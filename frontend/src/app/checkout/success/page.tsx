@@ -353,7 +353,7 @@ export default function CheckoutSuccessPage() {
                     <Package className="size-6 text-gold" />
                     פרטי ההזמנה
                   </h2>
-                  <p className="text-zinc-400 mb-6">מס' הזמנה: <span className="font-mono text-gold">{orderId}</span></p>
+                  <p className="text-zinc-400 mb-6">מס&apos; הזמנה: <span className="font-mono text-gold">{orderId}</span></p>
 
                 <div className="space-y-6">
                     {/* Top meta */}

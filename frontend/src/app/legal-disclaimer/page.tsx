@@ -67,7 +67,7 @@ export default function LegalDisclaimerPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="size-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>חוק האזנת סתר, תשל"ט–1979</span>
+                      <span>חוק האזנת סתר, תשל&quot;ט–1979</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="size-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -80,7 +80,7 @@ export default function LegalDisclaimerPage() {
                   </ul>
                   <div className="p-4 rounded-lg bg-blue-500/20 border-2 border-blue-500/50">
                     <p className="text-sm font-semibold text-blue-300">
-                      Aegis Spectra אינה אחראית לכל שימוש שאינו תואם את החוקים והתקנות הנ"ל.
+                      Aegis Spectra אינה אחראית לכל שימוש שאינו תואם את החוקים והתקנות הנ&quot;ל.
                     </p>
                   </div>
                 </div>

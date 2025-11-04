@@ -26,17 +26,40 @@ export default function Home() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
+    };
   }, []);
 
   const parallaxX = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  
+  // Force re-render on mount to fix caching issues
+  useEffect(() => {
+    // Trigger a re-render to ensure animations restart
+    if (isMounted) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        setIsMounted(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isMounted]);
 
   return (
     <main className="relative overflow-hidden">
@@ -66,32 +89,38 @@ export default function Home() {
 
       {/* Hero Section with Parallax */}
       <motion.header 
+        key={isMounted ? 'hero-mounted' : 'hero-loading'}
         style={{ opacity, y }}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        initial={false}
+        animate={{ opacity: 1 }}
       >
         {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {typeof window !== 'undefined' && [...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full bg-gold/30"
-              initial={{
-                x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : 0,
-                y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : 0,
-              }}
-              animate={{
-                y: typeof window !== 'undefined' ? [null, Math.random() * window.innerHeight] : 0,
-                x: typeof window !== 'undefined' ? [null, Math.random() * window.innerWidth] : 0,
-                opacity: [0.3, 0.7, 0.3],
-              }}
-              transition={{
-                duration: 10 + Math.random() * 10,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
+        {isMounted && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={`particle-${i}-${isMounted}`}
+                className="absolute w-2 h-2 rounded-full bg-gold/30"
+                initial={{
+                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
+                  opacity: 0.3,
+                }}
+                animate={{
+                  y: [null, Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080)],
+                  x: [null, Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920)],
+                  opacity: [0.3, 0.7, 0.3],
+                }}
+                transition={{
+                  duration: 10 + Math.random() * 10,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* NAV */}
         <nav className="absolute top-0 left-0 right-0 z-40 max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
@@ -111,6 +140,7 @@ export default function Home() {
             </Link>
           </motion.div>
           <motion.div 
+            key={isMounted ? 'nav-links-mounted' : 'nav-links-loading'}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -187,16 +217,19 @@ export default function Home() {
               </div>
             )}
           </motion.div>
-        </nav>
+          </nav>
+        )}
 
         {/* Hero Content */}
-        <div className="max-w-6xl mx-auto px-4 pt-20 pb-20 md:pb-32 relative z-30">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="max-w-4xl"
-          >
+        {isMounted && (
+          <div className="max-w-6xl mx-auto px-4 pt-20 pb-20 md:pb-32 relative z-30">
+            <motion.div
+              key="hero-content"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="max-w-4xl"
+            >
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -330,8 +363,9 @@ export default function Home() {
             >
               <ArrowDown className="size-6 text-zinc-400" />
             </motion.div>
-          </motion.div>
-        </div>
+            </motion.div>
+          </div>
+        )}
       </motion.header>
 
       {/* Statistics Section */}

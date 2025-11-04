@@ -67,6 +67,15 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.ok) {
+        // Save user data and API key to localStorage
+        if (data.user) {
+          localStorage.setItem("user_token", data.token);
+          localStorage.setItem("user_id", data.user.id.toString());
+          localStorage.setItem("user_name", data.user.name || formData.name);
+          localStorage.setItem("user_email", data.user.email || formData.email);
+          if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
+          localStorage.setItem("user_role", data.user.role || "customer");
+        }
         // Save API key if provided (only shown once!)
         if (data.apiKey) {
           localStorage.setItem('new_api_key', data.apiKey);
@@ -121,9 +130,9 @@ export default function RegisterPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-8 p-6 rounded-2xl border-2 border-yellow-500/50 bg-yellow-500/10 backdrop-blur-sm"
               >
-                <h3 className="text-lg font-bold mb-4 text-yellow-400">⚠️ שמור את ה-API Key שלך!</h3>
+                <h3 className="text-lg font-bold mb-4 text-yellow-400">⚠️ שמור את ה-Secret Key שלך!</h3>
                 <p className="text-sm text-zinc-300 mb-4">
-                  ה-API Key הזה יוצג רק פעם אחת. אנא שמור אותו במקום בטוח!
+                  ה-Secret Key הזה יוצג רק פעם אחת. אנא שמור אותו במקום בטוח!
                 </p>
                 <div className="bg-black/50 rounded-lg p-4 mb-4">
                   <code className="text-gold font-mono text-sm break-all">{apiKey}</code>
@@ -137,10 +146,10 @@ export default function RegisterPage() {
                   className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
                 >
                   <Copy className="size-5" />
-                  העתק API Key
+                  העתק Secret Key
                 </button>
                 <p className="text-xs text-zinc-400 mt-4">
-                  ה-API Key הזה מאפשר גישה לחשבון שלך. אל תשתף אותו עם אחרים!
+                  ה-Secret Key הזה מאפשר גישה לחשבון שלך. אל תשתף אותו עם אחרים!
                 </p>
               </motion.div>
             )}

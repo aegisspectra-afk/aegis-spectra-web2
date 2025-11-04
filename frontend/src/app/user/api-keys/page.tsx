@@ -58,7 +58,7 @@ export default function ApiKeysPage() {
 
   async function createApiKey() {
     if (!newKeyName.trim()) {
-      alert("אנא הזן שם ל-API Key");
+      alert("אנא הזן שם ל-Secret Key");
       return;
     }
 
@@ -86,18 +86,18 @@ export default function ApiKeysPage() {
         setNewKeyName("");
         fetchApiKeys(); // Refresh list
       } else {
-        alert(data.error || "שגיאה ביצירת API Key");
+        alert(data.error || "שגיאה ביצירת Secret Key");
       }
     } catch (error) {
-      console.error("Error creating API key:", error);
-      alert("שגיאה ביצירת API Key");
+      console.error("Error creating Secret key:", error);
+      alert("שגיאה ביצירת Secret Key");
     } finally {
       setCreating(false);
     }
   }
 
   async function deleteApiKey(keyId: number) {
-    if (!confirm("האם אתה בטוח שברצונך למחוק את ה-API Key הזה?")) {
+    if (!confirm("האם אתה בטוח שברצונך למחוק את ה-Secret Key הזה?")) {
       return;
     }
 
@@ -119,11 +119,11 @@ export default function ApiKeysPage() {
       if (data.ok) {
         fetchApiKeys(); // Refresh list
       } else {
-        alert(data.error || "שגיאה במחיקת API Key");
+        alert(data.error || "שגיאה במחיקת Secret Key");
       }
     } catch (error) {
-      console.error("Error deleting API key:", error);
-      alert("שגיאה במחיקת API Key");
+      console.error("Error deleting Secret key:", error);
+      alert("שגיאה במחיקת Secret Key");
     }
   }
 
@@ -143,10 +143,10 @@ export default function ApiKeysPage() {
             <div className="mb-8">
               <h1 className="text-4xl font-bold mb-4 flex items-center gap-3">
                 <Key className="size-8 text-gold" />
-                API Keys שלי
+                Secret Keys שלי
               </h1>
               <p className="text-zinc-400">
-                נהל את ה-API Keys שלך. כל API Key מאפשר גישה לחשבון שלך.
+                נהל את ה-Secret Keys שלך. כל Secret Key מאפשר גישה לחשבון שלך.
               </p>
             </div>
           </ScrollReveal>
@@ -162,9 +162,9 @@ export default function ApiKeysPage() {
                 <div className="flex items-start gap-4 mb-4">
                   <AlertCircle className="size-6 text-yellow-400 flex-shrink-0 mt-1" />
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-2 text-yellow-400">⚠️ שמור את ה-API Key החדש!</h3>
+                    <h3 className="text-lg font-bold mb-2 text-yellow-400">⚠️ שמור את ה-Secret Key החדש!</h3>
                     <p className="text-sm text-zinc-300 mb-4">
-                      ה-API Key הזה יוצג רק פעם אחת. אנא שמור אותו במקום בטוח!
+                      ה-Secret Key הזה יוצג רק פעם אחת. אנא שמור אותו במקום בטוח!
                     </p>
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default function ApiKeysPage() {
                   ) : (
                     <>
                       <Copy className="size-5" />
-                      העתק API Key
+                      העתק Secret Key
                     </>
                   )}
                 </button>
@@ -206,11 +206,11 @@ export default function ApiKeysPage() {
                   className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-4 font-semibold hover:bg-gold/90 transition"
                 >
                   <Plus className="size-5" />
-                  צור API Key חדש
+                  צור Secret Key חדש
                 </button>
               ) : (
                 <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 backdrop-blur-sm">
-                  <h2 className="text-xl font-bold mb-4">צור API Key חדש</h2>
+                  <h2 className="text-xl font-bold mb-4">צור Secret Key חדש</h2>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">שם (אופציונלי)</label>
@@ -236,7 +236,7 @@ export default function ApiKeysPage() {
                         ) : (
                           <>
                             <Key className="size-5" />
-                            צור API Key
+                            צור Secret Key
                           </>
                         )}
                       </button>
@@ -259,18 +259,18 @@ export default function ApiKeysPage() {
           {/* API Keys List */}
           <ScrollReveal delay={0.3}>
             <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold mb-6">API Keys שלי</h2>
+              <h2 className="text-2xl font-bold mb-6">Secret Keys שלי</h2>
               
               {loading ? (
                 <div className="text-center py-12">
                   <div className="size-12 border-2 border-zinc-700 border-t-gold rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-zinc-400">טוען API Keys...</p>
+                  <p className="text-zinc-400">טוען Secret Keys...</p>
                 </div>
               ) : apiKeys.length === 0 ? (
                 <div className="text-center py-12">
                   <Key className="size-16 mx-auto mb-6 text-zinc-600" />
-                  <h3 className="text-xl font-bold mb-2">אין API Keys</h3>
-                  <p className="text-zinc-400 mb-6">צור API Key חדש כדי להתחיל</p>
+                  <h3 className="text-xl font-bold mb-2">אין Secret Keys</h3>
+                  <p className="text-zinc-400 mb-6">צור Secret Key חדש כדי להתחיל</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -295,7 +295,7 @@ export default function ApiKeysPage() {
                             )}
                           </div>
                           <div className="space-y-1 text-sm text-zinc-400">
-                            <p>API Key: <code className="text-zinc-300">{key.displayKey}</code></p>
+                            <p>Secret Key: <code className="text-zinc-300">{key.displayKey}</code></p>
                             {key.lastUsed && (
                               <p>שימוש אחרון: {new Date(key.lastUsed).toLocaleDateString("he-IL")}</p>
                             )}
@@ -308,7 +308,7 @@ export default function ApiKeysPage() {
                         <button
                           onClick={() => deleteApiKey(key.id)}
                           className="p-3 rounded-lg hover:bg-red-500/20 text-red-400 transition"
-                          title="מחק API Key"
+                          title="מחק Secret Key"
                         >
                           <Trash2 className="size-5" />
                         </button>
@@ -328,10 +328,10 @@ export default function ApiKeysPage() {
                 אבטחה
               </h3>
               <ul className="space-y-2 text-sm text-zinc-300">
-                <li>• שמור את ה-API Keys שלך בסוד - אל תשתף אותם עם אחרים</li>
-                <li>• אם API Key נחשף, מחק אותו מיד וצור חדש</li>
-                <li>• כל API Key מאפשר גישה מלאה לחשבון שלך</li>
-                <li>• מומלץ ליצור API Key נפרד לכל אפליקציה או שירות</li>
+                <li>• שמור את ה-Secret Keys שלך בסוד - אל תשתף אותם עם אחרים</li>
+                <li>• אם Secret Key נחשף, מחק אותו מיד וצור חדש</li>
+                <li>• כל Secret Key מאפשר גישה מלאה לחשבון שלך</li>
+                <li>• מומלץ ליצור Secret Key נפרד לכל אפליקציה או שירות</li>
               </ul>
             </div>
           </ScrollReveal>

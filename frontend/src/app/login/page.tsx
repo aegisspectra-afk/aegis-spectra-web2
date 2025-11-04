@@ -35,11 +35,12 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save auth token (JWT)
+        // Save auth token (JWT) and all user data
         localStorage.setItem("user_token", data.token);
-        localStorage.setItem("user_email", formData.email);
-        localStorage.setItem("user_name", data.user.name || formData.email);
         localStorage.setItem("user_id", data.user.id.toString());
+        localStorage.setItem("user_name", data.user.name || formData.email);
+        localStorage.setItem("user_email", data.user.email || formData.email);
+        if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
         localStorage.setItem("user_role", data.user.role || "customer");
         
         // Show warning if email not verified

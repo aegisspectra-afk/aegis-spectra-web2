@@ -8,6 +8,8 @@ import {
   MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 type UserProfile = {
   id: number;
@@ -32,26 +34,57 @@ export default function UserDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // בדיקה אם יש משתמש מחובר (בעתיד - authentication)
-    const savedUser = localStorage.getItem("user_profile");
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-        // כאן אפשר לטעון הזמנות ותמיכה מה-API
-      } catch (err) {
-        console.error("Error parsing user data:", err);
-      }
-    } else {
-      // Demo user for now
-      setUser({
-        id: 1,
-        name: "דני כהן",
-        email: "danny@example.com",
-        phone: "0501234567",
-        created_at: new Date().toISOString()
-      });
+    // Load user data from localStorage (saved during login/registration)
+    const token = localStorage.getItem("user_token");
+    const userId = localStorage.getItem("user_id");
+    const userName = localStorage.getItem("user_name");
+    const userEmail = localStorage.getItem("user_email");
+    const userPhone = localStorage.getItem("user_phone");
+    const userRole = localStorage.getItem("user_role");
+    
+    if (!token) {
+      // Redirect to login if not authenticated
+      window.location.href = "/login";
+      return;
     }
+    
+    if (userId && userName) {
+      setUser({
+        id: parseInt(userId),
+        name: userName,
+        email: userEmail || undefined,
+        phone: userPhone || undefined,
+        created_at: new Date().toISOString() // TODO: Load from API
+      });
+    } else {
+      // If no user data, try to fetch from API
+      fetch("/api/auth/me", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok && data.user) {
+            setUser({
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              phone: data.user.phone,
+              created_at: data.user.created_at || new Date().toISOString()
+            });
+            // Save to localStorage
+            localStorage.setItem("user_id", data.user.id.toString());
+            localStorage.setItem("user_name", data.user.name);
+            if (data.user.email) localStorage.setItem("user_email", data.user.email);
+            if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching user data:", err);
+        });
+    }
+    
     setLoading(false);
   }, []);
 
@@ -67,10 +100,11 @@ export default function UserDashboardPage() {
   }
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen bg-charcoal text-white">
+      <Navbar />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(113,113,122,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
       
-      <div className="max-w-6xl mx-auto px-4 py-20">
+      <div className="max-w-6xl mx-auto px-4 pt-24 pb-20">
         {/* Header */}
         <ScrollReveal>
           <div className="flex items-center justify-between mb-12">
@@ -98,7 +132,7 @@ export default function UserDashboardPage() {
               { id: "orders" as const, label: "הזמנות", icon: Package },
               { id: "support" as const, label: "תמיכה", icon: MessageSquare },
               { id: "reports" as const, label: "דוחות", icon: FileText },
-              { id: "api-keys" as const, label: "API Keys", icon: Key }
+              { id: "api-keys" as const, label: "Secret Keys", icon: Key }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -364,7 +398,7 @@ export default function UserDashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                   <Key className="size-6 text-gold" />
-                  API Keys שלי
+                  Secret Keys שלי
                 </h2>
                 <Link
                   href="/user/api-keys"
@@ -375,19 +409,20 @@ export default function UserDashboardPage() {
               </div>
               <div className="text-center py-12">
                 <Key className="size-16 mx-auto mb-6 text-zinc-600" />
-                <p className="text-zinc-400 mb-4">ניהול API Keys מלא</p>
+                <p className="text-zinc-400 mb-4">ניהול Secret Keys מלא</p>
                 <Link
                   href="/user/api-keys"
                   className="inline-flex items-center gap-2 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
                 >
                   <Key className="size-5" />
-                  עבור לניהול API Keys
+                  עבור לניהול Secret Keys
                 </Link>
               </div>
             </div>
           )}
         </ScrollReveal>
       </div>
+      <Footer />
     </main>
   );
 }

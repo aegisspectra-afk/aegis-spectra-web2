@@ -53,13 +53,8 @@ export function Navbar() {
     router.push("/");
   };
 
-  // Navigation links - use anchor links for homepage, regular links for other pages
-  const navLinks = pathname === '/' ? [
-    { href: "/services", label: "שירותים" },
-    { href: "/products", label: "מוצרים" },
-    { href: "/about", label: "אודות" },
-    { href: "#faq", label: "שאלות נפוצות" },
-  ] : [
+  // Navigation links - same as StickyNav
+  const navLinks = [
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },
     { href: "/about", label: "אודות" },
@@ -77,20 +72,9 @@ export function Navbar() {
           <span className="font-bold text-gold text-lg group-hover:text-gold/80 transition">Aegis Spectra</span>
         </Link>
         
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6 text-sm">
-          {navLinks.map((link) => (
-            link.href.startsWith('#') ? (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleSmoothScroll(e, link.href)}
-                className="hover:text-gold transition relative group"
-              >
-                {link.label}
-                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
-              </a>
-            ) : (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6 text-sm">
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -99,8 +83,7 @@ export function Navbar() {
                 {link.label}
                 <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
               </Link>
-            )
-          ))}
+            ))}
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
               <Link
@@ -140,8 +123,8 @@ export function Navbar() {
               </Link>
             </div>
           )}
-          {/* Show "הזמנת ייעוץ חינם" only on homepage */}
-          {pathname === '/' && (
+          {/* Show "הזמנת ייעוץ חינם" - same as StickyNav */}
+          {pathname === '/' ? (
             <a
               href="#contact"
               onClick={(e) => handleSmoothScroll(e, "#contact")}
@@ -155,6 +138,19 @@ export function Navbar() {
                 transition={{ duration: 0.3 }}
               />
             </a>
+          ) : (
+            <Link
+              href="/#contact"
+              className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+            >
+              <span className="relative z-10">הזמנת ייעוץ חינם</span>
+              <motion.span
+                className="absolute inset-0 bg-gold"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </Link>
           )}
         </div>
 
@@ -188,28 +184,14 @@ export function Navbar() {
             >
               <div className="p-6 space-y-4">
                 {navLinks.map((link) => (
-                  link.href.startsWith('#') ? (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      onClick={(e) => {
-                        handleSmoothScroll(e, link.href);
-                        setIsOpen(false);
-                      }}
-                      className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
-                    >
-                      {link.label}
-                    </Link>
-                  )
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
+                  >
+                    {link.label}
+                  </Link>
                 ))}
                 {isLoggedIn ? (
                   <>
@@ -250,8 +232,8 @@ export function Navbar() {
                     </Link>
                   </>
                 )}
-                {/* Show "הזמנת ייעוץ חינם" only on homepage */}
-                {pathname === '/' && (
+                {/* Show "הזמנת ייעוץ חינם" - same as StickyNav */}
+                {pathname === '/' ? (
                   <a
                     href="#contact"
                     onClick={(e) => {
@@ -262,6 +244,14 @@ export function Navbar() {
                   >
                     הזמנת ייעוץ חינם
                   </a>
+                ) : (
+                  <Link
+                    href="/#contact"
+                    onClick={() => setIsOpen(false)}
+                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
+                  >
+                    הזמנת ייעוץ חינם
+                  </Link>
                 )}
               </div>
             </motion.div>

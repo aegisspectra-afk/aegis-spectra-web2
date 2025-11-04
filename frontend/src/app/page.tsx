@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { 
   Shield, Camera, Lock, Zap, Phone, Star, ChevronRight, Check,
-  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers, Mail
+  TrendingUp, Award, Users, Clock, ArrowDown, Sparkles, Layers, Mail, User, LogOut
 } from "lucide-react";
 import LeadForm from "@/components/LeadForm";
 import ProductCard from "@/components/ProductCard";

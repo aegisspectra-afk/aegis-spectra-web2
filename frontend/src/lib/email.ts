@@ -72,12 +72,21 @@ class EmailService {
       const { Resend } = await import('resend');
       const resendClient = new Resend(process.env.RESEND_API_KEY);
       
-      const result = await resendClient.emails.send({
-        from: template.from || this.fromEmail,
-        to: Array.isArray(template.to) ? template.to[0] : template.to,
-        subject: template.subject,
-        html: template.html,
-      });
+      // Handle multiple recipients
+      const recipients = Array.isArray(template.to) ? template.to : [template.to];
+      
+      // Send to all recipients
+      const sendPromises = recipients.map(recipient =>
+        resendClient.emails.send({
+          from: template.from || this.fromEmail,
+          to: recipient,
+          subject: template.subject,
+          html: template.html,
+        })
+      );
+      
+      const results = await Promise.all(sendPromises);
+      const result = results[0]; // Return first result for compatibility
 
       return { success: true, messageId: result.data?.id };
     } catch (error) {
@@ -116,10 +125,11 @@ class EmailService {
               <div class="lead-info">
                 <h2>Lead Details</h2>
                 <div class="field"><span class="label">Name:</span> ${lead.name}</div>
-                ${lead.phone ? `<div class="field"><span class="label">Phone:</span> ${lead.phone}</div>` : ''}
-                ${lead.email ? `<div class="field"><span class="label">Email:</span> ${lead.email}</div>` : ''}
+                ${lead.phone ? `<div class="field"><span class="label">Phone:</span> <a href="tel:${lead.phone}">${lead.phone}</a></div>` : ''}
+                ${lead.email ? `<div class="field"><span class="label">Email:</span> <a href="mailto:${lead.email}">${lead.email}</a></div>` : ''}
                 ${lead.city ? `<div class="field"><span class="label">City:</span> ${lead.city}</div>` : ''}
                 ${lead.product_sku ? `<div class="field"><span class="label">Product:</span> ${lead.product_sku}</div>` : ''}
+                ${lead.source ? `<div class="field"><span class="label">Source:</span> ${lead.source}</div>` : ''}
                 ${lead.message ? `<div class="field"><span class="label">Message:</span><div style="margin-top: 10px; padding: 15px; background: #f1f5f9; border-radius: 6px; white-space: pre-wrap;">${lead.message}</div></div>` : ''}
               </div>
             </div>
@@ -132,9 +142,10 @@ class EmailService {
       </html>
     `;
 
+    // Send to company email (aegisspectra@gmail.com)
     return this.sendEmail({
       to: process.env.ADMIN_EMAIL || 'aegisspectra@gmail.com',
-      subject: `New Lead: ${lead.name}${lead.city ? ` from ${lead.city}` : ''}`,
+      subject: `🛡️ New Lead: ${lead.name}${lead.city ? ` from ${lead.city}` : ''}`,
       html
     });
   }
@@ -155,6 +166,7 @@ class EmailService {
             .content { background: #f8f9fa; padding: 40px; border-radius: 0 0 8px 8px; }
             .highlight { background: #e0f2fe; padding: 15px; border-radius: 8px; border-right: 4px solid #0ea5e9; margin: 20px 0; }
             .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+            .contact-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
           </style>
         </head>
         <body>
@@ -171,6 +183,12 @@ class EmailService {
                 • נחזור אליך בטלפון <strong>${customerData.phone}</strong> תוך 24 שעות<br>
                 • נכין עבורך הצעת מחיר מפורטת<br>
                 • נקבע פגישה לביקור מדידה (אם נדרש)
+              </div>
+              ${customerData.message ? `<div class="contact-info"><strong>ההודעה שלך:</strong><div style="margin-top: 10px; padding: 15px; background: #f1f5f9; border-radius: 6px; white-space: pre-wrap;">${customerData.message}</div></div>` : ''}
+              <div class="contact-info">
+                <strong>פרטי יצירת קשר:</strong><br>
+                📞 טלפון: <a href="tel:+972559737025">+972-55-973-7025</a><br>
+                📧 אימייל: <a href="mailto:aegisspectra@gmail.com">aegisspectra@gmail.com</a>
               </div>
             </div>
             <div class="footer">

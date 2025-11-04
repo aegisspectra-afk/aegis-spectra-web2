@@ -118,21 +118,74 @@ export default function Home() {
           >
             {[
               { href: "/services", label: "שירותים" },
-              { href: "#products", label: "מוצרים" },
+              { href: "/products", label: "מוצרים" },
               { href: "/about", label: "אודות" },
-              { href: "#faq", label: "שאלות נפוצות" },
+              { href: "/blog", label: "בלוג" },
+              { href: "/contact", label: "צור קשר" },
             ].map((item, i) => (
               <motion.a
                 key={i}
                 href={item.href}
-                className="hover:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1 transition relative group"
+                className="hover:text-gold focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal rounded px-2 py-1 transition relative group"
                 aria-label={item.label}
                 whileHover={{ y: -2 }}
               >
                 {item.label}
-                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-zinc-400 transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
               </motion.a>
             ))}
+            {/* Show login/register or dashboard/logout */}
+            {typeof window !== 'undefined' && localStorage.getItem("user_token") ? (
+              <div className="flex items-center gap-4">
+                <motion.a
+                  href="/user"
+                  className="flex items-center gap-2 hover:text-gold transition"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <User className="size-4" />
+                  דשבורד
+                </motion.a>
+                <motion.button
+                  onClick={() => {
+                    localStorage.removeItem("user_token");
+                    localStorage.removeItem("user_email");
+                    localStorage.removeItem("user_name");
+                    localStorage.removeItem("user_id");
+                    localStorage.removeItem("user_role");
+                    window.location.href = "/";
+                  }}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <LogOut className="size-4" />
+                  התנתק
+                </motion.button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <motion.a
+                  href="/login"
+                  className="hover:text-gold transition"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  התחברות
+                </motion.a>
+                <motion.a
+                  href="/register"
+                  className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="relative z-10">הרשמה</span>
+                  <motion.span
+                    className="absolute inset-0 bg-gold"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.a>
+              </div>
+            )}
             <motion.a
               href="#contact"
               className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal relative overflow-hidden group"

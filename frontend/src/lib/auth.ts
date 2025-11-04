@@ -119,11 +119,12 @@ export function checkRateLimit(identifier: string, maxAttempts: number = 5, wind
 // Clean up old rate limit records periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [key, record] of rateLimitStore.entries()) {
+  // Use Array.from to avoid TypeScript iteration issues
+  Array.from(rateLimitStore.entries()).forEach(([key, record]) => {
     if (now > record.resetTime) {
       rateLimitStore.delete(key);
     }
-  }
+  });
 }, 60 * 1000); // Clean every minute
 
 // Get API key from request headers

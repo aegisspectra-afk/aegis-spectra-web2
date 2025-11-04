@@ -28,7 +28,7 @@ type Order = {
 export default function UserDashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [activeTab, setActiveTab] = useState<"profile" | "orders" | "support" | "reports">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "orders" | "support" | "reports" | "api-keys">("profile");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,7 +97,8 @@ export default function UserDashboardPage() {
               { id: "profile" as const, label: "פרופיל", icon: User },
               { id: "orders" as const, label: "הזמנות", icon: Package },
               { id: "support" as const, label: "תמיכה", icon: MessageSquare },
-              { id: "reports" as const, label: "דוחות", icon: FileText }
+              { id: "reports" as const, label: "דוחות", icon: FileText },
+              { id: "api-keys" as const, label: "API Keys", icon: Key }
             ].map((tab) => {
               const Icon = tab.icon;
               return (

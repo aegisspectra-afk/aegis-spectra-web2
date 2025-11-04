@@ -186,21 +186,6 @@ export default function Home() {
                 </motion.a>
               </div>
             )}
-            <motion.a
-              href="#contact"
-              className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal relative overflow-hidden group"
-              aria-label="הזמנת ייעוץ חינם"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="relative z-10">הזמנת ייעוץ חינם</span>
-              <motion.span
-                className="absolute inset-0 bg-gold"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: 0 }}
-                transition={{ duration: 0.3 }}
-              />
-            </motion.a>
           </motion.div>
         </nav>
 

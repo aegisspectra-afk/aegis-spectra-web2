@@ -135,35 +135,6 @@ export function StickyNav() {
                     </Link>
                   </div>
                 )}
-                {/* Show "הזמנת ייעוץ חינם" - same as Navbar */}
-                {pathname === '/' ? (
-                  <a
-                    href="#contact"
-                    onClick={(e) => handleSmoothScroll(e, "#contact")}
-                    className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
-                  >
-                    <span className="relative z-10">הזמנת ייעוץ חינם</span>
-                    <motion.span
-                      className="absolute inset-0 bg-gold"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </a>
-                ) : (
-                  <Link
-                    href="/#contact"
-                    className="rounded-full border border-gold px-4 py-2 hover:bg-gold hover:text-black transition relative overflow-hidden group"
-                  >
-                    <span className="relative z-10">הזמנת ייעוץ חינם</span>
-                    <motion.span
-                      className="absolute inset-0 bg-gold"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </Link>
-                )}
               </div>
 
               {/* Mobile Menu Button */}
@@ -246,27 +217,6 @@ export function StickyNav() {
                       הרשמה
                     </Link>
                   </>
-                )}
-                {/* Show "הזמנת ייעוץ חינם" - same as Navbar */}
-                {pathname === '/' ? (
-                  <a
-                    href="#contact"
-                    onClick={(e) => {
-                      handleSmoothScroll(e, "#contact");
-                      setIsOpen(false);
-                    }}
-                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
-                  >
-                    הזמנת ייעוץ חינם
-                  </a>
-                ) : (
-                  <Link
-                    href="/#contact"
-                    onClick={() => setIsOpen(false)}
-                    className="block mt-6 rounded-xl bg-gold text-black px-6 py-3 text-center font-semibold hover:bg-gold/90 transition"
-                  >
-                    הזמנת ייעוץ חינם
-                  </Link>
                 )}
               </div>
             </motion.div>

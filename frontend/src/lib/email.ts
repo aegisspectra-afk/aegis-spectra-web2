@@ -133,7 +133,7 @@ class EmailService {
     `;
 
     return this.sendEmail({
-      to: process.env.ADMIN_EMAIL || 'admin@aegis-spectra.com',
+      to: process.env.ADMIN_EMAIL || 'aegisspectra@gmail.com',
       subject: `New Lead: ${lead.name}${lead.city ? ` from ${lead.city}` : ''}`,
       html
     });

@@ -37,7 +37,8 @@ export default function ContactPage() {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("phone", formData.phone);
-      formDataToSend.append("city", formData.email || "");
+      formDataToSend.append("email", formData.email || "");
+      formDataToSend.append("city", "");
       formDataToSend.append("message", `${formData.subject}\n\n${formData.message}`);
 
       const response = await fetch("/api/lead", {

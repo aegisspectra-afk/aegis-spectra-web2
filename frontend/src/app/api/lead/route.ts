@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const phone = formData.get('phone') as string;
+    const email = formData.get('email') as string || '';
     const city = formData.get('city') as string || '';
     const message = formData.get('message') as string || '';
     const product_sku = formData.get('product_sku') as string || '';
@@ -21,24 +22,44 @@ export async function POST(request: NextRequest) {
 
     // שמירה ב-DB
     await sql`
-      INSERT INTO leads (name, phone, city, message, product_sku, created_at)
-      VALUES (${name}, ${phone}, ${city}, ${message}, ${product_sku}, NOW())
-    `;
+      INSERT INTO leads (name, phone, email, city, message, product_sku, created_at)
+      VALUES (${name}, ${phone}, ${email || null}, ${city}, ${message}, ${product_sku}, NOW())
+    `.catch(async (e) => {
+      // If email column doesn't exist, try without it
+      if (e.message?.includes('email') || e.message?.includes('column')) {
+        return await sql`
+          INSERT INTO leads (name, phone, city, message, product_sku, created_at)
+          VALUES (${name}, ${phone}, ${city}, ${message}, ${product_sku}, NOW())
+        `;
+      }
+      throw e;
+    });
 
-    // Send email notification to admin (async, don't wait)
+    // Send email notification to company (aegisspectra@gmail.com)
     emailService.sendLeadNotification({
       lead: {
         name,
         phone,
+        email,
         city,
         message,
         product_sku,
         source: 'website'
       }
-    }).catch(err => console.error('Failed to send email notification:', err));
+    }).catch(err => console.error('Failed to send email notification to company:', err));
 
-    // Send confirmation email to customer (if email provided in future)
-    // For now, we only have phone, so we skip customer email
+    // Send confirmation email to customer (if email provided)
+    if (email) {
+      emailService.sendConfirmationEmail({
+        customerData: {
+          fullName: name,
+          phone,
+          email,
+          city,
+          message
+        }
+      }).catch(err => console.error('Failed to send confirmation email to customer:', err));
+    }
 
     return NextResponse.json({ ok: true, msg: 'Lead saved successfully' });
   } catch (error: any) {

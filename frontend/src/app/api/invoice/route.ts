@@ -98,36 +98,16 @@ export async function POST(request: NextRequest) {
     const safeOrderId = String(orderId || 'order');
     const html = buildInvoiceHtml(safeOrderId, order || {});
 
-    // Try to render to PDF if Playwright is available
-    try {
-      const { chromium } = await import('playwright-core') as any;
-
-      const browser = await chromium.launch({ args: ['--no-sandbox'], headless: true });
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle' });
-      const pdfBuffer: Uint8Array = await page.pdf({ format: 'A4', printBackground: true });
-      await page.close();
-      await browser.close();
-
-      return new NextResponse(Buffer.from(pdfBuffer), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename=invoice-${safeOrderId}.pdf`,
-          'Cache-Control': 'no-store',
-        },
-      });
-    } catch {
-      // Fallback: return downloadable HTML if PDF generation is unavailable
-      return new NextResponse(html, {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `attachment; filename=invoice-${safeOrderId}.html`,
-          'Cache-Control': 'no-store',
-        },
-      });
-    }
+    // Return HTML invoice (PDF generation requires additional dependencies)
+    // Users can print to PDF from browser using Ctrl+P or browser print dialog
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `attachment; filename=invoice-${safeOrderId}.html`,
+        'Cache-Control': 'no-store',
+      },
+    });
   } catch (error) {
     console.error('Error generating invoice:', error);
     return NextResponse.json(

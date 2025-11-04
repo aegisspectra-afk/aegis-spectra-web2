@@ -217,8 +217,7 @@ export default function Home() {
               </div>
             )}
           </motion.div>
-          </nav>
-        )}
+        </nav>
 
         {/* Hero Content */}
         {isMounted && (

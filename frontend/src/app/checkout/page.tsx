@@ -46,8 +46,8 @@ export default function CheckoutPage() {
     const sku = searchParams.get("sku");
     const quantity = parseInt(searchParams.get("quantity") || "1");
     if (sku && !savedCart) {
-      // Fetch product details
-      fetch(`/api/products/${sku}`)
+      // Fetch product details from SKU API
+      fetch(`/api/products/sku/${sku}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.ok && data.product) {

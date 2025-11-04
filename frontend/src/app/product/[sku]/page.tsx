@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Shield, Camera, HardDrive, Smartphone, Wifi, Check, ArrowRight } from "lucide-react";
+import { Shield, Camera, HardDrive, Smartphone, Wifi, Check, ArrowRight, CreditCard } from "lucide-react";
 import { ProductJSONLD } from "@/components/JSONLDSchema";
 
 type Product = {
@@ -65,51 +65,72 @@ export default function ProductPage() {
   const sku = params?.sku as string;
   const [p, setP] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const [error, setError] = useState<string | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
   
   useEffect(() => {
     if (!sku) return;
     
     const fetchProduct = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const res = await fetch(`${apiUrl}/api/products/${sku}`, { 
-          cache: "no-store",
-          signal: controller.signal
+        // Try internal API first (fast, no external dependency)
+        const res = await fetch(`/api/products/sku/${sku}`, { 
+          cache: "no-store"
         });
         
-        clearTimeout(timeoutId);
-        
         if (res.ok) {
-          const product = await res.json();
-          setP(product);
-        } else {
-          setP(FALLBACK_PRODUCTS[sku] || null);
+          const data = await res.json();
+          if (data.ok && data.product) {
+            setP({
+              sku: data.product.sku,
+              name: data.product.name,
+              price_regular: data.product.price_regular,
+              price_sale: data.product.price_sale,
+              currency: data.product.currency || "ILS",
+              short_desc: data.product.short_desc || data.product.description || ""
+            });
+            setLoading(false);
+            return;
+          }
         }
+        
+        // Fallback to static data if API fails
+        setP(FALLBACK_PRODUCTS[sku] || null);
       } catch (error) {
         console.error('Error fetching product:', error);
         setP(FALLBACK_PRODUCTS[sku] || null);
+        setError('שגיאה בטעינת המוצר');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [sku, apiUrl]);
+  }, [sku]);
+  
+  const handlePurchase = () => {
+    if (!p) return;
+    
+    setPurchasing(true);
+    // Redirect to checkout with product SKU
+    window.location.href = `/checkout?sku=${p.sku}&quantity=1`;
+  };
 
   if (loading) {
     return (
-      <main className="max-w-4xl mx-auto px-4 py-10">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-zinc-800 rounded-lg w-1/2"></div>
-          <div className="h-4 bg-zinc-800 rounded-lg w-3/4"></div>
-          <div className="h-10 bg-zinc-800 rounded-lg w-1/3"></div>
-          <div className="grid md:grid-cols-2 gap-4 mt-8">
-            <div className="h-24 bg-zinc-800 rounded-lg"></div>
-            <div className="h-24 bg-zinc-800 rounded-lg"></div>
+      <main className="relative min-h-screen">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
+        <div className="max-w-6xl mx-auto px-4 py-20">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-zinc-800 rounded-lg w-1/2"></div>
+            <div className="h-4 bg-zinc-800 rounded-lg w-3/4"></div>
+            <div className="h-10 bg-zinc-800 rounded-lg w-1/3"></div>
+            <div className="grid md:grid-cols-2 gap-4 mt-8">
+              <div className="h-24 bg-zinc-800 rounded-lg"></div>
+              <div className="h-24 bg-zinc-800 rounded-lg"></div>
+            </div>
           </div>
         </div>
       </main>
@@ -170,19 +191,42 @@ export default function ProductPage() {
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handlePurchase}
+              disabled={purchasing || !p}
+              className="rounded-xl bg-gold text-black px-8 py-4 font-bold inline-flex items-center justify-center gap-2 hover:bg-gold/90 transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            >
+              {purchasing ? (
+                <>
+                  <div className="size-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  מעבר לתשלום...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="size-5" />
+                  רכוש עכשיו
+                </>
+              )}
+            </button>
             <Link 
               href="/#contact" 
-              className="rounded-xl bg-gold text-black px-6 py-3 font-semibold inline-flex items-center justify-center gap-2 hover:bg-gold/90 transition"
+              className="rounded-xl border border-gold px-6 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10 transition"
             >
               הזמנת ייעוץ חינם <ArrowRight className="size-4" />
             </Link>
             <Link 
               href="https://wa.me/972559737025" 
-              className="rounded-xl border border-gold px-6 py-3 inline-flex items-center justify-center gap-2 hover:bg-gold/10 transition"
+              className="rounded-xl border border-zinc-700 px-6 py-3 inline-flex items-center justify-center gap-2 hover:bg-zinc-800 transition"
             >
               שאלות ב-WhatsApp
             </Link>
           </div>
+          
+          {error && (
+            <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* תכונות עיקריות */}

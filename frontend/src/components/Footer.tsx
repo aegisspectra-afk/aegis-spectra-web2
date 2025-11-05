@@ -38,6 +38,7 @@ export function Footer() {
                 { href: "/services", label: "שירותים" },
                 { href: "/products", label: "מוצרים" },
                 { href: "/portfolio", label: "פורטפוליו" },
+                { href: "/quote", label: "הצעת מחיר" },
                 { href: "/about", label: "אודות" },
                 { href: "/blog", label: "בלוג" },
                 { href: "/contact", label: "צור קשר" },

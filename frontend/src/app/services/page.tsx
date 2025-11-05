@@ -251,16 +251,22 @@ export default function ServicesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/#contact"
+                href="/quote"
                 className="rounded-xl bg-gold text-black px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-gold/90 transition"
               >
-                הזמנת ייעוץ חינם
+                קבל הצעת מחיר
               </Link>
               <Link
                 href="/products"
                 className="rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 transition"
               >
                 צפייה במוצרים
+              </Link>
+              <Link
+                href="/#contact"
+                className="rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 transition"
+              >
+                צור קשר
               </Link>
             </div>
           </div>

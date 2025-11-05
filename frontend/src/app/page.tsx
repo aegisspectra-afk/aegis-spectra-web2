@@ -470,7 +470,7 @@ export default function Home() {
                     ))}
                   </ul>
                   <motion.a
-                    href="#contact"
+                    href="/quote"
                     className="block w-full rounded-xl border-2 border-zinc-600 px-6 py-3 text-center font-semibold hover:bg-zinc-700 hover:text-white transition relative overflow-hidden group"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

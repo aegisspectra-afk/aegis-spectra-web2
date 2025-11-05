@@ -400,12 +400,20 @@ export default function ProductPage() {
         <div className="rounded-2xl border border-gold/50 bg-black/30 p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">מוכן להתחיל?</h2>
           <p className="opacity-80 mb-6">הזמינו ייעוץ חינם וקבלו הצעת מחיר תוך 24 שעות</p>
-          <Link 
-            href="/#contact" 
-            className="inline-flex rounded-xl bg-gold text-black px-8 py-3 font-semibold hover:bg-gold/90 transition"
-          >
-            הזמנת ייעוץ חינם עכשיו
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/quote" 
+              className="inline-flex rounded-xl bg-gold text-black px-8 py-3 font-semibold hover:bg-gold/90 transition"
+            >
+              קבל הצעת מחיר
+            </Link>
+            <Link 
+              href="/#contact" 
+              className="inline-flex rounded-xl border-2 border-zinc-600 px-8 py-3 font-semibold hover:bg-zinc-800/50 transition"
+            >
+              צור קשר
+            </Link>
+          </div>
         </div>
       </div>
     </main>

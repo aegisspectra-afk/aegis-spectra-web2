@@ -20,13 +20,17 @@ export default function CTA() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <motion.a
-                href="#contact"
+              <Link
+                href="/quote"
                 className="rounded-xl bg-gold text-black px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-gold/90 transition relative overflow-hidden group"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">קבל הצעת מחיר</span>
+                <motion.span
+                  className="relative z-10"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  קבל הצעת מחיר
+                </motion.span>
                 <ArrowRight className="size-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                 <motion.div
                   className="absolute inset-0 bg-gold/80"
@@ -34,7 +38,7 @@ export default function CTA() {
                   whileHover={{ x: 0 }}
                   transition={{ duration: 0.3 }}
                 />
-              </motion.a>
+              </Link>
               <motion.a
                 href="https://wa.me/972559737025"
                 className="rounded-xl border-2 border-zinc-600 px-8 py-4 font-bold text-lg inline-flex items-center justify-center gap-2 hover:bg-zinc-800/50 backdrop-blur-sm transition relative overflow-hidden group"

@@ -16,23 +16,8 @@ export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
 
   const handleCheckout = () => {
-    // Redirect to quote page with cart items
-    const cartItems = cart.map(item => ({
-      sku: item.sku,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      packageSlug: item.packageSlug,
-      packageOptions: item.packageOptions,
-    }));
-    
-    // Store cart in sessionStorage for quote page
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('cartForQuote', JSON.stringify(cartItems));
-    }
-    
-    // Redirect to quote page
-    window.location.href = '/quote?source=cart';
+    // Redirect to checkout page
+    window.location.href = '/checkout';
   };
 
   if (cart.length === 0) {

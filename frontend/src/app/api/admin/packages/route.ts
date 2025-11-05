@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     // TODO: Save to database
     // For now, just return success
-    const newPackage: Package = {
+    const newPackage: Package & { createdAt?: string; updatedAt?: string } = {
       ...packageData,
       id: `pkg_${Date.now()}`,
       createdAt: new Date().toISOString(),

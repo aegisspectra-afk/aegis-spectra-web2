@@ -20,7 +20,7 @@ export default function QuotePage() {
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
-  const [packageOptions, setPackageOptions] = useState<PackagePriceOptions>({});
+  const [selectedPackageOptions, setSelectedPackageOptions] = useState<PackagePriceOptions>({});
   const [formData, setFormData] = useState({
     serviceType: null as ServiceType,
     packageType: null as PackageTypeOld,
@@ -58,7 +58,7 @@ export default function QuotePage() {
   const estimatedPrice = useMemo(() => {
     // If package is selected, use package pricing
     if (selectedPackage) {
-      const breakdown = calculatePackagePrice(selectedPackage, packageOptions);
+      const breakdown = calculatePackagePrice(selectedPackage, selectedPackageOptions);
       return breakdown.total;
     }
 
@@ -91,7 +91,7 @@ export default function QuotePage() {
     }
     
     return Math.round(basePrice);
-  }, [selectedPackage, packageOptions, formData.serviceType, formData.packageType, formData.propertySize]);
+  }, [selectedPackage, selectedPackageOptions, formData.serviceType, formData.packageType, formData.propertySize]);
 
   const validatePhone = (phone: string) => {
     const phoneRegex = /^0[2-9]\d{7,8}$/;
@@ -139,17 +139,17 @@ export default function QuotePage() {
 חבילה: ${selectedPackage.nameHebrew} (${selectedPackage.name})
 ${selectedPackage.description}
 `;
-        if (packageOptions.cameras) {
-          messageContent += `מצלמות: ${packageOptions.cameras}\n`;
+        if (selectedPackageOptions.cameras) {
+          messageContent += `מצלמות: ${selectedPackageOptions.cameras}\n`;
         }
-        if (packageOptions.aiDetection) {
-          messageContent += `AI Detection: ${packageOptions.aiDetection}\n`;
+        if (selectedPackageOptions.aiDetection) {
+          messageContent += `AI Detection: ${selectedPackageOptions.aiDetection}\n`;
         }
-        if (packageOptions.storage) {
-          messageContent += `אחסון: ${packageOptions.storage}\n`;
+        if (selectedPackageOptions.storage) {
+          messageContent += `אחסון: ${selectedPackageOptions.storage}\n`;
         }
-        if (packageOptions.addons && packageOptions.addons.length > 0) {
-          messageContent += `תוספות: ${packageOptions.addons.join(', ')}\n`;
+        if (selectedPackageOptions.addons && selectedPackageOptions.addons.length > 0) {
+          messageContent += `תוספות: ${selectedPackageOptions.addons.join(', ')}\n`;
         }
       } else {
         messageContent += `חבילה: ${formData.packageType === "basic" ? "בסיסי" : formData.packageType === "professional" ? "מקצועי" : "ארגוני"}\n`;
@@ -211,7 +211,7 @@ ${selectedPackage.description}
     { id: "combined", label: "משולב", icon: Package, desc: "שילוב של סייבר ומיגון פיזי" },
   ];
 
-  const packageOptions = [
+  const legacyPackageOptions = [
     { id: "basic", label: "בסיסי", price: "מ-2,500 ₪", desc: "לבתים קטנים" },
     { id: "professional", label: "מקצועי", price: "מ-5,000 ₪", desc: "לעסקים בינוניים" },
     { id: "enterprise", label: "ארגוני", price: "מ-10,000 ₪", desc: "לחברות גדולות" },
@@ -340,7 +340,7 @@ ${selectedPackage.description}
                       <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
                         <h2 className="text-2xl font-bold mb-6">בחר חבילה</h2>
                         <div className="grid md:grid-cols-3 gap-6">
-                          {packageOptions.map((option) => (
+                          {legacyPackageOptions.map((option) => (
                             <button
                               key={option.id}
                               type="button"

@@ -185,6 +185,7 @@ ${selectedPackage.description}
           setFormData({
             serviceType: null,
             packageType: null,
+            packageSlug: "",
             propertySize: "",
             location: "",
             specialRequirements: "",

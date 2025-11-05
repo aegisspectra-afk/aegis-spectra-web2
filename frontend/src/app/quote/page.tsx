@@ -184,7 +184,7 @@ export default function QuotePage() {
             serverPrice = priceData.total;
             
             // Warn if client price differs from server price
-            if (Math.abs(estimatedPrice - serverPrice) > 1) {
+            if (serverPrice !== null && Math.abs(estimatedPrice - serverPrice) > 1) {
               const shouldContinue = confirm(
                 `המחיר עודכן. מחיר חדש: ${serverPrice.toLocaleString()} ₪ (במקום ${estimatedPrice.toLocaleString()} ₪). האם להמשיך?`
               );

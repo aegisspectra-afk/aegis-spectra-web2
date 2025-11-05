@@ -127,9 +127,9 @@ export default function AdminPackagesPage() {
                               מומלץ
                             </span>
                           )}
-                          {pkg.version && (
+                          {(pkg as any).version && (
                             <span className="px-2 py-1 text-xs bg-zinc-700 text-zinc-300 rounded">
-                              v{pkg.version}
+                              v{(pkg as any).version}
                             </span>
                           )}
                         </div>

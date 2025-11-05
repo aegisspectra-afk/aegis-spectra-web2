@@ -84,7 +84,9 @@ export function ReviewList({ productId, sku, limit = 10, showFilters = true }: R
       });
 
       if (res.ok) {
-        setHelpfulReviews(new Set([...helpfulReviews, reviewId]));
+        const newHelpful = new Set(helpfulReviews);
+        newHelpful.add(reviewId);
+        setHelpfulReviews(newHelpful);
         // Update the review's helpful count
         setReviews(reviews.map(r => 
           r.id === reviewId ? { ...r, helpful_count: r.helpful_count + 1 } : r

@@ -9,6 +9,7 @@ import { Package } from '@/types/packages';
 import { calculatePackagePrice, formatPrice, PackagePriceOptions } from '@/lib/packages/calculatePrice';
 import { Calculator, TrendingUp, Info, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
+import { useToastContext } from '@/components/ToastProvider';
 import { CameraSelector } from './CameraSelector';
 
 interface PackageCalculatorProps {
@@ -48,8 +49,8 @@ export function PackageCalculator({ packageData, onPriceChange }: PackageCalcula
       packageOptions: options,
       image: packageData.heroImage || packageData.image,
     });
-    // Show success message (you can use your toast system here)
-    alert('החבילה נוספה לעגלה!');
+    // Show success toast
+    showToast('החבילה נוספה לעגלה!', 'success', 3000);
   };
 
   const handleCameraChange = (value: number) => {

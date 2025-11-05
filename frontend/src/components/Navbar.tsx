@@ -2,16 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Menu, X, User, LogOut } from "lucide-react";
+import { Shield, Menu, X, User, LogOut, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { trackLogout } from "@/lib/analytics";
+import { useCart } from "@/contexts/cart-context";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { getCartItemCount } = useCart();
 
   useEffect(() => {
     // Check if user is logged in
@@ -132,6 +134,20 @@ export function Navbar() {
                 <span className="absolute bottom-0 right-0 w-0 h-0.5 bg-gold transition-all group-hover:w-full" />
               </Link>
             ))}
+            {/* Cart Icon */}
+            <Link
+              href="/cart"
+              className="relative flex items-center gap-2 hover:text-gold transition"
+            >
+              <ShoppingCart className="size-5" />
+              {getCartItemCount() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-gold text-black text-xs font-bold rounded-full size-5 flex items-center justify-center">
+                  {getCartItemCount()}
+                </span>
+              )}
+              <span className="hidden sm:inline">עגלה</span>
+            </Link>
+
             {isLoggedIn ? (
               <div className="flex items-center gap-4">
                 <Link
@@ -212,6 +228,21 @@ export function Navbar() {
                     {link.label}
                   </Link>
                 ))}
+                {/* Cart Link (Mobile) */}
+                <Link
+                  href="/cart"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 block py-3 text-lg hover:text-gold transition border-b border-zinc-800"
+                >
+                  <ShoppingCart className="size-5" />
+                  עגלת קניות
+                  {getCartItemCount() > 0 && (
+                    <span className="bg-gold text-black text-xs font-bold rounded-full px-2 py-0.5">
+                      {getCartItemCount()}
+                    </span>
+                  )}
+                </Link>
+
                 {isLoggedIn ? (
                   <>
                     <Link

@@ -1,119 +1,127 @@
-"use client";
+/**
+ * Admin Login Page
+ */
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Shield, Lock, Mail } from "lucide-react";
-import { useToastContext } from "@/components/ToastProvider";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { Shield, Lock, User } from 'lucide-react';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { showToast } = useToastContext();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-    setError(null);
 
     try {
-      const res = await fetch("/api/auth/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      // TODO: Call admin login API
+      const response = await fetch('/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (data.ok && data.token) {
-        // Save token to localStorage and cookie
-        localStorage.setItem("admin_token", data.token);
-        document.cookie = `admin_token=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+      if (data.success) {
+        // Store admin token
+        localStorage.setItem('admin_token', data.token);
+        localStorage.setItem('admin_email', email);
         
-        showToast("התחברות הצליחה!", "success");
-        router.push("/admin");
+        // Redirect to admin dashboard
+        router.push('/admin/packages');
       } else {
-        setError(data.error || "שגיאה בהתחברות");
-        showToast(data.error || "שגיאה בהתחברות", "error");
+        setError(data.error || 'שגיאה בהתחברות');
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError("שגיאה בהתחברות");
-      showToast("שגיאה בהתחברות", "error");
+      setError('שגיאה בהתחברות. נא לנסות שוב.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-      <div className="max-w-md w-full mx-auto px-4">
-        <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-900/30 rounded-full mb-4">
-              <Shield className="text-cyan-400" size={32} />
-            </div>
-            <h1 className="text-2xl font-bold mb-2">דשבורד מנהל</h1>
-            <p className="text-gray-400 text-sm">התחבר עם חשבון מנהל</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                <Mail className="inline-block mr-2" size={16} />
-                אימייל
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                placeholder="admin@aegis-spectra.com"
-                required
-              />
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
+        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black/30 border border-zinc-800 rounded-xl p-8 mt-12"
+          >
+            <div className="text-center mb-8">
+              <Shield className="size-12 text-gold mx-auto mb-4" />
+              <h1 className="text-3xl font-bold mb-2">התחברות מנהל</h1>
+              <p className="text-zinc-400">גש לפאנל הניהול</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                <Lock className="inline-block mr-2" size={16} />
-                סיסמה
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                placeholder="הזן סיסמה"
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-500/20 border border-red-500 text-red-400 rounded-lg p-4 text-sm">
+                  {error}
+                </div>
+              )}
 
-            {error && (
-              <div className="bg-red-900/20 border border-red-500 rounded-lg p-3 text-red-400 text-sm">
-                {error}
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  אימייל
+                </label>
+                <div className="relative">
+                  <User className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-zinc-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:border-gold transition"
+                    placeholder="admin@example.com"
+                  />
+                </div>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading || !email || !password}
-              className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              {loading ? "מתחבר..." : "התחבר"}
-            </button>
-          </form>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  סיסמה
+                </label>
+                <div className="relative">
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 size-5 text-zinc-400" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:border-gold transition"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-700">
-            <p className="text-xs text-gray-400 text-center">
-              משתמש רגיל? <a href="/user" className="text-cyan-400 hover:text-cyan-300">חשבון משתמש</a>
-            </p>
-          </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gold text-black rounded-lg px-6 py-3 font-bold hover:bg-gold/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'מתחבר...' : 'התחבר'}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-zinc-400">
+              <p>רק למנהלים מורשים</p>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }
-

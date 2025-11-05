@@ -165,6 +165,7 @@ export function CameraSelector({ min, max, value, onChange, disabled = false }: 
           className="absolute top-1/2 -translate-y-1/2 size-5 bg-gold rounded-full shadow-lg border-2 border-zinc-900 ring-2 ring-gold/20"
           style={{
             left: `calc(${progress}% - 10px)`,
+            direction: 'ltr', // Force LTR for positioning
           }}
           animate={{
             scale: isDragging ? 1.4 : 1,
@@ -189,7 +190,11 @@ export function CameraSelector({ min, max, value, onChange, disabled = false }: 
           onChange={handleChange}
           disabled={disabled}
           className="absolute w-full h-full opacity-0 cursor-pointer z-10"
-          style={{ WebkitAppearance: 'none', appearance: 'none' }}
+          style={{ 
+            WebkitAppearance: 'none', 
+            appearance: 'none',
+            direction: 'ltr', // Force LTR for slider to work correctly
+          }}
         />
       </div>
 

@@ -74,7 +74,6 @@ export async function POST(request: NextRequest) {
     const newPackage: Package = {
       ...packageData,
       id: `pkg_${Date.now()}`,
-      version: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

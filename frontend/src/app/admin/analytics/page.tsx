@@ -51,8 +51,8 @@ export default function AdminAnalyticsPage() {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">דשבורד אנליטיקה</h1>
 
-          {/* Funnel */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Funnel */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -106,10 +106,10 @@ export default function AdminAnalyticsPage() {
                 {funnel.conversionRate.toFixed(2)}% שיעור המרה
               </div>
             </motion.div>
-          </div>
+        </div>
 
-          {/* Top Packages */}
-          <div className="bg-black/30 border border-zinc-800 rounded-xl p-6 mb-8">
+        {/* Top Packages */}
+        <div className="bg-black/30 border border-zinc-800 rounded-xl p-6 mb-8">
             <h2 className="text-2xl font-bold mb-4">החבילות הפופולריות</h2>
             <div className="space-y-4">
               {data?.topPackages?.length > 0 ? (
@@ -126,7 +126,6 @@ export default function AdminAnalyticsPage() {
                 <p className="text-zinc-400 text-center py-8">אין נתונים</p>
               )}
             </div>
-          </div>
         </div>
       </div>
     </div>

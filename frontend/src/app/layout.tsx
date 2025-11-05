@@ -53,9 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="he" dir="rtl">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="icon" href="/icon.svg" sizes="any" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="canonical" href="https://aegis-spectra.netlify.app" />
       </head>
       <body className={heebo.className}>

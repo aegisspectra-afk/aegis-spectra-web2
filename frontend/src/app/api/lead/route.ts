@@ -1,6 +1,7 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email';
+import { verifyRecaptcha } from '@/lib/recaptcha';
 
 const sql = neon();
 
@@ -14,10 +15,20 @@ export async function POST(request: NextRequest) {
     const message = formData.get('message') as string || '';
     const product_sku = formData.get('product_sku') as string || '';
     const bot_field = formData.get('bot-field') as string;
+    const recaptchaToken = formData.get('recaptcha_token') as string | null;
 
     // Spam protection - אם bot-field מלא, זה spam
     if (bot_field) {
       return NextResponse.json({ ok: false, error: 'Spam detected' }, { status: 400 });
+    }
+
+    // Verify reCAPTCHA token
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken, 'lead_form', 0.5);
+    if (!recaptchaResult.valid) {
+      console.warn('reCAPTCHA verification failed:', recaptchaResult.error);
+      // In production, you might want to reject here
+      // For now, we'll log but allow (for development)
+      // return NextResponse.json({ ok: false, error: 'reCAPTCHA verification failed' }, { status: 400 });
     }
 
     // שמירה ב-DB

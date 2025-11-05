@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 declare global {
   interface Window {
@@ -11,18 +11,34 @@ declare global {
   }
 }
 
-interface ReCaptchaProps {
-  siteKey: string;
-  onVerify: (token: string) => void;
-  action?: string;
-}
+// Initialize reCAPTCHA script (call once)
+let recaptchaLoaded = false;
+let recaptchaLoading = false;
 
-export function ReCaptcha({ siteKey, onVerify, action = "submit" }: ReCaptchaProps) {
-  const isLoaded = useRef(false);
+const loadReCaptcha = (siteKey: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("Window not available"));
+      return;
+    }
 
-  useEffect(() => {
-    if (typeof window === "undefined" || isLoaded.current) return;
+    if (recaptchaLoaded && window.grecaptcha) {
+      resolve();
+      return;
+    }
 
+    if (recaptchaLoading) {
+      // Wait for existing load
+      const checkInterval = setInterval(() => {
+        if (recaptchaLoaded && window.grecaptcha) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+      return;
+    }
+
+    recaptchaLoading = true;
     const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
     script.async = true;
@@ -30,50 +46,48 @@ export function ReCaptcha({ siteKey, onVerify, action = "submit" }: ReCaptchaPro
     document.head.appendChild(script);
 
     script.onload = () => {
-      isLoaded.current = true;
+      window.grecaptcha.ready(() => {
+        recaptchaLoaded = true;
+        recaptchaLoading = false;
+        resolve();
+      });
     };
 
-    return () => {
-      const existing = document.querySelector(`script[src*="recaptcha"]`);
-      if (existing) {
-        document.head.removeChild(existing);
-      }
+    script.onerror = () => {
+      recaptchaLoading = false;
+      reject(new Error("Failed to load reCAPTCHA"));
     };
+  });
+};
+
+// Hook for easy use
+export function useReCaptcha(action: string = "submit") {
+  const [isReady, setIsReady] = useState(false);
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+  useEffect(() => {
+    if (!siteKey || typeof window === "undefined") return;
+
+    loadReCaptcha(siteKey)
+      .then(() => setIsReady(true))
+      .catch((err) => console.error("reCAPTCHA load error:", err));
   }, [siteKey]);
 
-  const execute = async () => {
-    if (typeof window === "undefined" || !window.grecaptcha || !isLoaded.current) {
+  const execute = useCallback(async (): Promise<string | null> => {
+    if (!siteKey || typeof window === "undefined" || !window.grecaptcha || !isReady) {
+      console.warn("reCAPTCHA not ready");
       return null;
     }
 
     try {
       const token = await window.grecaptcha.execute(siteKey, { action });
-      onVerify(token);
       return token;
     } catch (error) {
-      console.error("reCAPTCHA error:", error);
+      console.error("reCAPTCHA execute error:", error);
       return null;
     }
-  };
+  }, [siteKey, action, isReady]);
 
-  return { execute };
-}
-
-// Hook for easy use
-export function useReCaptcha(siteKey: string, action: string = "submit") {
-  const execute = async () => {
-    if (typeof window === "undefined" || !window.grecaptcha) {
-      return null;
-    }
-
-    try {
-      return await window.grecaptcha.execute(siteKey, { action });
-    } catch (error) {
-      console.error("reCAPTCHA error:", error);
-      return null;
-    }
-  };
-
-  return { execute };
+  return { execute, isReady };
 }
 

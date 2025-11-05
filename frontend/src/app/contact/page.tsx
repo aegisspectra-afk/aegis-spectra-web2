@@ -7,8 +7,10 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { trackContactForm, trackPhoneCall, trackWhatsAppClick } from "@/components/Analytics";
+import { useReCaptcha } from "@/components/ReCaptcha";
 
 export default function ContactPage() {
+  const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("contact_form");
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [formData, setFormData] = useState({
     name: "",
@@ -34,12 +36,27 @@ export default function ContactPage() {
     setFormStatus("loading");
     
     try {
+      // Get reCAPTCHA token
+      let recaptchaToken: string | null = null;
+      if (recaptchaReady) {
+        try {
+          recaptchaToken = await executeRecaptcha();
+        } catch (err) {
+          console.warn("reCAPTCHA failed, continuing without it:", err);
+        }
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("phone", formData.phone);
       formDataToSend.append("email", formData.email || "");
       formDataToSend.append("city", "");
       formDataToSend.append("message", `${formData.subject}\n\n${formData.message}`);
+      
+      // Add reCAPTCHA token
+      if (recaptchaToken) {
+        formDataToSend.append("recaptcha_token", recaptchaToken);
+      }
 
       const response = await fetch("/api/lead", {
         method: "POST",

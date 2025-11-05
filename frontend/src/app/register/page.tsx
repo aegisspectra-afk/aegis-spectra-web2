@@ -9,11 +9,13 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useToastContext } from "@/components/ToastProvider";
 import { trackRegister } from "@/lib/analytics";
+import { useReCaptcha } from "@/components/ReCaptcha";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { showToast } = useToastContext();
+  const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("register");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,6 +59,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // Get reCAPTCHA token
+      let recaptchaToken: string | null = null;
+      if (recaptchaReady) {
+        try {
+          recaptchaToken = await executeRecaptcha();
+        } catch (err) {
+          console.warn("reCAPTCHA failed, continuing without it:", err);
+        }
+      }
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,6 +77,7 @@ export default function RegisterPage() {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
+          recaptcha_token: recaptchaToken,
         }),
       });
 

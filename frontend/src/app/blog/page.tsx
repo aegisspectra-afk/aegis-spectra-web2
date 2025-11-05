@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Calendar, Tag, User, Search, Filter, ChevronRight, Clock, Eye } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import Link from "next/link";
@@ -96,9 +97,15 @@ export default function BlogPage() {
                 whileHover={{ y: -8 }}
               >
                 {post.image && (
-                  <div className="h-48 bg-zinc-800 relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                  <div className="h-48 bg-zinc-800 relative overflow-hidden">
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                      loading="lazy"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                   </div>
                 )}
                 <div className="p-6 flex-grow flex flex-col">

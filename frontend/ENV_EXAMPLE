@@ -9,6 +9,17 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 # Format: G-XXXXXXXXXX
 NEXT_PUBLIC_GA_ID=
 
+# reCAPTCHA v3
+# Get your Site Key from: https://www.google.com/recaptcha/admin
+# Site Key (public) - goes in NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+# Use this site key in the HTML code your site serves to users
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LezXQMsAAAAAJa14nF2G8znabIQ0SEudyFiwZ0i
+
+# Secret Key (private) - goes in RECAPTCHA_SECRET_KEY (server-side only)
+# Get your Secret Key from: https://www.google.com/recaptcha/admin
+# Use this secret key for communication between your site and reCAPTCHA
+RECAPTCHA_SECRET_KEY=6LezXQMsAAAAAABUGKjkJLPIDIm5xHTTfWFdzX35
+
 # Admin Password (for /admin page)
 # Set this in Netlify Environment Variables
 ADMIN_PASSWORD=aegis2024

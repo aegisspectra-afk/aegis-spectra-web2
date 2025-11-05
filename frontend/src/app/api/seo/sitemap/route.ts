@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
   try {
     // Get all products
     const products = await sql`
-      SELECT sku, name, updated_at FROM products
-      WHERE active = true
+      SELECT sku, name, updated_at, created_at FROM products
+      WHERE stock IS NULL OR stock > 0
       ORDER BY created_at DESC
     `.catch(() => []);
 
@@ -47,7 +47,11 @@ export async function GET(request: NextRequest) {
 
     // Add product pages
     products.forEach((product: any) => {
-      const lastmod = product.updated_at ? new Date(product.updated_at).toISOString() : currentDate;
+      const lastmod = product.updated_at 
+        ? new Date(product.updated_at).toISOString() 
+        : (product.created_at 
+          ? new Date(product.created_at).toISOString() 
+          : currentDate);
       sitemap += `  <url>
     <loc>${baseUrl}/product/${encodeURIComponent(product.sku)}</loc>
     <lastmod>${lastmod}</lastmod>

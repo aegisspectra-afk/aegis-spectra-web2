@@ -21,6 +21,7 @@ import WhyChooseUs from "@/components/WhyChooseUs";
 import Trust from "@/components/Trust";
 import FAQ from "@/components/FAQ";
 import CTA from "@/components/CTA";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -762,6 +763,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup />
     </main>
   );
 }

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Shield, Camera, Lock, Package, CheckCircle, Upload, Calculator, Send } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useReCaptcha } from "@/components/ReCaptcha";
 
 type ServiceType = "cyber" | "physical" | "combined" | null;
 type PackageType = "basic" | "professional" | "enterprise" | null;
 
 export default function QuotePage() {
+  const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("quote_form");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     serviceType: null as ServiceType,
@@ -26,6 +28,38 @@ export default function QuotePage() {
   });
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  // Calculate estimated price dynamically
+  const estimatedPrice = useMemo(() => {
+    let basePrice = 0;
+    
+    // Base price by service type
+    if (formData.serviceType === "cyber") {
+      basePrice = 3000;
+    } else if (formData.serviceType === "physical") {
+      basePrice = 2500;
+    } else if (formData.serviceType === "combined") {
+      basePrice = 5000;
+    }
+    
+    // Add package multiplier
+    if (formData.packageType === "basic") {
+      basePrice *= 1;
+    } else if (formData.packageType === "professional") {
+      basePrice *= 1.5;
+    } else if (formData.packageType === "enterprise") {
+      basePrice *= 2.5;
+    }
+    
+    // Add property size factor
+    const size = parseInt(formData.propertySize) || 0;
+    if (size > 0) {
+      const sizeFactor = Math.max(1, size / 100); // 100m² = 1x, 200m² = 2x, etc.
+      basePrice *= sizeFactor;
+    }
+    
+    return Math.round(basePrice);
+  }, [formData.serviceType, formData.packageType, formData.propertySize]);
 
   const validatePhone = (phone: string) => {
     const phoneRegex = /^0[2-9]\d{7,8}$/;
@@ -49,19 +83,35 @@ export default function QuotePage() {
     setStatus("loading");
     
     try {
+      // Get reCAPTCHA token
+      let recaptchaToken: string | null = null;
+      if (recaptchaReady) {
+        try {
+          recaptchaToken = await executeRecaptcha();
+        } catch (err) {
+          console.warn("reCAPTCHA failed, continuing without it:", err);
+        }
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("email", formData.email || "");
       formDataToSend.append("city", formData.location);
       formDataToSend.append("message", `
 סוג שירות: ${formData.serviceType === "cyber" ? "סייבר" : formData.serviceType === "physical" ? "פיזי" : "משולב"}
 חבילה: ${formData.packageType === "basic" ? "בסיסי" : formData.packageType === "professional" ? "מקצועי" : "ארגוני"}
-גודל נכס: ${formData.propertySize}
+גודל נכס: ${formData.propertySize} מ״ר
 מיקום: ${formData.location}
 דרישות מיוחדות: ${formData.specialRequirements}
-תקציב משוער: ${formData.budget}
+תקציב משוער: ${formData.budget} ₪
+מחיר משוער (אוטומטי): ${estimatedPrice} ₪
       ${formData.message}
       `.trim());
+      
+      if (recaptchaToken) {
+        formDataToSend.append("recaptcha_token", recaptchaToken);
+      }
 
       const response = await fetch("/api/lead", {
         method: "POST",
@@ -224,6 +274,36 @@ export default function QuotePage() {
                         ))}
                       </div>
                     </div>
+
+                    {/* Estimated Price Display */}
+                    {estimatedPrice > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl border-2 border-gold/50 bg-gradient-to-br from-gold/10 to-gold/5 p-6 backdrop-blur-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Calculator className="size-8 text-gold" />
+                            <div>
+                              <h3 className="font-bold text-lg text-white mb-1">מחיר משוער</h3>
+                              <p className="text-sm text-zinc-400">לפי הבחירות שלך</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-extrabold text-gold mb-1">
+                              ₪{estimatedPrice.toLocaleString("he-IL")}
+                            </div>
+                            <p className="text-xs text-zinc-400">מחיר משוער בלבד</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-gold/20">
+                          <p className="text-xs text-zinc-400">
+                            המחיר הסופי ייקבע לאחר בדיקה מקצועית בשטח. מחיר זה כולל התקנה ואבטחה בסיסית.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
 
                     {/* Property Details */}
                     <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">

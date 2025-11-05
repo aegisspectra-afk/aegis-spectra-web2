@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { trackEvent, trackConversion } from "@/components/Analytics";
+import { useReCaptcha } from "@/components/ReCaptcha";
 
 export default function LeadForm() {
   const [status, setStatus] = useState<"idle"|"ok"|"err"|"loading">("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("lead_form");
 
   // Phone validation
   function validatePhone(phone: string): boolean {
@@ -47,6 +49,21 @@ export default function LeadForm() {
     setErrors({});
     
     try {
+      // Get reCAPTCHA token
+      let recaptchaToken: string | null = null;
+      if (recaptchaReady) {
+        try {
+          recaptchaToken = await executeRecaptcha();
+        } catch (err) {
+          console.warn("reCAPTCHA failed, continuing without it:", err);
+        }
+      }
+
+      // Add reCAPTCHA token to form data
+      if (recaptchaToken) {
+        formData.append("recaptcha_token", recaptchaToken);
+      }
+      
       // שליחה ל-API route שישמור ב-DB
       const response = await fetch("/api/lead", {
         method: "POST",

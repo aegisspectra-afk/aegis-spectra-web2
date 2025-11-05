@@ -104,6 +104,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },
+    { href: "/portfolio", label: "פורטפוליו" },
     { href: "/about", label: "אודות" },
     { href: "/blog", label: "בלוג" },
     { href: "/contact", label: "צור קשר" },

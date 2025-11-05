@@ -6,6 +6,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CartProvider } from "@/contexts/cart-context";
+import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
 const heebo = Heebo({ subsets: ["hebrew"], weight: ["400","700"] });
 
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <JSONLDSchema />
               {gaId && <GoogleAnalytics gaId={gaId} />}
               {children}
+              <WhatsAppFloatingButton />
             </CartProvider>
           </ToastProvider>
         </ErrorBoundary>

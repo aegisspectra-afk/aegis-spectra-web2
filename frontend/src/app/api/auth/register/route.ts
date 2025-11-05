@@ -13,6 +13,7 @@ import {
   checkRateLimit,
   generateEmailVerificationToken
 } from '@/lib/auth';
+import { verifyRecaptcha } from '@/lib/recaptcha';
 
 const sql = neon();
 
@@ -28,7 +29,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, phone, password } = body;
+    const { name, email, phone, password, recaptcha_token } = body;
+
+    // Verify reCAPTCHA token
+    const recaptchaResult = await verifyRecaptcha(recaptcha_token, 'register', 0.5);
+    if (!recaptchaResult.valid) {
+      console.warn('reCAPTCHA verification failed:', recaptchaResult.error);
+      // In production, you might want to reject here
+      // For now, we'll log but allow (for development)
+      // return NextResponse.json({ ok: false, error: 'reCAPTCHA verification failed' }, { status: 400 });
+    }
 
     // Validate required fields
     if (!name || !email || !phone || !password) {

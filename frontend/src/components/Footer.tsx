@@ -2,6 +2,7 @@
 
 import { Shield, Phone, Mail, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import NewsletterSignup from "./NewsletterSignup";
 
 export function Footer() {
   return (
@@ -18,11 +19,14 @@ export function Footer() {
               אבטחה חכמה לבית ולעסק — מצלמות, בקרת כניסה וניהול מרחוק. 
               שירותי התקנה מקצועיים ותמיכה מקוונת.
             </p>
-            <p className="max-w-md text-zinc-500 text-xs leading-relaxed">
+            <p className="max-w-md text-zinc-500 text-xs leading-relaxed mb-4">
               <Link href="/legal-disclaimer" className="hover:text-gold transition underline">
                 Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי של מותגים
               </Link>
             </p>
+            
+            {/* Newsletter Signup */}
+            <NewsletterSignup />
           </div>
 
           {/* Quick Links */}
@@ -33,6 +37,7 @@ export function Footer() {
                 { href: "/", label: "דף הבית" },
                 { href: "/services", label: "שירותים" },
                 { href: "/products", label: "מוצרים" },
+                { href: "/portfolio", label: "פורטפוליו" },
                 { href: "/about", label: "אודות" },
                 { href: "/blog", label: "בלוג" },
                 { href: "/contact", label: "צור קשר" },

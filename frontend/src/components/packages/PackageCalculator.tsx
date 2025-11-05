@@ -19,6 +19,7 @@ interface PackageCalculatorProps {
 
 export function PackageCalculator({ packageData, onPriceChange }: PackageCalculatorProps) {
   const { addToCart } = useCart();
+  const { showToast } = useToastContext();
   const [options, setOptions] = useState<PackagePriceOptions>({
     cameras: packageData.specifications.cameras.default,
     aiDetection: packageData.specifications.aiDetection?.level || 'basic',

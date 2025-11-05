@@ -11,6 +11,7 @@ import { PackageAddons } from '@/components/packages/PackageAddons';
 import { PackageCalculator } from '@/components/packages/PackageCalculator';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { analytics } from '@/services/analytics/events';
 
 interface PageProps {
   params: {
@@ -68,6 +69,11 @@ export default function PackagePage({ params }: PageProps) {
 
   if (!packageData) {
     notFound();
+  }
+
+  // Track package view
+  if (typeof window !== 'undefined') {
+    analytics.packageView(params.slug);
   }
 
   return (

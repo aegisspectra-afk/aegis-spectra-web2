@@ -11,6 +11,8 @@ import { useReCaptcha } from "@/components/ReCaptcha";
 import { getPackageBySlug } from "@/data/packages";
 import { calculatePackagePrice, PackagePriceOptions } from "@/lib/packages/calculatePrice";
 import { Package as PackageType } from "@/types/packages";
+import { analytics } from "@/services/analytics/events";
+import { saveDraftToLocalStorage, loadDraftFromLocalStorage, clearDraftFromLocalStorage } from "@/services/quotes/draft";
 
 type ServiceType = "cyber" | "physical" | "combined" | null;
 type PackageTypeOld = "basic" | "professional" | "enterprise" | null;
@@ -37,8 +39,31 @@ export default function QuotePage() {
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  // Load package from URL parameter
+  // Load package from URL parameter or draft
   useEffect(() => {
+    // Try to load draft first
+    const draft = loadDraftFromLocalStorage();
+    if (draft && draft.packageSlug) {
+      const pkg = getPackageBySlug(draft.packageSlug);
+      if (pkg) {
+        setSelectedPackage(pkg);
+        setSelectedPackageOptions(draft.options);
+        setFormData(prev => ({
+          ...prev,
+          packageSlug: draft.packageSlug,
+          propertySize: draft.propertyDetails?.size || "",
+          location: draft.propertyDetails?.location || "",
+          specialRequirements: draft.propertyDetails?.specialRequirements || "",
+          budget: draft.propertyDetails?.budget || "",
+          serviceType: pkg.category === "Residential" ? "physical" : pkg.category === "Commercial" ? "physical" : "combined",
+        }));
+        setStep(2);
+        analytics.quoteStart();
+        return;
+      }
+    }
+
+    // Otherwise, load from URL parameter
     const packageSlug = searchParams.get("package");
     if (packageSlug) {
       const pkg = getPackageBySlug(packageSlug);
@@ -49,16 +74,42 @@ export default function QuotePage() {
           packageSlug: packageSlug,
           serviceType: pkg.category === "Residential" ? "physical" : pkg.category === "Commercial" ? "physical" : "combined",
         }));
-        setStep(2); // Skip to step 2
+        setStep(2);
+        analytics.packageView(packageSlug);
+        analytics.quoteStart();
       }
     }
   }, [searchParams]);
 
-  // Calculate estimated price dynamically
+  // Auto-save draft every 30 seconds
+  useEffect(() => {
+    if (!selectedPackage || step < 2) return;
+
+    const timer = setTimeout(() => {
+      saveDraftToLocalStorage({
+        packageSlug: selectedPackage.slug,
+        packageSnapshot: selectedPackage,
+        options: selectedPackageOptions,
+        propertyDetails: {
+          size: formData.propertySize,
+          location: formData.location,
+          specialRequirements: formData.specialRequirements,
+          budget: formData.budget,
+        },
+      });
+    }, 30000); // 30 seconds
+
+    return () => clearTimeout(timer);
+  }, [selectedPackage, selectedPackageOptions, formData, step]);
+
+  // Calculate estimated price dynamically (client-side for UX)
+  // Server-side validation will happen on submit
   const estimatedPrice = useMemo(() => {
     // If package is selected, use package pricing
     if (selectedPackage) {
       const breakdown = calculatePackagePrice(selectedPackage, selectedPackageOptions);
+      // Track price calculation
+      analytics.priceCalc(selectedPackage.slug, breakdown.total, selectedPackageOptions);
       return breakdown.total;
     }
 
@@ -115,6 +166,40 @@ export default function QuotePage() {
     setStatus("loading");
     
     try {
+      // Server-side price validation (authoritative)
+      let serverPrice: number | null = null;
+      if (selectedPackage) {
+        try {
+          const priceResponse = await fetch('/api/price/calc', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              packageSlug: selectedPackage.slug,
+              options: selectedPackageOptions,
+            }),
+          });
+          const priceData = await priceResponse.json();
+          
+          if (priceData.success) {
+            serverPrice = priceData.total;
+            
+            // Warn if client price differs from server price
+            if (Math.abs(estimatedPrice - serverPrice) > 1) {
+              const shouldContinue = confirm(
+                `המחיר עודכן. מחיר חדש: ${serverPrice.toLocaleString()} ₪ (במקום ${estimatedPrice.toLocaleString()} ₪). האם להמשיך?`
+              );
+              if (!shouldContinue) {
+                setStatus("idle");
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Price validation failed:", err);
+          // Continue anyway - don't block submission
+        }
+      }
+
       // Get reCAPTCHA token
       let recaptchaToken: string | null = null;
       if (recaptchaReady) {
@@ -160,7 +245,7 @@ ${selectedPackage.description}
 מיקום: ${formData.location}
 דרישות מיוחדות: ${formData.specialRequirements}
 תקציב משוער: ${formData.budget} ₪
-מחיר משוער (אוטומטי): ${estimatedPrice} ₪
+מחיר משוער (אוטומטי): ${serverPrice || estimatedPrice} ₪${serverPrice ? ' (מוודא שרת)' : ''}
       ${formData.message}
       `.trim();
 
@@ -179,9 +264,20 @@ ${selectedPackage.description}
       
       if (data.ok) {
         setStatus("success");
+        
+        // Track quote submission
+        if (selectedPackage) {
+          analytics.quoteSubmit(data.id || 'unknown', serverPrice || estimatedPrice);
+        }
+        
+        // Clear draft
+        clearDraftFromLocalStorage();
+        
         setTimeout(() => {
           setStatus("idle");
           setStep(1);
+          setSelectedPackage(null);
+          setSelectedPackageOptions({});
           setFormData({
             serviceType: null,
             packageType: null,

@@ -6,8 +6,7 @@ import {
   Shield, Plus, Edit2, Trash2, Search, Filter, Package, 
   DollarSign, Tag, Image as ImageIcon, Save, X, RefreshCw
 } from "lucide-react";
-import { useToast } from "@/components/Toast";
-import { ToastContainer } from "@/components/Toast";
+import { useToastContext } from "@/components/ToastProvider";
 
 type Product = {
   id?: number;
@@ -34,28 +33,24 @@ export default function ProductsManagementPage() {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const { toasts, showToast, closeToast } = useToast();
+  const { showToast } = useToastContext();
 
   useEffect(() => {
-    const savedAuth = localStorage.getItem("admin_auth");
-    const savedPassword = localStorage.getItem("admin_password");
-    if (savedAuth === "true" && savedPassword) {
-      setIsAuthenticated(true);
-      fetchProducts();
-    } else {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
       setLoading(false);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setIsAuthenticated(true);
+    fetchProducts(token);
   }, []);
 
-  async function fetchProducts() {
+  async function fetchProducts(token: string) {
     try {
       setLoading(true);
-      const savedPassword = localStorage.getItem("admin_password");
-      if (!savedPassword) return;
 
-      const res = await fetch("/api/products", {
-        headers: { "Authorization": `Bearer ${savedPassword}` }
+      const res = await fetch("/api/admin/products", {
+        headers: { "Authorization": `Bearer ${token}` }
       });
 
       const data = await res.json();
@@ -74,16 +69,19 @@ export default function ProductsManagementPage() {
 
   async function saveProduct(product: Product) {
     try {
-      const savedPassword = localStorage.getItem("admin_password");
-      if (!savedPassword) return;
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        showToast("אין הרשאה", "error");
+        return;
+      }
 
-      const url = product.id ? `/api/products/${product.id}` : "/api/products";
+      const url = product.id ? `/api/admin/products/${product.id}` : "/api/admin/products";
       const method = product.id ? "PATCH" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: {
-          "Authorization": `Bearer ${savedPassword}`,
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify(product)
@@ -92,11 +90,11 @@ export default function ProductsManagementPage() {
       const data = await res.json();
       if (data.ok) {
         showToast(product.id ? "מוצר עודכן בהצלחה" : "מוצר נוצר בהצלחה", "success");
-        fetchProducts();
+        fetchProducts(token);
         setShowForm(false);
         setEditingProduct(null);
       } else {
-        showToast("שגיאה בשמירת מוצר", "error");
+        showToast(data.error || "שגיאה בשמירת מוצר", "error");
       }
     } catch (err) {
       console.error("Error saving product:", err);
@@ -108,20 +106,23 @@ export default function ProductsManagementPage() {
     if (!confirm("האם אתה בטוח שברצונך למחוק את המוצר?")) return;
 
     try {
-      const savedPassword = localStorage.getItem("admin_password");
-      if (!savedPassword) return;
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        showToast("אין הרשאה", "error");
+        return;
+      }
 
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${savedPassword}` }
+        headers: { "Authorization": `Bearer ${token}` }
       });
 
       const data = await res.json();
       if (data.ok) {
         showToast("מוצר נמחק בהצלחה", "success");
-        fetchProducts();
+        fetchProducts(token);
       } else {
-        showToast("שגיאה במחיקת מוצר", "error");
+        showToast(data.error || "שגיאה במחיקת מוצר", "error");
       }
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -144,21 +145,20 @@ export default function ProductsManagementPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 mb-4">נדרשת התחברות</p>
-          <a href="/admin" className="text-gold">חזור לדף ההתחברות</a>
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-20">
+            <p className="text-zinc-400 mb-4">נדרשת התחברות</p>
+            <a href="/admin/login" className="text-gold hover:text-gold/80">חזור לדף ההתחברות</a>
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="relative min-h-screen">
-      <ToastContainer toasts={toasts} onClose={closeToast} />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(113,113,122,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Package className="text-gold size-8" />
@@ -313,7 +313,7 @@ export default function ProductsManagementPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
 

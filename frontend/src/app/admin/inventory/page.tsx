@@ -30,23 +30,21 @@ export default function AdminInventoryPage() {
     }
   }, [authenticated]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    } else {
-      setError("סיסמה שגויה");
-    }
-  };
-
   const fetchAlerts = async () => {
     setLoading(true);
     setError(null);
 
     try {
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        setError("אין הרשאה");
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/inventory/alerts", {
         headers: {
-          Authorization: `Bearer ${ADMIN_PASSWORD}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -65,60 +63,37 @@ export default function AdminInventoryPage() {
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    if (token) {
+      setAuthenticated(true);
+      fetchAlerts();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   if (!authenticated) {
     return (
-      <main className="relative min-h-screen flex items-center justify-center">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-        <div className="max-w-md w-full mx-auto px-4">
-          <div className="bg-gray-800 rounded-lg p-8 border border-gray-700">
-            <h1 className="text-2xl font-bold mb-6 text-center">ניהול מלאי</h1>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  סיסמת אדמין
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  required
-                />
-              </div>
-              {error && (
-                <div className="bg-red-900/20 border border-red-500 rounded-lg p-3 text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-              <button
-                type="submit"
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                התחבר
-              </button>
-            </form>
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-20">
+            <p className="text-zinc-400 mb-4">נדרשת התחברות</p>
+            <a href="/admin/login" className="text-gold hover:text-gold/80">חזור לדף ההתחברות</a>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">ניהול מלאי</h1>
             <p className="text-gray-400">התראות מלאי וניהול</p>
           </div>
-          <Link
-            href="/admin"
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-          >
-            חזרה לדשבורד
-          </Link>
         </div>
 
         {loading && (
@@ -187,7 +162,7 @@ export default function AdminInventoryPage() {
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -240,7 +240,7 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
               >
-                נוכחות שקטה.
+                הגנה בלתי נראית.
                 <motion.span
                   className="absolute -bottom-2 right-0 w-full h-0.5 bg-zinc-600/50"
                   initial={{ scaleX: 0 }}
@@ -254,7 +254,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 1 }}
                 className="block mt-2"
               >
-                התקנה מדויקת לבית ולעסק.
+                פתרונות מיגון מתקדמים.
               </motion.span>
             </motion.h1>
 
@@ -264,8 +264,8 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 1.2 }}
               className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-300 mb-6 md:mb-8 leading-relaxed"
             >
-              Aegis Spectra Security – מיגון מתקדם בסגנון Noir: מצלמות AI, אזעקות ובקרת כניסה,
-              תיעוד מלא ותמיכה אישית בעברית. כל התקנה – כמו שעון שוויצרי.
+              Aegis Spectra Security – מיגון מתקדם בסגנון עילית: מצלמות AI, אזעקות ובקרת כניסה חכמה, 
+              תיעוד מקיף ותמיכה מקצועית בעברית. כל התקנה – בסטנדרטים מקצועיים גבוהים.
             </motion.p>
 
             {/* CTA Buttons */}

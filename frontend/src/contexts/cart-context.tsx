@@ -10,6 +10,16 @@ export interface CartItem {
   price: number;
   quantity: number;
   image?: string;
+  // Package-specific fields
+  type?: 'product' | 'package';
+  packageSlug?: string;
+  packageOptions?: {
+    cameras?: number;
+    aiDetection?: 'basic' | 'advanced' | 'enterprise';
+    storage?: string;
+    addons?: string[];
+    maintenance?: boolean;
+  };
 }
 
 // Cart context interface

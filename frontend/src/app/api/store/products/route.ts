@@ -571,6 +571,32 @@ export const products: Product[] = [
 
 export async function GET(request: NextRequest) {
   try {
+    // Import packages dynamically
+    const { packages: packageData } = await import('@/data/packages');
+    
+    // Convert packages to products format
+    const packageProducts: Product[] = packageData.map(pkg => ({
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.description,
+      priceRange: pkg.priceRange,
+      minPrice: pkg.pricing.base,
+      maxPrice: pkg.pricing.base + (pkg.pricing.addons?.reduce((sum, addon) => sum + addon.price, 0) || 0),
+      category: 'packages' as const,
+      features: pkg.features.map(f => f.name),
+      specifications: [
+        { label: 'מספר מצלמות', value: `${pkg.specifications.cameras.min}-${pkg.specifications.cameras.max}` },
+        { label: 'אחסון', value: pkg.specifications.storage.size },
+        { label: 'AI Detection', value: pkg.specifications.aiDetection?.level || 'אין' },
+        { label: 'אחריות', value: `${pkg.specifications.warranty.months} חודשים` },
+        { label: 'מחיר', value: pkg.priceRange }
+      ],
+      image: pkg.image || '/api/placeholder/300/200',
+      popular: pkg.popular,
+      inStock: true,
+      stockCount: 10,
+    }));
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -579,7 +605,7 @@ export async function GET(request: NextRequest) {
     const popular = searchParams.get('popular');
     const newProducts = searchParams.get('new');
 
-    let filteredProducts = [...products];
+    let filteredProducts = [...products, ...packageProducts];
 
     // Filter by category
     if (category && category !== 'all') {

@@ -22,6 +22,7 @@ import Trust from "@/components/Trust";
 import FAQ from "@/components/FAQ";
 import CTA from "@/components/CTA";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
+import { packages } from "@/data/packages";
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -404,89 +405,100 @@ export default function Home() {
       </section>
 
       {/* PACKAGES */}
-      <section id="packages" className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
+      <section id="packages" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative">
         <ScrollReveal>
-          <SectionTitle title="חבילות מותאמות" subtitle="Apartment / House / Business" />
+          <SectionTitle title="חבילות מותאמות" subtitle="Apartment / House / Business / Enterprise" />
         </ScrollReveal>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-          {[
-            {
-              title: "Apartment Basic",
-              price: "החל מ-₪ 2,290",
-              bullets: ["2–3 מצלמות IP", "NVR 4 ערוצים", "אפליקציה בעברית", "התקנה בסיסית"],
-              featured: false,
-              gradient: "from-zinc-800/50 to-zinc-900/50"
-            },
-            {
-              title: "House Pro",
-              price: "החל מ-₪ 5,990",
-              bullets: ["5–8 מצלמות 4K/Color", "NVR 8–16", "UPS + VLAN", "אינטרקום שער"],
-              featured: true,
-              gradient: "from-zinc-700/50 to-zinc-800/50"
-            },
-            {
-              title: "Business Suite",
-              price: "החל מ-₪ 8,900",
-              bullets: ["6–12 מצלמות", "אזור קופה", "SLA Silver/Gold", "דו״חות חודשיים"],
-              featured: false,
-              gradient: "from-zinc-800/50 to-zinc-900/50"
-            }
-          ].map((p, i) => (
-            <ScrollReveal key={i} delay={i * 0.15} direction="up">
-              <TiltCard intensity={15}>
-                <motion.div
-                  className={`rounded-3xl border p-8 bg-gradient-to-br ${p.gradient} backdrop-blur-sm relative overflow-hidden group ${
-                    p.featured
-                      ? "border-zinc-600 shadow-[0_0_20px_rgba(113,113,122,0.2)] ring-2 ring-zinc-700/30"
-                      : "border-zinc-800/50"
-                  }`}
-                  whileHover={{ y: -12, scale: 1.03 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {p.featured && (
-                    <motion.div
-                      className="absolute top-0 right-0 bg-zinc-700 text-white px-4 py-1 rounded-bl-xl text-xs font-bold"
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      מומלץ
-                    </motion.div>
-                  )}
-                  <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-zinc-200 transition">{p.title}</h3>
-                  <div className="text-3xl font-extrabold text-white mb-6">{p.price}</div>
-                  <ul className="space-y-3 mb-8">
-                    {p.bullets.map((b, bi) => (
-                      <motion.li
-                        key={bi}
-                        className="flex items-center gap-3 text-sm"
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: bi * 0.1 }}
-                      >
-                        <Check className="size-5 text-zinc-300 flex-shrink-0" />
-                        <span>{b}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                  <motion.a
-                    href="/quote"
-                    className="block w-full rounded-xl border-2 border-zinc-600 px-6 py-3 text-center font-semibold hover:bg-zinc-700 hover:text-white transition relative overflow-hidden group"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          {packages.map((pkg, i) => {
+            const gradient = pkg.recommended || pkg.popular
+              ? "from-zinc-700/50 to-zinc-800/50"
+              : "from-zinc-800/50 to-zinc-900/50";
+            
+            const mainFeatures = pkg.features.slice(0, 5).map(f => f.name);
+            
+            return (
+              <ScrollReveal key={pkg.id} delay={i * 0.1} direction="up">
+                <TiltCard intensity={15}>
+                  <motion.div
+                    className={`rounded-3xl border p-6 sm:p-8 bg-gradient-to-br ${gradient} backdrop-blur-sm relative overflow-hidden group ${
+                      pkg.recommended || pkg.popular
+                        ? "border-zinc-600 shadow-[0_0_20px_rgba(113,113,122,0.2)] ring-2 ring-zinc-700/30"
+                        : "border-zinc-800/50"
+                    }`}
+                    whileHover={{ y: -12, scale: 1.03 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <span className="relative z-10">בקשת הצעת מחיר</span>
-                    <motion.span
-                      className="absolute inset-0 bg-gold"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: 0 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </motion.a>
-                </motion.div>
-              </TiltCard>
-            </ScrollReveal>
-          ))}
+                    {(pkg.recommended || pkg.popular) && (
+                      <motion.div
+                        className="absolute top-0 right-0 bg-zinc-700 text-white px-4 py-1 rounded-bl-xl text-xs font-bold"
+                        initial={{ opacity: 0, scale: 0 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {pkg.recommended ? "מומלץ" : "פופולרי"}
+                      </motion.div>
+                    )}
+                    <div className="mb-3">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-1 text-white group-hover:text-zinc-200 transition">
+                        {pkg.nameHebrew}
+                      </h3>
+                      <p className="text-sm text-zinc-400">{pkg.name}</p>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-white mb-4">{pkg.priceRange}</div>
+                    <ul className="space-y-2 mb-6">
+                      {mainFeatures.map((feature, fi) => (
+                        <motion.li
+                          key={fi}
+                          className="flex items-center gap-2 text-xs sm:text-sm"
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ delay: fi * 0.05 }}
+                        >
+                          <Check className="size-4 sm:size-5 text-zinc-300 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                    <div className="flex flex-col gap-2">
+                      <motion.a
+                        href={`/packages/${pkg.slug}`}
+                        className="block w-full rounded-xl border-2 border-zinc-600 px-4 py-2 sm:px-6 sm:py-3 text-center text-sm sm:text-base font-semibold hover:bg-zinc-700 hover:text-white transition relative overflow-hidden group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span className="relative z-10">לפרטים</span>
+                      </motion.a>
+                      <motion.a
+                        href={`/quote?package=${pkg.slug}`}
+                        className="block w-full rounded-xl border-2 border-gold px-4 py-2 sm:px-6 sm:py-3 text-center text-sm sm:text-base font-semibold bg-gold/10 text-gold hover:bg-gold hover:text-black transition relative overflow-hidden group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span className="relative z-10">בקשת הצעת מחיר</span>
+                        <motion.span
+                          className="absolute inset-0 bg-gold"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: 0 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </motion.a>
+                    </div>
+                  </motion.div>
+                </TiltCard>
+              </ScrollReveal>
+            );
+          })}
+        </div>
+        <div className="mt-12 text-center">
+          <motion.a
+            href="/packages/compare"
+            className="inline-block px-6 py-3 rounded-xl border-2 border-zinc-600 text-white font-semibold hover:bg-zinc-800 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            השווה בין חבילות
+          </motion.a>
         </div>
       </section>
 

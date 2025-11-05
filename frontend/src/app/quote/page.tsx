@@ -1,22 +1,30 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Shield, Camera, Lock, Package, CheckCircle, Upload, Calculator, Send } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useReCaptcha } from "@/components/ReCaptcha";
+import { getPackageBySlug } from "@/data/packages";
+import { calculatePackagePrice, PackagePriceOptions } from "@/lib/packages/calculatePrice";
+import { Package as PackageType } from "@/types/packages";
 
 type ServiceType = "cyber" | "physical" | "combined" | null;
-type PackageType = "basic" | "professional" | "enterprise" | null;
+type PackageTypeOld = "basic" | "professional" | "enterprise" | null;
 
 export default function QuotePage() {
   const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("quote_form");
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
+  const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
+  const [packageOptions, setPackageOptions] = useState<PackagePriceOptions>({});
   const [formData, setFormData] = useState({
     serviceType: null as ServiceType,
-    packageType: null as PackageType,
+    packageType: null as PackageTypeOld,
+    packageSlug: "",
     propertySize: "",
     location: "",
     specialRequirements: "",
@@ -29,8 +37,32 @@ export default function QuotePage() {
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
+  // Load package from URL parameter
+  useEffect(() => {
+    const packageSlug = searchParams.get("package");
+    if (packageSlug) {
+      const pkg = getPackageBySlug(packageSlug);
+      if (pkg) {
+        setSelectedPackage(pkg);
+        setFormData(prev => ({
+          ...prev,
+          packageSlug: packageSlug,
+          serviceType: pkg.category === "Residential" ? "physical" : pkg.category === "Commercial" ? "physical" : "combined",
+        }));
+        setStep(2); // Skip to step 2
+      }
+    }
+  }, [searchParams]);
+
   // Calculate estimated price dynamically
   const estimatedPrice = useMemo(() => {
+    // If package is selected, use package pricing
+    if (selectedPackage) {
+      const breakdown = calculatePackagePrice(selectedPackage, packageOptions);
+      return breakdown.total;
+    }
+
+    // Otherwise, use old calculation
     let basePrice = 0;
     
     // Base price by service type
@@ -59,7 +91,7 @@ export default function QuotePage() {
     }
     
     return Math.round(basePrice);
-  }, [formData.serviceType, formData.packageType, formData.propertySize]);
+  }, [selectedPackage, packageOptions, formData.serviceType, formData.packageType, formData.propertySize]);
 
   const validatePhone = (phone: string) => {
     const phoneRegex = /^0[2-9]\d{7,8}$/;
@@ -98,16 +130,41 @@ export default function QuotePage() {
       formDataToSend.append("phone", formData.phone);
       formDataToSend.append("email", formData.email || "");
       formDataToSend.append("city", formData.location);
-      formDataToSend.append("message", `
+      let messageContent = `
 סוג שירות: ${formData.serviceType === "cyber" ? "סייבר" : formData.serviceType === "physical" ? "פיזי" : "משולב"}
-חבילה: ${formData.packageType === "basic" ? "בסיסי" : formData.packageType === "professional" ? "מקצועי" : "ארגוני"}
+`;
+
+      if (selectedPackage) {
+        messageContent += `
+חבילה: ${selectedPackage.nameHebrew} (${selectedPackage.name})
+${selectedPackage.description}
+`;
+        if (packageOptions.cameras) {
+          messageContent += `מצלמות: ${packageOptions.cameras}\n`;
+        }
+        if (packageOptions.aiDetection) {
+          messageContent += `AI Detection: ${packageOptions.aiDetection}\n`;
+        }
+        if (packageOptions.storage) {
+          messageContent += `אחסון: ${packageOptions.storage}\n`;
+        }
+        if (packageOptions.addons && packageOptions.addons.length > 0) {
+          messageContent += `תוספות: ${packageOptions.addons.join(', ')}\n`;
+        }
+      } else {
+        messageContent += `חבילה: ${formData.packageType === "basic" ? "בסיסי" : formData.packageType === "professional" ? "מקצועי" : "ארגוני"}\n`;
+      }
+
+      messageContent += `
 גודל נכס: ${formData.propertySize} מ״ר
 מיקום: ${formData.location}
 דרישות מיוחדות: ${formData.specialRequirements}
 תקציב משוער: ${formData.budget} ₪
 מחיר משוער (אוטומטי): ${estimatedPrice} ₪
       ${formData.message}
-      `.trim());
+      `.trim();
+
+      formDataToSend.append("message", messageContent);
       
       if (recaptchaToken) {
         formDataToSend.append("recaptcha_token", recaptchaToken);
@@ -252,28 +309,64 @@ export default function QuotePage() {
               {step === 2 && (
                 <ScrollReveal>
                   <div className="space-y-8">
-                    {/* Package Selection */}
-                    <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
-                      <h2 className="text-2xl font-bold mb-6">בחר חבילה</h2>
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {packageOptions.map((option) => (
+                    {/* Package Selection - Show selected package if exists */}
+                    {selectedPackage ? (
+                      <div className="rounded-2xl border-2 border-gold/50 bg-gold/10 p-8 backdrop-blur-sm">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h2 className="text-2xl font-bold mb-2">{selectedPackage.nameHebrew}</h2>
+                            <p className="text-zinc-400">{selectedPackage.description}</p>
+                            <p className="text-gold font-bold text-xl mt-2">{selectedPackage.priceRange}</p>
+                          </div>
                           <button
-                            key={option.id}
                             type="button"
-                            onClick={() => setFormData({ ...formData, packageType: option.id as PackageType })}
-                            className={`p-6 rounded-xl border-2 transition-all text-right ${
-                              formData.packageType === option.id
-                                ? "border-gold bg-gold/10"
-                                : "border-zinc-800 bg-black/30 hover:border-zinc-700"
-                            }`}
+                            onClick={() => {
+                              setSelectedPackage(null);
+                              setFormData(prev => ({ ...prev, packageSlug: "" }));
+                            }}
+                            className="text-zinc-400 hover:text-white transition"
                           >
-                            <h3 className="font-bold text-lg mb-2">{option.label}</h3>
-                            <p className="text-gold font-semibold mb-2">{option.price}</p>
-                            <p className="text-sm text-zinc-400">{option.desc}</p>
+                            ✕
                           </button>
-                        ))}
+                        </div>
+                        <a
+                          href={`/packages/${selectedPackage.slug}`}
+                          className="text-gold hover:text-gold/80 text-sm underline"
+                        >
+                          לפרטים מלאים של החבילה →
+                        </a>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="rounded-2xl border border-zinc-800 bg-black/30 p-8 backdrop-blur-sm">
+                        <h2 className="text-2xl font-bold mb-6">בחר חבילה</h2>
+                        <div className="grid md:grid-cols-3 gap-6">
+                          {packageOptions.map((option) => (
+                            <button
+                              key={option.id}
+                              type="button"
+                              onClick={() => setFormData({ ...formData, packageType: option.id as PackageTypeOld })}
+                              className={`p-6 rounded-xl border-2 transition-all text-right ${
+                                formData.packageType === option.id
+                                  ? "border-gold bg-gold/10"
+                                  : "border-zinc-800 bg-black/30 hover:border-zinc-700"
+                              }`}
+                            >
+                              <h3 className="font-bold text-lg mb-2">{option.label}</h3>
+                              <p className="text-gold font-semibold mb-2">{option.price}</p>
+                              <p className="text-sm text-zinc-400">{option.desc}</p>
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mt-6 text-center">
+                          <a
+                            href="/packages/compare"
+                            className="text-gold hover:text-gold/80 text-sm underline"
+                          >
+                            השווה בין חבילות →
+                          </a>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Estimated Price Display */}
                     {estimatedPrice > 0 && (

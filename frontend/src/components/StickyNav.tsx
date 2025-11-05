@@ -94,7 +94,6 @@ export function StickyNav() {
   const navLinks = [
     { href: "/services", label: "שירותים" },
     { href: "/products", label: "מוצרים" },
-    { href: "/portfolio", label: "פורטפוליו" },
     { href: "/quote", label: "הצעת מחיר" },
     { href: "/about", label: "אודות" },
     { href: "/blog", label: "בלוג" },

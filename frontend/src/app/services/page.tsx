@@ -50,8 +50,8 @@ export default function ServicesPage() {
     {
       icon: Camera,
       title: "מצלמות חיצוניות ו-CCTV",
-      description: "התקנת מערכות CCTV מתקדמות עם ציוד מוביל (Provision, Hikvision ועוד), רשתות אבטחה מקצועיות",
-      features: ["ציוד מוביל (Provision, Hikvision)", "רשתות מקצועיות", "ראיית לילה", "צפייה מרחוק"]
+      description: "התקנת מערכות CCTV מתקדמות עם ציוד מוביל (Provision, Hikvision ועוד), רשתות אבטחה מקצועיות. Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של המותגים הנ\"ל.",
+      features: ["עובדים עם מוצרי מובילים כמו Provision, Hikvision", "רשתות מקצועיות", "ראיית לילה", "צפייה מרחוק"]
     },
     {
       icon: Lock,

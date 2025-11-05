@@ -25,21 +25,7 @@ export default function AdminUsersPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const checkAuthAndFetchUsers = useCallback(async () => {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-
-    fetchUsers(token);
-  }, [router]);
-
-  useEffect(() => {
-    checkAuthAndFetchUsers();
-  }, [checkAuthAndFetchUsers]);
-
-  const fetchUsers = async (token: string) => {
+  const fetchUsers = useCallback(async (token: string) => {
     setLoading(true);
     setError(null);
 
@@ -63,7 +49,21 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const checkAuthAndFetchUsers = useCallback(async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    fetchUsers(token);
+  }, [router, fetchUsers]);
+
+  useEffect(() => {
+    checkAuthAndFetchUsers();
+  }, [checkAuthAndFetchUsers]);
 
   const handleUpdateRole = async (userId: number, newRole: string) => {
     const token = localStorage.getItem("admin_token");

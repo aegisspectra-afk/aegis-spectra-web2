@@ -14,41 +14,25 @@ import { ScrollReveal } from '@/components/ScrollReveal';
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  const handleCheckout = async () => {
-    setIsCheckingOut(true);
+  const handleCheckout = () => {
+    // Redirect to quote page with cart items
+    const cartItems = cart.map(item => ({
+      sku: item.sku,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      packageSlug: item.packageSlug,
+      packageOptions: item.packageOptions,
+    }));
     
-    try {
-      const response = await fetch('/api/cart/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cart,
-          contact: {
-            // Will be filled in checkout form
-            name: '',
-            phone: '',
-            email: '',
-            location: '',
-          },
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Redirect to quote page or success page
-        window.location.href = `/quote?orderId=${data.data.orderId}`;
-      } else {
-        alert('שגיאה בתהליך הרכישה. נא לנסות שוב.');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert('שגיאה בתהליך הרכישה. נא לנסות שוב.');
-    } finally {
-      setIsCheckingOut(false);
+    // Store cart in sessionStorage for quote page
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('cartForQuote', JSON.stringify(cartItems));
     }
+    
+    // Redirect to quote page
+    window.location.href = '/quote?source=cart';
   };
 
   if (cart.length === 0) {
@@ -214,18 +198,11 @@ export default function CartPage() {
                   <div className="space-y-3">
                     <button
                       onClick={handleCheckout}
-                      disabled={isCheckingOut}
-                      className="w-full bg-gold text-black rounded-xl px-6 py-4 font-bold text-lg hover:bg-gold/90 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-gold text-black rounded-xl px-6 py-4 font-bold text-lg hover:bg-gold/90 transition flex items-center justify-center gap-2"
                     >
-                      {isCheckingOut ? (
-                        'מעבד...'
-                      ) : (
-                        <>
-                          <CreditCard className="size-5" />
-                          המשך לרכישה
-                          <ArrowRight className="size-5" />
-                        </>
-                      )}
+                      <CreditCard className="size-5" />
+                      המשך לרכישה
+                      <ArrowRight className="size-5" />
                     </button>
                     
                     <Link

@@ -6,14 +6,41 @@ import { Shield, Menu, X, User, LogOut, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { trackLogout } from "@/lib/analytics";
-import { useCart } from "@/contexts/cart-context";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { getCartItemCount } = useCart();
+  
+  // Get cart count from localStorage (client-side only)
+  const [cartItemCount, setCartItemCount] = useState(0);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const updateCartCount = () => {
+        try {
+          const saved = localStorage.getItem('cart');
+          const cart = saved ? JSON.parse(saved) : [];
+          const count = cart.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+          setCartItemCount(count);
+        } catch {
+          setCartItemCount(0);
+        }
+      };
+      
+      updateCartCount();
+      // Listen for storage changes
+      window.addEventListener('storage', updateCartCount);
+      // Also check periodically (for same-tab updates)
+      const interval = setInterval(updateCartCount, 1000);
+      
+      return () => {
+        window.removeEventListener('storage', updateCartCount);
+        clearInterval(interval);
+      };
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // Check if user is logged in
@@ -140,9 +167,9 @@ export function Navbar() {
               className="relative flex items-center gap-2 hover:text-gold transition"
             >
               <ShoppingCart className="size-5" />
-              {getCartItemCount() > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-gold text-black text-xs font-bold rounded-full size-5 flex items-center justify-center">
-                  {getCartItemCount()}
+                  {cartItemCount}
                 </span>
               )}
               <span className="hidden sm:inline">עגלה</span>
@@ -236,9 +263,9 @@ export function Navbar() {
                 >
                   <ShoppingCart className="size-5" />
                   עגלת קניות
-                  {getCartItemCount() > 0 && (
+                  {cartItemCount > 0 && (
                     <span className="bg-gold text-black text-xs font-bold rounded-full px-2 py-0.5">
-                      {getCartItemCount()}
+                      {cartItemCount}
                     </span>
                   )}
                 </Link>

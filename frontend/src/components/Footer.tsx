@@ -14,9 +14,14 @@ export function Footer() {
               <Shield className="text-gold size-8" />
               <span className="font-bold text-gold text-xl">Aegis Spectra Security</span>
             </div>
-            <p className="max-w-md text-zinc-400 text-sm leading-relaxed">
+            <p className="max-w-md text-zinc-400 text-sm leading-relaxed mb-2">
               אבטחה חכמה לבית ולעסק — מצלמות, בקרת כניסה וניהול מרחוק. 
               שירותי התקנה מקצועיים ותמיכה מקוונת.
+            </p>
+            <p className="max-w-md text-zinc-500 text-xs leading-relaxed">
+              <Link href="/legal-disclaimer" className="hover:text-gold transition underline">
+                Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי של מותגים
+              </Link>
             </p>
           </div>
 

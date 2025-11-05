@@ -101,8 +101,13 @@ export default function ProductsPage() {
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
                 המוצרים שלנו
               </h1>
-              <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+              <p className="text-zinc-400 text-lg max-w-2xl mx-auto mb-2">
                 בחר את המוצר המתאים לך מבין המגוון הרחב שלנו
+              </p>
+              <p className="text-zinc-500 text-sm max-w-2xl mx-auto">
+                <Link href="/legal-disclaimer" className="hover:text-gold transition underline">
+                  Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של מותגים
+                </Link>
               </p>
             </div>
           </ScrollReveal>

@@ -43,7 +43,7 @@ export interface PackageSpecification {
     features: string[];
   };
   app: {
-    platforms: ('iOS' | 'Android')[];
+    platforms: ('iOS' | 'Android' | 'Web')[];
     language: string;
     features: string[];
   };

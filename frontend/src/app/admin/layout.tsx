@@ -51,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return <>{children}</>;
   }
 
+  // Show loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -59,8 +60,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
+  // Redirect if not authenticated (handled in useEffect)
+  if (!isAuthenticated && pathname !== '/admin/login') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-zinc-400 mb-4">מעביר לדף התחברות...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gold mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
   const menuItems = [

@@ -43,9 +43,17 @@ export default function LegalDisclaimerPage() {
               <p className="text-lg font-semibold mb-4 text-white">
                 Aegis Spectra מספקת ציוד אבטחה, מצלמות, מערכות אזעקה, קודנים, מערכות גישה וציוד רשת לשימושים פרטיים ועסקיים.
               </p>
-              <p className="font-semibold text-gold">
+              <p className="font-semibold text-gold mb-4">
                 החברה אינה נושאת באחריות לשימוש בלתי תקין, בלתי חוקי או בניגוד לייעוד הציוד במוצרים הנרכשים באתר.
               </p>
+              <div className="p-4 rounded-lg bg-yellow-500/20 border-2 border-yellow-500/50 mt-4">
+                <p className="text-sm font-semibold text-yellow-300">
+                  <strong>הצהרת עצמאות:</strong> Aegis Spectra הינה עסק עצמאי בתחום התקנה ושירות של ציוד אבטחה. 
+                  החברה אינה נציג רשמי, מפיץ מורשה או קשורה בקשר עסקי רשמי עם Hikvision, Provision ISR, Dahua או כל מותג אחר. 
+                  החברה מספקת שירותי התקנה, תחזוקה ותמיכה בציוד אבטחה מבית מותגים מובילים כגון Hikvision, Provision ISR, Dahua ואחרים — 
+                  ללא קשר עסקי או ייצוג רשמי מול החברות הנ&quot;ל.
+                </p>
+              </div>
             </div>
           </ScrollReveal>
 

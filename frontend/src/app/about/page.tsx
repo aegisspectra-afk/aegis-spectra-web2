@@ -99,7 +99,8 @@ export default function AboutPage() {
                 <h3 className="text-xl font-bold text-white mb-4">מי אנחנו</h3>
                 <p className="text-zinc-300 leading-relaxed mb-4">
                   Aegis Spectra היא חברת אבטחה ומיגון מתקדמת, המתמחה בהתקנות מקצועיות
-                  של ציוד מוביל מהשוק (Provision, Hikvision ועוד) והגנה על בתים, עסקים וארגונים.
+                  של ציוד מוביל מהשוק (Provision, Hikvision ועוד) והגנה על בתים, עסקים וארגונים. 
+                  <strong className="text-yellow-400">Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של המותגים הנ&quot;ל.</strong>
                 </p>
                 <p className="text-zinc-300 leading-relaxed">
                   אנו מביאים ניסיון צבאי ומקצועי להתקנות אבטחה מדויקות ואמינות,
@@ -142,7 +143,8 @@ export default function AboutPage() {
                 </div>
                 <p className="text-zinc-300 leading-relaxed">
                   לספק פתרונות אבטחה ומיגון מתקדמים, מקצועיים ואמינים,
-                  תוך שימוש בציוד מוביל מהשוק (Provision, Hikvision ועוד),
+                  תוך שימוש בציוד מוביל מהשוק (Provision, Hikvision ועוד). 
+                  <strong className="text-yellow-400">Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של המותגים הנ&quot;ל.</strong>
                   התקנה מקצועית ונקייה, ותמיכה מלאה בעברית.
                 </p>
               </div>
@@ -190,7 +192,7 @@ export default function AboutPage() {
               {[
                 {
                   title: "ציוד מוביל",
-                  description: "אנו משתמשים בציוד מוביל מהשוק כמו Provision, Hikvision ועוד, עם אחריות מלאה"
+                  description: "אנו משתמשים בציוד מוביל מהשוק כמו Provision, Hikvision ועוד, עם אחריות מלאה. Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של המותגים הנ\"ל."
                 },
                 {
                   title: "ניסיון מקצועי",

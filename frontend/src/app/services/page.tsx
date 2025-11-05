@@ -161,7 +161,8 @@ export default function ServicesPage() {
               </h2>
             </div>
             <p className="text-lg text-zinc-300 mb-12 max-w-3xl">
-              התקנות מקצועיות של ציוד מוביל מהשוק (Provision, Hikvision ועוד),
+              התקנות מקצועיות של ציוד מוביל מהשוק (Provision, Hikvision ועוד). 
+              <strong className="text-yellow-400">Aegis Spectra הינה עסק עצמאי ואינה נציג רשמי או מפיץ מורשה של המותגים הנ&quot;ל.</strong>
               מערכות CCTV, חיישנים, IoT ואינטגרציה מלאה עם מערכת הסייבר.
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

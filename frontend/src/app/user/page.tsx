@@ -5,13 +5,16 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { 
   Shield, User, Phone, Mail, Calendar, Package, 
-  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key, Save, Edit, X
+  MessageSquare, FileText, Settings, LogOut, Clock, CheckCircle, Download, Key, Save, Edit, X, Star, Gift, ShoppingCart, Ticket
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useToastContext } from "@/components/ToastProvider";
 import { trackProfileUpdate } from "@/lib/analytics";
+import { LoyaltyPoints } from "@/components/Loyalty/LoyaltyPoints";
+import { LoyaltyCoupons } from "@/components/Loyalty/LoyaltyCoupons";
+import { TicketForm } from "@/components/Support/TicketForm";
 
 type UserProfile = {
   id: number;
@@ -253,10 +256,39 @@ function ProfileEditor({ user, onUpdate }: { user: UserProfile; onUpdate: (user:
   );
 }
 
+interface LoyaltyData {
+  points: number;
+  total_earned: number;
+  total_spent: number;
+  tier: string;
+}
+
+interface Coupon {
+  id: number;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  min_purchase?: number;
+  max_discount?: number;
+  valid_until?: string;
+  status: string;
+}
+
+interface SupportTicket {
+  id: number;
+  ticket_number: string;
+  subject: string;
+  status: string;
+  created_at: string;
+}
+
 export default function UserDashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [activeTab, setActiveTab] = useState<"profile" | "orders" | "support" | "reports" | "api-keys">("profile");
+  const [loyaltyData, setLoyaltyData] = useState<LoyaltyData | null>(null);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [activeTab, setActiveTab] = useState<"overview" | "profile" | "loyalty" | "orders" | "support" | "reports" | "api-keys">("overview");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -307,13 +339,22 @@ export default function UserDashboardPage() {
           if (data.user.email) localStorage.setItem("user_email", data.user.email);
           if (data.user.phone) localStorage.setItem("user_phone", data.user.phone);
           if (data.user.role) localStorage.setItem("user_role", data.user.role);
+          
+          // Fetch additional data
+          if (data.user.email) {
+            fetchAccountData(data.user.email);
+          } else {
+            setLoading(false);
+          }
         } else if (data && !data.ok) {
           // Authentication failed - redirect to login
           localStorage.removeItem("user_token");
           window.location.href = "/login?redirect=/user";
           return;
         }
-        setLoading(false);
+        if (!data || !data.ok || !data.user?.email) {
+          setLoading(false);
+        }
       })
       .catch(err => {
         console.error("Error fetching user data:", err);
@@ -323,6 +364,48 @@ export default function UserDashboardPage() {
         window.location.href = "/login?redirect=/user";
       });
   }, []);
+
+  const fetchAccountData = async (email: string) => {
+    try {
+      // Fetch loyalty points
+      const loyaltyRes = await fetch(`/api/loyalty/points?user_email=${encodeURIComponent(email)}`);
+      const loyaltyData = await loyaltyRes.json();
+      if (loyaltyData.ok && loyaltyData.loyalty) {
+        setLoyaltyData(loyaltyData.loyalty);
+      }
+
+      // Fetch coupons
+      const couponsRes = await fetch(`/api/loyalty/coupons?user_email=${encodeURIComponent(email)}`);
+      const couponsData = await couponsRes.json();
+      if (couponsData.ok && couponsData.coupons) {
+        setCoupons(couponsData.coupons);
+      }
+
+      // Fetch support tickets
+      const ticketsRes = await fetch(`/api/support/tickets?user_email=${encodeURIComponent(email)}`);
+      const ticketsData = await ticketsRes.json();
+      if (ticketsData.ok && ticketsData.tickets) {
+        setTickets(ticketsData.tickets);
+      }
+    } catch (err) {
+      console.error("Error fetching account data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTierColor = (tier: string) => {
+    switch (tier) {
+      case "Platinum":
+        return "text-purple-400 bg-purple-900/20 border-purple-500";
+      case "Gold":
+        return "text-yellow-400 bg-yellow-900/20 border-yellow-500";
+      case "Silver":
+        return "text-gray-300 bg-gray-800 border-gray-600";
+      default:
+        return "text-gray-400 bg-gray-800 border-gray-700";
+    }
+  };
 
   if (loading) {
     return (
@@ -362,9 +445,11 @@ export default function UserDashboardPage() {
 
         {/* Tabs */}
         <ScrollReveal delay={0.1}>
-          <div className="flex gap-2 mb-8 border-b border-zinc-800">
+          <div className="flex gap-2 mb-8 border-b border-zinc-800 overflow-x-auto">
             {[
+              { id: "overview" as const, label: "סקירה", icon: User },
               { id: "profile" as const, label: "פרופיל", icon: User },
+              { id: "loyalty" as const, label: "נאמנות", icon: Star },
               { id: "orders" as const, label: "הזמנות", icon: Package },
               { id: "support" as const, label: "תמיכה", icon: MessageSquare },
               { id: "reports" as const, label: "דוחות", icon: FileText },
@@ -391,8 +476,82 @@ export default function UserDashboardPage() {
 
         {/* Tab Content */}
         <ScrollReveal delay={0.2}>
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {loyaltyData && (
+                <div className={`rounded-2xl border p-6 backdrop-blur-sm ${getTierColor(loyaltyData.tier)}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Star className="text-yellow-400" size={24} />
+                      <h3 className="text-xl font-bold">נקודות נאמנות</h3>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold">{loyaltyData.points}</p>
+                      <p className="text-sm opacity-80">רמה: {loyaltyData.tier}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <p className="text-sm opacity-80">סה&quot;כ נצבר</p>
+                      <p className="text-lg font-semibold">{loyaltyData.total_earned}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm opacity-80">סה&quot;כ הוצא</p>
+                      <p className="text-lg font-semibold">{loyaltyData.total_spent}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <button
+                  onClick={() => setActiveTab("loyalty")}
+                  className="bg-black/30 rounded-2xl border border-zinc-800 p-6 backdrop-blur-sm hover:border-gold transition-colors text-right"
+                >
+                  <Gift className="text-gold mb-3" size={32} />
+                  <h3 className="font-semibold text-white mb-1">קופונים</h3>
+                  <p className="text-zinc-400 text-sm">{coupons.filter(c => c.status === "active").length} פעילים</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("orders")}
+                  className="bg-black/30 rounded-2xl border border-zinc-800 p-6 backdrop-blur-sm hover:border-gold transition-colors text-right"
+                >
+                  <ShoppingCart className="text-gold mb-3" size={32} />
+                  <h3 className="font-semibold text-white mb-1">הזמנות</h3>
+                  <p className="text-zinc-400 text-sm">{orders.length} הזמנות</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("support")}
+                  className="bg-black/30 rounded-2xl border border-zinc-800 p-6 backdrop-blur-sm hover:border-gold transition-colors text-right"
+                >
+                  <Ticket className="text-gold mb-3" size={32} />
+                  <h3 className="font-semibold text-white mb-1">כרטיסי תמיכה</h3>
+                  <p className="text-zinc-400 text-sm">{tickets.filter(t => t.status !== "closed").length} פתוחים</p>
+                </button>
+              </div>
+            </div>
+          )}
+
           {activeTab === "profile" && user && (
             <ProfileEditor user={user} onUpdate={setUser} />
+          )}
+
+          {activeTab === "loyalty" && (
+            <div className="space-y-6">
+              {user?.email && (
+                <>
+                  <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 backdrop-blur-sm">
+                    <LoyaltyPoints userEmail={user.email} />
+                  </div>
+                  <div className="rounded-2xl border border-zinc-800 bg-black/30 p-6 backdrop-blur-sm">
+                    <h3 className="text-xl font-bold mb-4">קופונים אישיים</h3>
+                    <LoyaltyCoupons userEmail={user.email} />
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {activeTab === "orders" && (
@@ -466,54 +625,54 @@ export default function UserDashboardPage() {
               <div className="space-y-6">
                 <div className="rounded-xl border border-zinc-800 bg-black/30 p-6">
                   <h3 className="font-semibold text-white mb-4">פתח קריאת שירות</h3>
-                  <form className="space-y-4" onSubmit={(e) => {
-                    e.preventDefault();
-                    // Handle form submission
-                    alert('קריאת שירות נשלחה! נחזור אליך בהקדם.');
-                  }}>
-                    <div>
-                      <label className="block text-sm mb-2 text-zinc-300">נושא</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="לדוגמה: בעיה במצלמה, תיקון נדרש..."
-                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-gold/70 transition text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-zinc-300">תיאור הבעיה</label>
-                      <textarea
-                        rows={4}
-                        required
-                        placeholder="תאר את הבעיה בפירוט..."
-                        className="w-full bg-black/30 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-gold/70 transition text-white"
-                      />
-                    </div>
-                    <div className="flex gap-4">
-                      <button
-                        type="submit"
-                        className="flex-1 rounded-xl bg-gold text-black px-6 py-3 font-semibold hover:bg-gold/90 transition"
-                      >
-                        שלח קריאה
-                      </button>
-                      <a
-                        href="https://wa.me/972559737025"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-6 py-3 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition inline-flex items-center gap-2"
-                      >
-                        <Phone className="size-4" />
-                        WhatsApp
-                      </a>
-                    </div>
-                  </form>
+                  <TicketForm
+                    onSuccess={() => {
+                      if (user?.email) {
+                        fetchAccountData(user.email);
+                      }
+                    }}
+                  />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-4">קריאות קודמות</h3>
                   <div className="space-y-3">
-                    <div className="text-center py-8 text-zinc-400 rounded-xl border border-zinc-800 bg-black/30">
-                      אין קריאות פתוחות
-                    </div>
+                    {tickets.length > 0 ? (
+                      tickets.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          className="bg-black/30 rounded-xl border border-zinc-800 p-4 hover:border-zinc-600 transition"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-semibold text-white">#{ticket.ticket_number}</p>
+                              <p className="text-sm text-zinc-400">{ticket.subject}</p>
+                              <p className="text-xs text-zinc-500 mt-1">
+                                {new Date(ticket.created_at).toLocaleDateString("he-IL")}
+                              </p>
+                            </div>
+                            <div className="text-left">
+                              <span
+                                className={`px-3 py-1 rounded text-sm ${
+                                  ticket.status === "open"
+                                    ? "bg-green-900/30 text-green-400"
+                                    : ticket.status === "resolved"
+                                    ? "bg-blue-900/30 text-blue-400"
+                                    : "bg-gray-700 text-gray-400"
+                                }`}
+                              >
+                                {ticket.status === "open" ? "פתוח" :
+                                 ticket.status === "resolved" ? "נפתר" :
+                                 ticket.status === "closed" ? "סגור" : ticket.status}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-zinc-400 rounded-xl border border-zinc-800 bg-black/30">
+                        אין קריאות פתוחות
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="rounded-xl border border-zinc-800 bg-black/30 p-6">

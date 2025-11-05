@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
 
           <div className="mt-6 pt-6 border-t border-gray-700">
             <p className="text-xs text-gray-400 text-center">
-              משתמש רגיל? <a href="/account" className="text-cyan-400 hover:text-cyan-300">חשבון משתמש</a>
+              משתמש רגיל? <a href="/user" className="text-cyan-400 hover:text-cyan-300">חשבון משתמש</a>
             </p>
           </div>
         </div>

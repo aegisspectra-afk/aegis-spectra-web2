@@ -47,63 +47,262 @@ export async function GET(request: NextRequest) {
       productIdNum = parseInt(productId!);
     }
 
-    // Build query
-    let query = sql`
-      SELECT r.*,
-             (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
-      FROM reviews r
-      WHERE r.product_id = ${productIdNum}
-        AND r.status = ${status}
-    `;
-
-    if (rating) {
-      query = sql`
-        SELECT r.*,
-               (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
-        FROM reviews r
-        WHERE r.product_id = ${productIdNum}
-          AND r.status = ${status}
-          AND r.rating = ${parseInt(rating)}
-      `;
+    // Build the query based on filters and sorting
+    let reviews;
+    
+    // Execute query based on filters and sort
+    if (verifiedOnly && rating) {
+      // Sort by helpful count first, then by sort parameter
+      if (sort === 'helpful') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY helpful_count DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'oldest') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.created_at ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_high') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.rating DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_low') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.rating ASC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        // Default: newest
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      }
+    } else if (verifiedOnly) {
+      if (sort === 'helpful') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+          ORDER BY helpful_count DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'oldest') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+          ORDER BY r.created_at ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_high') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+          ORDER BY r.rating DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_low') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+          ORDER BY r.rating ASC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.verified_purchase = true
+          ORDER BY r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      }
+    } else if (rating) {
+      if (sort === 'helpful') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY helpful_count DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'oldest') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.created_at ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_high') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.rating DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_low') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.rating ASC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+            AND r.rating = ${parseInt(rating)}
+          ORDER BY r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      }
+    } else {
+      if (sort === 'helpful') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+          ORDER BY helpful_count DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'oldest') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+          ORDER BY r.created_at ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_high') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+          ORDER BY r.rating DESC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else if (sort === 'rating_low') {
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+          ORDER BY r.rating ASC, r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        // Default: newest
+        reviews = await sql`
+          SELECT r.*,
+                 (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
+          FROM reviews r
+          WHERE r.product_id = ${productIdNum}
+            AND r.status = ${status}
+          ORDER BY r.created_at DESC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      }
     }
-
-    if (verifiedOnly) {
-      query = sql`
-        SELECT r.*,
-               (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
-        FROM reviews r
-        WHERE r.product_id = ${productIdNum}
-          AND r.status = ${status}
-          AND r.verified_purchase = true
-        ${rating ? sql`AND r.rating = ${parseInt(rating)}` : sql``}
-      `;
-    }
-
-    // Sort
-    let orderBy = 'r.created_at DESC';
-    switch (sort) {
-      case 'oldest':
-        orderBy = 'r.created_at ASC';
-        break;
-      case 'helpful':
-        orderBy = 'helpful_count DESC, r.created_at DESC';
-        break;
-      case 'rating_high':
-        orderBy = 'r.rating DESC, r.created_at DESC';
-        break;
-      case 'rating_low':
-        orderBy = 'r.rating ASC, r.created_at DESC';
-        break;
-      default:
-        orderBy = 'r.created_at DESC';
-    }
-
-    const reviews = await sql`
-      ${query}
-      ORDER BY ${sql.raw(orderBy)}
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
 
     // Get total count
     const totalQuery = sql`

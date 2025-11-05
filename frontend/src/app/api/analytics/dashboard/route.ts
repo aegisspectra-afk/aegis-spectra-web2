@@ -14,90 +14,148 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
 
-    // Sales metrics
-    const salesMetrics = await sql`
-      SELECT 
-        COUNT(*) as total_orders,
-        SUM(total_amount) as total_revenue,
-        AVG(total_amount) as average_order_value,
-        COUNT(DISTINCT customer_email) as unique_customers
-      FROM orders
-      WHERE status IN ('completed', 'paid', 'shipped')
-      ${startDate ? sql`AND created_at >= ${startDate}` : sql``}
-      ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
-    `;
-
-    // Product metrics
-    const productMetrics = await sql`
-      SELECT 
-        COUNT(*) as total_products,
-        COUNT(*) FILTER (WHERE stock > 0 OR stock IS NULL) as in_stock_products,
-        COUNT(*) FILTER (WHERE stock <= 0) as out_of_stock_products,
-        COUNT(*) FILTER (WHERE low_stock_alert = true) as low_stock_products,
-        SUM(stock) as total_stock_value
-      FROM products
-      WHERE active = true
-    `;
-
-    // Top products
-    const topProducts = await sql`
-      SELECT 
-        p.id,
-        p.sku,
-        p.name,
-        SUM(oi.quantity) as total_sold,
-        SUM(oi.price * oi.quantity) as total_revenue
-      FROM products p
-      LEFT JOIN order_items oi ON p.sku = oi.product_sku
-      LEFT JOIN orders o ON oi.order_id = o.id
-      WHERE o.status IN ('completed', 'paid', 'shipped')
-        ${startDate ? sql`AND o.created_at >= ${startDate}` : sql``}
-        ${endDate ? sql`AND o.created_at <= ${endDate}` : sql``}
-      GROUP BY p.id, p.sku, p.name
-      ORDER BY total_sold DESC
-      LIMIT 10
-    `;
-
-    // Sales by day
-    const salesByDay = await sql`
-      SELECT 
-        DATE(created_at) as date,
-        COUNT(*) as order_count,
-        SUM(total_amount) as revenue
-      FROM orders
-      WHERE status IN ('completed', 'paid', 'shipped')
+    // Sales metrics - with error handling
+    let salesMetrics: any[] = [];
+    try {
+      salesMetrics = await sql`
+        SELECT 
+          COUNT(*) as total_orders,
+          COALESCE(SUM(total_amount), 0) as total_revenue,
+          COALESCE(AVG(total_amount), 0) as average_order_value,
+          COUNT(DISTINCT customer_email) as unique_customers
+        FROM orders
+        WHERE status IN ('completed', 'paid', 'shipped')
         ${startDate ? sql`AND created_at >= ${startDate}` : sql``}
         ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
-      GROUP BY DATE(created_at)
-      ORDER BY date DESC
-      LIMIT 30
-    `;
+      `;
+    } catch (err: any) {
+      console.error('Error fetching sales metrics:', err);
+      // If table doesn't exist, return empty metrics
+      salesMetrics = [{
+        total_orders: 0,
+        total_revenue: 0,
+        average_order_value: 0,
+        unique_customers: 0
+      }];
+    }
 
-    // Customer metrics
-    const customerMetrics = await sql`
-      SELECT 
-        COUNT(DISTINCT customer_email) as total_customers,
-        COUNT(DISTINCT customer_email) FILTER (
-          WHERE created_at >= NOW() - INTERVAL '30 days'
-        ) as new_customers_30d,
-        COUNT(DISTINCT customer_email) FILTER (
-          WHERE created_at >= NOW() - INTERVAL '7 days'
-        ) as new_customers_7d
-      FROM orders
-    `;
+    // Product metrics - with error handling
+    let productMetrics: any[] = [];
+    try {
+      productMetrics = await sql`
+        SELECT 
+          COUNT(*) as total_products,
+          COUNT(*) FILTER (WHERE stock > 0 OR stock IS NULL) as in_stock_products,
+          COUNT(*) FILTER (WHERE stock <= 0) as out_of_stock_products,
+          COUNT(*) FILTER (WHERE low_stock_alert = true) as low_stock_products,
+          COALESCE(SUM(stock), 0) as total_stock_value
+        FROM products
+        WHERE active = true OR active IS NULL
+      `;
+    } catch (err: any) {
+      console.error('Error fetching product metrics:', err);
+      productMetrics = [{
+        total_products: 0,
+        in_stock_products: 0,
+        out_of_stock_products: 0,
+        low_stock_products: 0,
+        total_stock_value: 0
+      }];
+    }
 
-    // Support tickets
-    const supportMetrics = await sql`
-      SELECT 
-        COUNT(*) as total_tickets,
-        COUNT(*) FILTER (WHERE status = 'open') as open_tickets,
-        COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress_tickets,
-        COUNT(*) FILTER (WHERE status = 'resolved') as resolved_tickets,
-        AVG(EXTRACT(EPOCH FROM (COALESCE(resolved_at, NOW()) - created_at))/3600) as avg_resolution_hours
-      FROM support_tickets
-      ${startDate ? sql`WHERE created_at >= ${startDate}` : sql``}
-      ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
-    `;
+    // Top products - with error handling
+    let topProducts: any[] = [];
+    try {
+      topProducts = await sql`
+        SELECT 
+          p.id,
+          p.sku,
+          p.name,
+          COALESCE(SUM(oi.quantity), 0) as total_sold,
+          COALESCE(SUM(oi.price * oi.quantity), 0) as total_revenue
+        FROM products p
+        LEFT JOIN order_items oi ON p.sku = oi.product_sku
+        LEFT JOIN orders o ON oi.order_id = o.id
+        WHERE o.status IN ('completed', 'paid', 'shipped') OR o.status IS NULL
+          ${startDate ? sql`AND o.created_at >= ${startDate}` : sql``}
+          ${endDate ? sql`AND o.created_at <= ${endDate}` : sql``}
+        GROUP BY p.id, p.sku, p.name
+        ORDER BY total_sold DESC
+        LIMIT 10
+      `;
+    } catch (err: any) {
+      console.error('Error fetching top products:', err);
+      topProducts = [];
+    }
+
+    // Sales by day - with error handling
+    let salesByDay: any[] = [];
+    try {
+      salesByDay = await sql`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as order_count,
+          COALESCE(SUM(total_amount), 0) as revenue
+        FROM orders
+        WHERE status IN ('completed', 'paid', 'shipped')
+          ${startDate ? sql`AND created_at >= ${startDate}` : sql``}
+          ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+        LIMIT 30
+      `;
+    } catch (err: any) {
+      console.error('Error fetching sales by day:', err);
+      salesByDay = [];
+    }
+
+    // Customer metrics - with error handling
+    let customerMetrics: any[] = [];
+    try {
+      customerMetrics = await sql`
+        SELECT 
+          COUNT(DISTINCT customer_email) as total_customers,
+          COUNT(DISTINCT customer_email) FILTER (
+            WHERE created_at >= NOW() - INTERVAL '30 days'
+          ) as new_customers_30d,
+          COUNT(DISTINCT customer_email) FILTER (
+            WHERE created_at >= NOW() - INTERVAL '7 days'
+          ) as new_customers_7d
+        FROM orders
+      `;
+    } catch (err: any) {
+      console.error('Error fetching customer metrics:', err);
+      customerMetrics = [{
+        total_customers: 0,
+        new_customers_30d: 0,
+        new_customers_7d: 0
+      }];
+    }
+
+    // Support tickets - with error handling
+    let supportMetrics: any[] = [];
+    try {
+      supportMetrics = await sql`
+        SELECT 
+          COUNT(*) as total_tickets,
+          COUNT(*) FILTER (WHERE status = 'open') as open_tickets,
+          COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress_tickets,
+          COUNT(*) FILTER (WHERE status = 'resolved') as resolved_tickets,
+          COALESCE(AVG(EXTRACT(EPOCH FROM (COALESCE(resolved_at, NOW()) - created_at))/3600), 0) as avg_resolution_hours
+        FROM support_tickets
+        ${startDate ? sql`WHERE created_at >= ${startDate}` : sql``}
+        ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
+      `;
+    } catch (err: any) {
+      console.error('Error fetching support metrics:', err);
+      supportMetrics = [{
+        total_tickets: 0,
+        open_tickets: 0,
+        in_progress_tickets: 0,
+        resolved_tickets: 0,
+        avg_resolution_hours: 0
+      }];
+    }
 
     const dashboard = salesMetrics[0] || {};
     const products = productMetrics[0] || {};

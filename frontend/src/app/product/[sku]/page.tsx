@@ -5,10 +5,16 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Shield, Camera, HardDrive, Smartphone, Wifi, Check, ArrowRight, CreditCard } from "lucide-react";
 import { ProductJSONLD } from "@/components/JSONLDSchema";
+import { ReviewList } from "@/components/Reviews/ReviewList";
+import { ReviewForm } from "@/components/Reviews/ReviewForm";
+import { ProductRecommendations } from "@/components/Recommendations/ProductRecommendations";
 
 type Product = {
+  id?: number;
   sku: string; name: string; price_regular: number; price_sale?: number;
   currency: "ILS"; short_desc: string;
+  rating_avg?: number;
+  review_count?: number;
 };
 
 const fmt = (n:number)=> new Intl.NumberFormat("he-IL",{style:"currency",currency:"ILS"}).format(n);
@@ -67,6 +73,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   
   useEffect(() => {
     if (!sku) return;
@@ -84,12 +91,15 @@ export default function ProductPage() {
           const data = await res.json();
           if (data.ok && data.product) {
             setP({
+              id: data.product.id,
               sku: data.product.sku,
               name: data.product.name,
               price_regular: data.product.price_regular,
               price_sale: data.product.price_sale,
               currency: data.product.currency || "ILS",
-              short_desc: data.product.short_desc || data.product.description || ""
+              short_desc: data.product.short_desc || data.product.description || "",
+              rating_avg: data.product.rating_avg,
+              review_count: data.product.review_count
             });
             setLoading(false);
             return;
@@ -330,6 +340,60 @@ export default function ProductPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* ביקורות ודירוגים */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <span>ביקורות ודירוגים</span>
+              {p.rating_avg && (
+                <span className="text-lg text-gold">
+                  ({p.rating_avg.toFixed(1)} ⭐ • {p.review_count || 0} ביקורות)
+                </span>
+              )}
+            </h2>
+            {!showReviewForm && (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+              >
+                כתוב ביקורה
+              </button>
+            )}
+          </div>
+
+          {showReviewForm && (
+            <div className="mb-6">
+              <ReviewForm
+                productId={p.id}
+                sku={p.sku}
+                onSuccess={() => {
+                  setShowReviewForm(false);
+                  // Refresh reviews will happen automatically in ReviewList
+                }}
+                onCancel={() => setShowReviewForm(false)}
+              />
+            </div>
+          )}
+
+          <ReviewList
+            productId={p.id}
+            sku={p.sku}
+            limit={10}
+            showFilters={true}
+          />
+        </section>
+
+        {/* המלצות מוצרים */}
+        <section className="mb-10">
+          <ProductRecommendations
+            productId={p.id}
+            sku={p.sku}
+            type="related"
+            limit={4}
+            showTitle={true}
+          />
         </section>
 
         {/* CTA אחרון */}

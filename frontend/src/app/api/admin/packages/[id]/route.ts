@@ -57,10 +57,10 @@ export async function PUT(
     // TODO: Save to database
     // TODO: Increment version
 
-    const updatedPackage: Package = {
+    const updatedPackage: Package & { version?: number; updatedAt?: string } = {
       ...packageData,
       id,
-      version: (existingPackage.version || 1) + 1,
+      version: ((existingPackage as any).version || 1) + 1,
       updatedAt: new Date().toISOString(),
     };
 

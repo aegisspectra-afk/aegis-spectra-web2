@@ -409,8 +409,15 @@ export default function Home() {
         <ScrollReveal>
           <SectionTitle title="חבילות מותאמות" subtitle="Apartment / House / Business / Enterprise" />
         </ScrollReveal>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-          {packages.map((pkg, i) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+          {packages
+            .filter((pkg) => 
+              pkg.id === 'apartment-basic' || 
+              pkg.id === 'apartment-pro' || 
+              pkg.id === 'house-pro' || 
+              pkg.id === 'business-starter'
+            )
+            .map((pkg, i) => {
             const gradient = pkg.recommended || pkg.popular
               ? "from-zinc-700/50 to-zinc-800/50"
               : "from-zinc-800/50 to-zinc-900/50";
@@ -490,7 +497,7 @@ export default function Home() {
             );
           })}
         </div>
-        <div className="mt-12 text-center">
+        <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <motion.a
             href="/packages/compare"
             className="inline-block px-6 py-3 rounded-xl border-2 border-zinc-600 text-white font-semibold hover:bg-zinc-800 transition-colors"
@@ -498,6 +505,14 @@ export default function Home() {
             whileTap={{ scale: 0.95 }}
           >
             השווה בין חבילות
+          </motion.a>
+          <motion.a
+            href="/packages"
+            className="inline-block px-6 py-3 rounded-xl bg-gold text-black font-semibold hover:bg-gold/90 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            צפה בכל החבילות
           </motion.a>
         </div>
       </section>

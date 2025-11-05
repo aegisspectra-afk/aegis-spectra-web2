@@ -9,6 +9,7 @@ import { Package } from '@/types/packages';
 import { calculatePackagePrice, formatPrice, PackagePriceOptions } from '@/lib/packages/calculatePrice';
 import { Calculator, TrendingUp, Info, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/cart-context';
+import { CameraSelector } from './CameraSelector';
 
 interface PackageCalculatorProps {
   packageData: Package;
@@ -98,27 +99,12 @@ export function PackageCalculator({ packageData, onPriceChange }: PackageCalcula
               transition={{ delay: 0.1, duration: 0.5 }}
               className="rounded-xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6"
             >
-              <label className="block text-white font-bold mb-4">
-                מספר מצלמות ({packageData.specifications.cameras.min}-{packageData.specifications.cameras.max})
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min={packageData.specifications.cameras.min}
-                  max={packageData.specifications.cameras.max}
-                  value={options.cameras || packageData.specifications.cameras.default}
-                  onChange={(e) => handleCameraChange(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-gold"
-                />
-                <input
-                  type="number"
-                  min={packageData.specifications.cameras.min}
-                  max={packageData.specifications.cameras.max}
-                  value={options.cameras || packageData.specifications.cameras.default}
-                  onChange={(e) => handleCameraChange(parseInt(e.target.value) || packageData.specifications.cameras.default)}
-                  className="w-20 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-center font-bold"
-                />
-              </div>
+              <CameraSelector
+                min={packageData.specifications.cameras.min}
+                max={packageData.specifications.cameras.max}
+                value={options.cameras || packageData.specifications.cameras.default}
+                onChange={handleCameraChange}
+              />
             </motion.div>
 
             {/* AI Detection */}

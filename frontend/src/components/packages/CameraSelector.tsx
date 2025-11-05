@@ -38,11 +38,9 @@ export function CameraSelector({ min, max, value, onChange, disabled = false }: 
   };
 
   const getLabel = (val: number) => {
-    if (val === min) return 'כיסוי בסיסי';
     if (val <= min + 1) return 'כיסוי בסיסי';
     if (val === 3 || val === min + 2) return 'כיסוי מלא';
     if (val >= 4) return 'מערכת מתקדמת';
-    if (val >= max - 1) return 'מערכת מתקדמת';
     return 'כיסוי אופטימלי';
   };
 

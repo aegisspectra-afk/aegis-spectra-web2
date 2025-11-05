@@ -25,12 +25,20 @@ export async function GET(request: NextRequest) {
     switch (type) {
       case 'similar':
         // Similar products based on category, tags, specs
-        recommendations = await getSimilarProducts(productId || sku, limit);
+        if (productId) {
+          recommendations = await getSimilarProducts(productId, limit);
+        } else if (sku) {
+          recommendations = await getSimilarProducts(sku, limit);
+        }
         break;
 
       case 'related':
         // Related products (bought together)
-        recommendations = await getRelatedProducts(productId || sku, limit);
+        if (productId) {
+          recommendations = await getRelatedProducts(productId, limit);
+        } else if (sku) {
+          recommendations = await getRelatedProducts(sku, limit);
+        }
         break;
 
       case 'popular':
@@ -50,7 +58,13 @@ export async function GET(request: NextRequest) {
         break;
 
       default:
-        recommendations = await getSimilarProducts(productId || sku, limit);
+        if (productId) {
+          recommendations = await getSimilarProducts(productId, limit);
+        } else if (sku) {
+          recommendations = await getSimilarProducts(sku, limit);
+        } else {
+          recommendations = await getPopularProducts(limit);
+        }
     }
 
     return NextResponse.json({

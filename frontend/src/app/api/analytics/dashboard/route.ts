@@ -1,24 +1,14 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireManager } from '@/lib/auth-server';
 
 const sql = neon();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
-
-function checkAuth(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  const providedPassword = authHeader?.replace('Bearer ', '');
-  return providedPassword === ADMIN_PASSWORD;
-}
 
 // GET - Get analytics dashboard data
 export async function GET(request: NextRequest) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json(
-        { ok: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    // Require manager/admin role
+    await requireManager(request);
 
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('start_date');
@@ -109,13 +99,36 @@ export async function GET(request: NextRequest) {
       ${endDate ? sql`AND created_at <= ${endDate}` : sql``}
     `;
 
+    const dashboard = salesMetrics[0] || {};
+    const products = productMetrics[0] || {};
+    const customers = customerMetrics[0] || {};
+    const support = supportMetrics[0] || {};
+
     return NextResponse.json({
       ok: true,
+      stats: {
+        totalSales: parseInt(dashboard.total_orders || '0'),
+        totalRevenue: parseFloat(dashboard.total_revenue || '0'),
+        totalOrders: parseInt(dashboard.total_orders || '0'),
+        totalCustomers: parseInt(customers.total_customers || '0'),
+        activeTickets: parseInt(support.open_tickets || '0'),
+        lowStockAlerts: parseInt(products.low_stock_products || '0'),
+        topProducts: (topProducts || []).map((p: any) => ({
+          name: p.name,
+          sales: parseInt(p.total_sold || '0'),
+          revenue: parseFloat(p.total_revenue || '0'),
+        })),
+        salesByDay: (salesByDay || []).map((d: any) => ({
+          date: d.date,
+          sales: parseInt(d.order_count || '0'),
+          revenue: parseFloat(d.revenue || '0'),
+        })),
+      },
       dashboard: {
-        sales: salesMetrics[0] || {},
-        products: productMetrics[0] || {},
-        customers: customerMetrics[0] || {},
-        support: supportMetrics[0] || {},
+        sales: dashboard,
+        products: products,
+        customers: customers,
+        support: support,
         top_products: topProducts,
         sales_by_day: salesByDay
       }

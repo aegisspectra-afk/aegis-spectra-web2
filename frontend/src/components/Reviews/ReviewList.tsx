@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ReviewStars } from "./ReviewStars";
-import { ThumbsUp, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { ThumbsUp, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 
 interface Review {
   id: number;
@@ -33,11 +34,7 @@ export function ReviewList({ productId, sku, limit = 10, showFilters = true }: R
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    fetchReviews();
-  }, [productId, sku, ratingFilter, sortBy, verifiedOnly]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     if (!productId && !sku) {
       setError("נדרש product_id או sku");
       setLoading(false);
@@ -70,7 +67,12 @@ export function ReviewList({ productId, sku, limit = 10, showFilters = true }: R
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, sku, ratingFilter, sortBy, verifiedOnly, limit]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
 
   const handleHelpful = async (reviewId: number) => {
     if (helpfulReviews.has(reviewId)) return;
@@ -204,12 +206,15 @@ export function ReviewList({ productId, sku, limit = 10, showFilters = true }: R
             {review.images && review.images.length > 0 && (
               <div className="flex gap-2 mb-3 flex-wrap">
                 {review.images.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`תמונה ${idx + 1}`}
-                    className="w-20 h-20 object-cover rounded border border-gray-600 cursor-pointer hover:opacity-80 transition-opacity"
-                  />
+                  <div key={idx} className="relative w-20 h-20 rounded border border-gray-600 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                    <Image
+                      src={img}
+                      alt={`תמונה ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </div>
                 ))}
               </div>
             )}

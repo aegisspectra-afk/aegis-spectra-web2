@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ProductCard } from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 interface Product {
   id: number;
@@ -40,11 +41,7 @@ export function ProductRecommendations({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchRecommendations();
-  }, [productId, sku, type, limit]);
-
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -69,7 +66,12 @@ export function ProductRecommendations({
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, sku, type, limit]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
+
 
   const getTitle = () => {
     if (title) return title;
@@ -133,14 +135,12 @@ export function ProductRecommendations({
         {products.map((product) => (
           <ProductCard
             key={product.id}
-            product={{
-              sku: product.sku,
-              name: product.name,
-              price_regular: product.price_regular,
-              price_sale: product.price_sale,
-              currency: product.currency || "ILS",
-              short_desc: product.short_desc || product.description || "",
-            }}
+            sku={product.sku}
+            name={product.name}
+            desc={product.short_desc || product.description || ""}
+            priceRegular={product.price_regular}
+            priceSale={product.price_sale}
+            ctaHref={`/product/${product.sku}`}
           />
         ))}
       </div>

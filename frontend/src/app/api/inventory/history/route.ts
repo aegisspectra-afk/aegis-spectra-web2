@@ -1,24 +1,13 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
 
 const sql = neon();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
-
-function checkAuth(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  const providedPassword = authHeader?.replace('Bearer ', '');
-  return providedPassword === ADMIN_PASSWORD;
-}
 
 // GET - Get stock history
 export async function GET(request: NextRequest) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json(
-        { ok: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    await requireAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get('product_id');

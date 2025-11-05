@@ -18,6 +18,8 @@ const publicRoutes = [
   '/quote',
   '/checkout', // Allow checkout without auth (guest checkout)
   '/checkout/success',
+  '/support', // Support page is public
+  '/admin/login', // Admin login page
 ];
 
 // Protected routes that require authentication
@@ -49,10 +51,14 @@ export function middleware(request: NextRequest) {
     // Get token from Authorization header or cookie
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '') || 
-                  request.cookies.get('user_token')?.value;
+                  request.cookies.get('user_token')?.value ||
+                  request.cookies.get('admin_token')?.value;
 
     if (!token) {
-      // Redirect to login with return URL
+      // Redirect to appropriate login page
+      if (pathname.startsWith('/admin')) {
+        return NextResponse.redirect(new URL('/admin/login', request.url));
+      }
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
@@ -62,8 +68,11 @@ export function middleware(request: NextRequest) {
     const decoded = verifyToken(token);
     if (!decoded || !decoded.sessionId) {
       // Invalid token - clear cookies and redirect to login
-      const response = NextResponse.redirect(new URL('/login', request.url));
+      const response = pathname.startsWith('/admin') 
+        ? NextResponse.redirect(new URL('/admin/login', request.url))
+        : NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('user_token');
+      response.cookies.delete('admin_token');
       return response;
     }
 
@@ -72,8 +81,10 @@ export function middleware(request: NextRequest) {
 
     // Check role-based access for admin routes
     if (pathname.startsWith('/admin')) {
-      if (decoded.role !== 'admin' && decoded.role !== 'super_admin') {
-        return NextResponse.redirect(new URL('/user', request.url));
+      const allowedRoles = ['super_admin', 'admin', 'manager'];
+      if (!allowedRoles.includes(decoded.role)) {
+        // Redirect to user dashboard or login
+        return NextResponse.redirect(new URL('/account', request.url));
       }
     }
 

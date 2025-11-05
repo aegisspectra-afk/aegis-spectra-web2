@@ -1,14 +1,8 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireManager } from '@/lib/auth-server';
 
 const sql = neon();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
-
-function checkAuth(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  const providedPassword = authHeader?.replace('Bearer ', '');
-  return providedPassword === ADMIN_PASSWORD;
-}
 
 // PATCH - Update order status
 export async function PATCH(
@@ -16,6 +10,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireManager(request);
+    
     const { id } = await params;
     const orderId = parseInt(id);
     const body = await request.json();

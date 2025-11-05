@@ -322,7 +322,7 @@ export function PackageCalculator({ packageData, onPriceChange }: PackageCalcula
                 )}
                 <div className="border-t border-zinc-700 pt-3 mt-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-white font-bold text-lg">סה"כ</span>
+                    <span className="text-white font-bold text-lg">סה&quot;כ</span>
                     <span className="text-gold font-extrabold text-2xl">
                       {formatPrice(breakdown.total)}
                     </span>

@@ -188,11 +188,13 @@
 
 ## 🚀 **מה לעשות הלאה?**
 
-### 1. **הגדר reCAPTCHA:**
-   - קבל מפתחות מ: https://www.google.com/recaptcha/admin
-   - הוסף ב-Netlify Environment Variables:
-     - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` (public)
-     - `RECAPTCHA_SECRET_KEY` (private, server-side only)
+### 1. **הגדר reCAPTCHA ב-Netlify (חובה!):**
+   - ✅ מפתחות כבר הוגדרו ב-`ENV_EXAMPLE`
+   - 📝 **הוסף ב-Netlify Environment Variables:**
+     - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` = `6LezXQMsAAAAAJa14nF2G8znabIQ0SEudyFiwZ0i`
+     - `RECAPTCHA_SECRET_KEY` = `6LezXQMsAAAAAABUGKjkJLPIDIm5xHTTfWFdzX35`
+   - 🔄 **Trigger New Deploy** אחרי הוספת ה-Variables!
+   - 📖 ראה `NETLIFY_ENV_SETUP.md` להוראות מפורטות
 
 ### 2. **בדוק שהכל עובד:**
    - ✅ Exit Intent Popup - מופיע כשיוצאים מהדף

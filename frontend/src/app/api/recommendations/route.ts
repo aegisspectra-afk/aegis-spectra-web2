@@ -1,6 +1,8 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 const sql = neon();
 
 // GET - Get product recommendations

@@ -2,6 +2,8 @@ import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireManager } from '@/lib/auth-server';
 
+export const dynamic = 'force-dynamic';
+
 const sql = neon();
 
 // GET - Get analytics dashboard data

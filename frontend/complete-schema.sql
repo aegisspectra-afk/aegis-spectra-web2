@@ -6,11 +6,132 @@
 -- ============================================
 
 -- ============================================
+-- 0. BASE TABLES (Must be created first)
+-- ============================================
+
+-- Create leads table
+CREATE TABLE IF NOT EXISTS leads (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  city VARCHAR(100),
+  message TEXT,
+  product_sku VARCHAR(50),
+  created_at TIMESTAMP DEFAULT NOW(),
+  status VARCHAR(50) DEFAULT 'new',
+  notes TEXT,
+  score INTEGER DEFAULT 0,
+  tags JSONB,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create products table (base schema)
+CREATE TABLE IF NOT EXISTS products (
+  id SERIAL PRIMARY KEY,
+  sku VARCHAR(100) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  price_regular DECIMAL(10, 2) NOT NULL,
+  price_sale DECIMAL(10, 2),
+  currency VARCHAR(10) DEFAULT 'ILS',
+  category VARCHAR(100),
+  tags JSONB,
+  images JSONB,
+  specs JSONB,
+  brand VARCHAR(100),
+  stock INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  phone VARCHAR(20) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  api_key_hash VARCHAR(255) UNIQUE NOT NULL,
+  email_verified BOOLEAN DEFAULT false,
+  email_verification_token VARCHAR(255),
+  role VARCHAR(50) DEFAULT 'customer',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  last_login TIMESTAMP
+);
+
+-- Create API keys table
+CREATE TABLE IF NOT EXISTS api_keys (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  api_key_hash VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255),
+  last_used TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT true
+);
+
+-- Create orders table
+CREATE TABLE IF NOT EXISTS orders (
+  id SERIAL PRIMARY KEY,
+  order_id VARCHAR(255) UNIQUE NOT NULL,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_email VARCHAR(255),
+  customer_phone VARCHAR(50) NOT NULL,
+  customer_address TEXT,
+  customer_city VARCHAR(100),
+  customer_postal_code VARCHAR(20),
+  items JSONB NOT NULL,
+  subtotal INTEGER NOT NULL,
+  shipping INTEGER DEFAULT 0,
+  discount INTEGER DEFAULT 0,
+  total INTEGER NOT NULL,
+  shipping_method VARCHAR(50),
+  payment_method VARCHAR(50) DEFAULT 'pending',
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  order_status VARCHAR(50) DEFAULT 'pending',
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create order_items table
+CREATE TABLE IF NOT EXISTS order_items (
+  id SERIAL PRIMARY KEY,
+  order_id VARCHAR(255) NOT NULL,
+  sku VARCHAR(50) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  price INTEGER NOT NULL,
+  quantity INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create base indexes
+CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+CREATE INDEX IF NOT EXISTS idx_leads_product_sku ON leads(product_sku);
+CREATE INDEX IF NOT EXISTS idx_leads_score ON leads(score DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_tags ON leads USING GIN(tags);
+CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+CREATE INDEX IF NOT EXISTS idx_orders_order_id ON orders(order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_order_status ON orders(order_status);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_sku ON order_items(sku);
+
+-- ============================================
 -- 1. INVENTORY MANAGEMENT SYSTEM
 -- ============================================
 
 -- Add inventory management fields to products table
-ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock INTEGER DEFAULT 10;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS reserved_stock INTEGER DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS low_stock_alert BOOLEAN DEFAULT false;

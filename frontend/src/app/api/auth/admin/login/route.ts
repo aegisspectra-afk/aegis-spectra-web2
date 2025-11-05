@@ -16,12 +16,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug: Check if user exists
+    const [userCheck] = await sql`
+      SELECT id, email, role, password_hash IS NOT NULL as has_password
+      FROM users
+      WHERE LOWER(email) = LOWER(${email})
+      LIMIT 1
+    `.catch(() => []);
+
+    if (!userCheck) {
+      return NextResponse.json(
+        { ok: false, error: 'אימייל או סיסמה שגויים - משתמש לא נמצא' },
+        { status: 401 }
+      );
+    }
+
+    if (!userCheck.has_password) {
+      return NextResponse.json(
+        { ok: false, error: 'אימייל או סיסמה שגויים - אין סיסמה במערכת' },
+        { status: 401 }
+      );
+    }
+
     // Authenticate user
     const authResult = await authenticateUser(email, password);
 
     if (!authResult.ok || !authResult.user) {
+      console.error('Admin login failed:', {
+        email,
+        userExists: !!userCheck,
+        error: authResult.error
+      });
       return NextResponse.json(
-        { ok: false, error: authResult.error || 'שגיאה בהתחברות' },
+        { ok: false, error: authResult.error || 'שגיאה בהתחברות - הסיסמה שגויה' },
         { status: 401 }
       );
     }

@@ -32,16 +32,22 @@ export async function authenticateUser(email: string, password: string): Promise
     const [user] = await sql`
       SELECT id, name, email, phone, password_hash, role, email_verified, created_at, last_login
       FROM users
-      WHERE email = ${email.toLowerCase().trim()}
+      WHERE LOWER(email) = LOWER(${email.trim()})
       LIMIT 1
     `.catch(() => []);
 
     if (!user || !user.password_hash) {
+      console.error('User not found or no password:', { email: email.trim(), userExists: !!user });
       return { ok: false, error: 'אימייל או סיסמה שגויים' };
     }
 
     const isValid = await verifyPassword(password, user.password_hash);
     if (!isValid) {
+      console.error('Password verification failed:', { 
+        email: email.trim(), 
+        userId: user.id,
+        hashPreview: user.password_hash.substring(0, 30)
+      });
       return { ok: false, error: 'אימייל או סיסמה שגויים' };
     }
 

@@ -134,10 +134,8 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <main className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">ניהול משתמשים</h1>
@@ -159,12 +157,6 @@ export default function AdminUsersPage() {
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
               רענן
-            </button>
-            <button
-              onClick={() => router.push("/admin")}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              חזרה לדשבורד
             </button>
           </div>
         </div>
@@ -255,7 +247,7 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
 

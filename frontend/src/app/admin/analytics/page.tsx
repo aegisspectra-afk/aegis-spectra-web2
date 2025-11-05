@@ -4,8 +4,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { TrendingUp, Eye, ShoppingCart, FileText, Users } from 'lucide-react';
 
@@ -30,17 +28,13 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-20">
-              <p className="text-zinc-400">טוען נתונים...</p>
-            </div>
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-20">
+            <p className="text-zinc-400">טוען נתונים...</p>
           </div>
-        </main>
-        <Footer />
-      </>
+        </div>
+      </div>
     );
   }
 
@@ -53,11 +47,9 @@ export default function AdminAnalyticsPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-8">דשבורד אנליטיקה</h1>
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">דשבורד אנליטיקה</h1>
 
           {/* Funnel */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -136,9 +128,8 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </div>
   );
 }
 

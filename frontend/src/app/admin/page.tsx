@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, AlertTriangle, Users, DollarSign, LogOut, User } from "lucide-react";
 import Link from "next/link";
@@ -33,11 +33,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     const token = localStorage.getItem("admin_token") || 
                   document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
 
@@ -66,7 +62,11 @@ export default function AdminDashboard() {
       console.error("Auth check error:", err);
       router.push("/admin/login");
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const handleLogout = () => {
     localStorage.removeItem("admin_token");
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                   <DollarSign className="text-green-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.totalRevenue.toLocaleString("he-IL")} ₪</span>
                 </div>
-                <p className="text-gray-400 text-sm">סה"כ הכנסות</p>
+                <p className="text-gray-400 text-sm">סה&quot;כ הכנסות</p>
               </div>
 
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                   <ShoppingCart className="text-blue-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.totalOrders}</span>
                 </div>
-                <p className="text-gray-400 text-sm">סה"כ הזמנות</p>
+                <p className="text-gray-400 text-sm">סה&quot;כ הזמנות</p>
               </div>
 
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">

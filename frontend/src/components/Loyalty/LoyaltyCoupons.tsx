@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tag, CheckCircle, XCircle } from "lucide-react";
 
 interface LoyaltyCouponsProps {
@@ -24,13 +24,7 @@ export function LoyaltyCoupons({ userEmail, onCouponSelected, selectedCoupon }: 
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (userEmail) {
-      fetchCoupons();
-    }
-  }, [userEmail]);
-
-  const fetchCoupons = async () => {
+  const fetchCoupons = useCallback(async () => {
     if (!userEmail) return;
 
     setLoading(true);
@@ -49,7 +43,13 @@ export function LoyaltyCoupons({ userEmail, onCouponSelected, selectedCoupon }: 
     } finally {
       setLoading(false);
     }
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchCoupons();
+    }
+  }, [userEmail, fetchCoupons]);
 
   const handleSelectCoupon = (coupon: Coupon) => {
     if (onCouponSelected) {

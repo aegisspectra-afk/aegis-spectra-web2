@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Gift, Star, Trophy } from "lucide-react";
 
 interface LoyaltyPointsProps {
@@ -20,13 +20,7 @@ export function LoyaltyPoints({ userEmail, onPointsUsed }: LoyaltyPointsProps) {
   const [loading, setLoading] = useState(false);
   const [pointsToUse, setPointsToUse] = useState(0);
 
-  useEffect(() => {
-    if (userEmail) {
-      fetchLoyaltyPoints();
-    }
-  }, [userEmail]);
-
-  const fetchLoyaltyPoints = async () => {
+  const fetchLoyaltyPoints = useCallback(async () => {
     if (!userEmail) return;
 
     setLoading(true);
@@ -42,7 +36,13 @@ export function LoyaltyPoints({ userEmail, onPointsUsed }: LoyaltyPointsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchLoyaltyPoints();
+    }
+  }, [userEmail, fetchLoyaltyPoints]);
 
   const handleUsePoints = () => {
     if (!loyaltyData || pointsToUse <= 0 || pointsToUse > loyaltyData.points) {

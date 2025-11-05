@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ChevronDown, ChevronUp, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface FAQ {
@@ -26,11 +26,7 @@ export function FAQList({ category, searchQuery, limit = 20 }: FAQListProps) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [helpfulVotes, setHelpfulVotes] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    fetchFAQs();
-  }, [category, searchQuery]);
-
-  const fetchFAQs = async () => {
+  const fetchFAQs = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -54,7 +50,11 @@ export function FAQList({ category, searchQuery, limit = 20 }: FAQListProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, searchQuery, limit]);
+
+  useEffect(() => {
+    fetchFAQs();
+  }, [fetchFAQs]);
 
   const handleHelpful = async (faqId: number, isHelpful: boolean) => {
     if (helpfulVotes.has(faqId)) return;
@@ -67,7 +67,9 @@ export function FAQList({ category, searchQuery, limit = 20 }: FAQListProps) {
       });
 
       if (res.ok) {
-        setHelpfulVotes(new Set([...helpfulVotes, faqId]));
+        const newVotes = new Set(helpfulVotes);
+        newVotes.add(faqId);
+        setHelpfulVotes(newVotes);
         // Update helpful count
         setFaqs(faqs.map(f => 
           f.id === faqId ? { ...f, helpful_count: f.helpful_count + (isHelpful ? 1 : 0) } : f

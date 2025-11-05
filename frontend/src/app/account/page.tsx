@@ -168,11 +168,11 @@ export default function AccountPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div>
-                        <p className="text-sm opacity-80">סה"כ נצבר</p>
+                        <p className="text-sm opacity-80">סה&quot;כ נצבר</p>
                         <p className="text-lg font-semibold">{loyaltyData.total_earned}</p>
                       </div>
                       <div>
-                        <p className="text-sm opacity-80">סה"כ הוצא</p>
+                        <p className="text-sm opacity-80">סה&quot;כ הוצא</p>
                         <p className="text-lg font-semibold">{loyaltyData.total_spent}</p>
                       </div>
                     </div>

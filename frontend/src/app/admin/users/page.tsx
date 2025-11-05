@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Users, Plus, Edit, Trash2, Shield, UserCheck, Mail, Phone } from "lucide-react";
 import { useToastContext } from "@/components/ToastProvider";
@@ -25,11 +25,7 @@ export default function AdminUsersPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    checkAuthAndFetchUsers();
-  }, []);
-
-  const checkAuthAndFetchUsers = async () => {
+  const checkAuthAndFetchUsers = useCallback(async () => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
       router.push("/admin/login");
@@ -37,7 +33,11 @@ export default function AdminUsersPage() {
     }
 
     fetchUsers(token);
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkAuthAndFetchUsers();
+  }, [checkAuthAndFetchUsers]);
 
   const fetchUsers = async (token: string) => {
     setLoading(true);

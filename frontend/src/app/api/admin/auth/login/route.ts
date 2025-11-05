@@ -7,12 +7,26 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
-    // TODO: Implement proper authentication
+    // TODO: Implement proper authentication with database
     // For now, use environment variables or hardcoded admin credentials
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@aegis-spectra.com';
-    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'aegisspectra@gmail.com';
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 's197678a';
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    // Support multiple admin accounts
+    const adminAccounts = [
+      { email: 'aegisspectra@gmail.com', password: 's197678a' },
+      { email: 'admin@aegis-spectra.com', password: 'admin123' },
+      ...(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD ? [{ 
+        email: process.env.ADMIN_EMAIL, 
+        password: process.env.ADMIN_PASSWORD 
+      }] : [])
+    ];
+
+    const isValid = adminAccounts.some(account => 
+      account.email === email && account.password === password
+    ) || (email === ADMIN_EMAIL && password === ADMIN_PASSWORD);
+
+    if (isValid) {
       // Generate token (in production, use JWT)
       const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
       

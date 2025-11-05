@@ -39,8 +39,42 @@ export default function QuotePage() {
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  // Load package from URL parameter or draft
+  // Load package from URL parameter, cart, or draft
   useEffect(() => {
+    // Check if coming from cart
+    const source = searchParams.get("source");
+    if (source === "cart" && typeof window !== "undefined") {
+      const cartItemsStr = sessionStorage.getItem("cartForQuote");
+      if (cartItemsStr) {
+        try {
+          const cartItems = JSON.parse(cartItemsStr);
+          if (cartItems.length > 0) {
+            // Load first package from cart
+            const firstItem = cartItems[0];
+            if (firstItem.packageSlug) {
+              const pkg = getPackageBySlug(firstItem.packageSlug);
+              if (pkg) {
+                setSelectedPackage(pkg);
+                setSelectedPackageOptions(firstItem.packageOptions || {});
+                setFormData(prev => ({
+                  ...prev,
+                  packageSlug: firstItem.packageSlug,
+                  serviceType: pkg.category === "Residential" ? "physical" : pkg.category === "Commercial" ? "physical" : "combined",
+                }));
+                setStep(2);
+                analytics.quoteStart();
+                // Clear cart from sessionStorage after loading
+                sessionStorage.removeItem("cartForQuote");
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error loading cart items:", err);
+        }
+      }
+    }
+
     // Try to load draft first
     const draft = loadDraftFromLocalStorage();
     if (draft && draft.packageSlug) {

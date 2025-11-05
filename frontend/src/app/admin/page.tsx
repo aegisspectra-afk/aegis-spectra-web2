@@ -110,10 +110,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <main className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_600px_at_80%_-10%,rgba(212,175,55,0.12),transparent),linear-gradient(#0B0B0D,#141418)]" />
-      
-      <div className="max-w-7xl mx-auto px-4 py-10">
+    <div className="p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -129,12 +127,6 @@ export default function AdminDashboard() {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/admin/users"
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-            >
-              ניהול משתמשים
-            </Link>
             <button
               onClick={() => {
                 const token = localStorage.getItem("admin_token");
@@ -206,30 +198,30 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <Link
-                href="/admin/inventory"
+                href="/admin/packages"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
                 <Package className="text-cyan-400 mb-3" size={32} />
-                <h3 className="font-semibold text-white mb-1">ניהול מלאי</h3>
-                <p className="text-gray-400 text-sm">עדכן מלאי, התראות, היסטוריה</p>
+                <h3 className="font-semibold text-white mb-1">ניהול חבילות</h3>
+                <p className="text-gray-400 text-sm">ערוך, עדכן, נהל חבילות</p>
               </Link>
 
               <Link
-                href="/admin/orders"
+                href="/admin/products"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
                 <ShoppingCart className="text-cyan-400 mb-3" size={32} />
-                <h3 className="font-semibold text-white mb-1">ניהול הזמנות</h3>
-                <p className="text-gray-400 text-sm">עקוב אחר הזמנות, עדכן סטטוס</p>
+                <h3 className="font-semibold text-white mb-1">ניהול מוצרים</h3>
+                <p className="text-gray-400 text-sm">עקוב אחר מוצרים, עדכן מלאי</p>
               </Link>
 
               <Link
-                href="/admin/support"
+                href="/admin/users"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
                 <MessageSquare className="text-cyan-400 mb-3" size={32} />
-                <h3 className="font-semibold text-white mb-1">ניהול תמיכה</h3>
-                <p className="text-gray-400 text-sm">{stats.activeTickets} כרטיסים פעילים</p>
+                <h3 className="font-semibold text-white mb-1">ניהול משתמשים</h3>
+                <p className="text-gray-400 text-sm">הרשאות, תפקידים, ניהול</p>
               </Link>
 
               <Link
@@ -262,6 +254,6 @@ export default function AdminDashboard() {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }

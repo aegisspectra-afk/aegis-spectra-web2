@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
         localStorage.setItem('admin_email', email);
         
         // Redirect to admin dashboard
-        router.push('/admin/packages');
+        router.push('/admin');
       } else {
         setError(data.error || 'שגיאה בהתחברות');
       }

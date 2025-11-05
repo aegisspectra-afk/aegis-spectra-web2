@@ -7,8 +7,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { packages } from '@/data/packages';
 import { Package } from '@/types/packages';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { Edit, Trash2, Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
@@ -46,25 +44,17 @@ export default function AdminPackagesPage() {
   // Show loading if not authenticated
   if (!isAuthenticated) {
     return (
-      <>
-        <Navbar />
-        <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-20">
-              <p className="text-zinc-400">בודק הרשאות...</p>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-zinc-400">בודק הרשאות...</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -206,9 +196,7 @@ export default function AdminPackagesPage() {
             </div>
           )}
         </div>
-      </main>
-      <Footer />
-    </>
+    </div>
   );
 }
 

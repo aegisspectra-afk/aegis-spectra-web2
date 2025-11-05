@@ -79,22 +79,73 @@ export async function PATCH(
       active,
     } = body;
 
-    // Build update query - use simple approach with all fields
+    // Build update query - use conditional updates
+    // First get current product
+    const [currentProduct] = await sql`
+      SELECT * FROM products WHERE id = ${productId} LIMIT 1
+    `.catch(() => []);
+
+    if (!currentProduct) {
+      return NextResponse.json(
+        { ok: false, error: 'Product not found' },
+        { status: 404 }
+      );
+    }
+
+    // Update only provided fields
+    const updateFields: any = {
+      updated_at: new Date(),
+    };
+
+    if (name !== undefined) updateFields.name = name;
+    else updateFields.name = currentProduct.name;
+    
+    if (description !== undefined) updateFields.description = description;
+    else updateFields.description = currentProduct.description;
+    
+    if (price !== undefined) updateFields.price = price;
+    else updateFields.price = currentProduct.price;
+    
+    if (price_sale !== undefined) updateFields.price_sale = price_sale;
+    else updateFields.price_sale = currentProduct.price_sale;
+    
+    if (category !== undefined) updateFields.category = category;
+    else updateFields.category = currentProduct.category;
+    
+    if (tags !== undefined) updateFields.tags = JSON.stringify(tags);
+    else updateFields.tags = currentProduct.tags;
+    
+    if (images !== undefined) updateFields.images = JSON.stringify(images);
+    else updateFields.images = currentProduct.images;
+    
+    if (specs !== undefined) updateFields.specs = JSON.stringify(specs);
+    else updateFields.specs = currentProduct.specs;
+    
+    if (brand !== undefined) updateFields.brand = brand;
+    else updateFields.brand = currentProduct.brand;
+    
+    if (stock !== undefined) updateFields.stock = stock;
+    else updateFields.stock = currentProduct.stock;
+    
+    if (active !== undefined) updateFields.active = active;
+    else updateFields.active = currentProduct.active;
+
+    // Update product
     const [updatedProduct] = await sql`
       UPDATE products
       SET 
-        name = ${name !== undefined ? name : sql`name`},
-        description = ${description !== undefined ? description : sql`description`},
-        price = ${price !== undefined ? price : sql`price`},
-        price_sale = ${price_sale !== undefined ? price_sale : sql`price_sale`},
-        category = ${category !== undefined ? category : sql`category`},
-        tags = ${tags !== undefined ? JSON.stringify(tags) : sql`tags`},
-        images = ${images !== undefined ? JSON.stringify(images) : sql`images`},
-        specs = ${specs !== undefined ? JSON.stringify(specs) : sql`specs`},
-        brand = ${brand !== undefined ? brand : sql`brand`},
-        stock = ${stock !== undefined ? stock : sql`stock`},
-        active = ${active !== undefined ? active : sql`active`},
-        updated_at = NOW()
+        name = ${updateFields.name},
+        description = ${updateFields.description},
+        price = ${updateFields.price},
+        price_sale = ${updateFields.price_sale},
+        category = ${updateFields.category},
+        tags = ${updateFields.tags},
+        images = ${updateFields.images},
+        specs = ${updateFields.specs},
+        brand = ${updateFields.brand},
+        stock = ${updateFields.stock},
+        active = ${updateFields.active},
+        updated_at = ${updateFields.updated_at}
       WHERE id = ${productId}
       RETURNING id, sku, name, description, price, price_sale, currency, category,
                 tags, images, specs, brand, stock, active, created_at, updated_at

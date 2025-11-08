@@ -88,15 +88,27 @@ class EmailService {
       try {
         const nodemailer = await import('nodemailer');
         
+        // Remove spaces from App Password (Gmail sometimes displays with spaces)
+        const appPassword = process.env.GMAIL_APP_PASSWORD.replace(/\s+/g, '');
+        const gmailUser = process.env.GMAIL_USER.trim();
+        
+        console.log('📧 Attempting to send email via Gmail SMTP:', {
+          user: gmailUser,
+          passwordLength: appPassword.length,
+          hasPassword: !!appPassword
+        });
+        
         const transporter = nodemailer.default.createTransport({
           service: 'gmail',
           host: 'smtp.gmail.com',
           port: 465,
           secure: true,
           auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_APP_PASSWORD, // Use App Password, not regular password
+            user: gmailUser,
+            pass: appPassword, // Use App Password, not regular password
           },
+          debug: true, // Enable debug logging
+          logger: true, // Enable logger
         });
 
         // Handle multiple recipients
@@ -115,11 +127,26 @@ class EmailService {
         const results = await Promise.all(sendPromises);
         const result = results[0]; // Return first result for compatibility
 
-        console.log('✅ Email sent via Gmail SMTP:', { to: template.to, messageId: result.messageId });
+        console.log('✅ Email sent via Gmail SMTP:', { 
+          to: template.to, 
+          messageId: result.messageId,
+          response: result.response 
+        });
         return { success: true, messageId: result.messageId };
-      } catch (error) {
-        console.error('Gmail SMTP email sending failed:', error);
-        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      } catch (error: any) {
+        console.error('❌ Gmail SMTP email sending failed:', {
+          error: error.message,
+          code: error.code,
+          command: error.command,
+          response: error.response,
+          responseCode: error.responseCode,
+          stack: error.stack
+        });
+        return { 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          details: error.code || error.responseCode || 'No additional details'
+        };
       }
     }
 

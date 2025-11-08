@@ -31,7 +31,10 @@ import {
   Key,
   Repeat,
   Bell,
-  Plug
+  Plug,
+  Image as ImageIcon,
+  Database,
+  Gauge
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -115,6 +118,9 @@ const menuItems = [
   { href: '/admin/sms', label: 'SMS', icon: MessageSquare },
   { href: '/admin/push-notifications', label: 'Push', icon: Bell },
   { href: '/admin/integrations', label: 'אינטגרציות', icon: Plug },
+  { href: '/admin/images', label: 'תמונות', icon: ImageIcon },
+  { href: '/admin/backup', label: 'גיבויים', icon: Database },
+  { href: '/admin/performance', label: 'ביצועים', icon: Gauge },
   { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
   { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },

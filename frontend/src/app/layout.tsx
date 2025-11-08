@@ -6,6 +6,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { ToastProvider } from "@/components/ToastProvider";
 import { CartProvider } from "@/contexts/cart-context";
+import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import AccessibilityMenu from "@/components/AccessibilityMenu";
 import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 
 const heebo = Heebo({ subsets: ["hebrew"], weight: ["400","700"] });
@@ -56,19 +58,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="icon" href="/icon.svg" sizes="any" />
         <link rel="apple-touch-icon" href="/icon.svg" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="canonical" href="https://aegis-spectra.netlify.app" />
+        <meta name="theme-color" content="#D4AF37" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Aegis Spectra" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={heebo.className}>
         <ErrorBoundary>
-          <ToastProvider>
-            <CartProvider>
-              <ServiceWorker />
-              <JSONLDSchema />
-              {gaId && <GoogleAnalytics gaId={gaId} />}
-              {children}
+          <AccessibilityProvider>
+            <ToastProvider>
+              <CartProvider>
+                <ServiceWorker />
+                <JSONLDSchema />
+                {gaId && <GoogleAnalytics gaId={gaId} />}
+              <a href="#main-content" className="skip-to-main">
+                דלג לתוכן הראשי
+              </a>
+              <main id="main-content">
+                {children}
+              </main>
+              <AccessibilityMenu />
               <WhatsAppFloatingButton />
-            </CartProvider>
-          </ToastProvider>
+              </CartProvider>
+            </ToastProvider>
+          </AccessibilityProvider>
         </ErrorBoundary>
       </body>
     </html>

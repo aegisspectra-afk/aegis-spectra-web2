@@ -1,0 +1,59 @@
+{
+  "name": "Aegis Spectra Security",
+  "short_name": "Aegis Spectra",
+  "description": "מערכות אבטחה מתקדמות - מצלמות AI, אזעקות ובקרת כניסה",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["security", "business", "shopping"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "מוצרים",
+      "short_name": "מוצרים",
+      "description": "צפה במוצרי האבטחה",
+      "url": "/products",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "הזמנות",
+      "short_name": "הזמנות",
+      "description": "צפה בהזמנות שלך",
+      "url": "/dashboard?tab=orders",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
+

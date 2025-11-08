@@ -108,6 +108,8 @@ const menuItems = [
   { href: '/admin/api-keys', label: 'מפתחות API', icon: Key },
   { href: '/admin/recurring-orders', label: 'הזמנות חוזרות', icon: Repeat },
   { href: '/admin/subscriptions', label: 'מנויים', icon: CreditCard },
+  { href: '/admin/permissions', label: 'הרשאות', icon: Shield },
+  { href: '/admin/security', label: 'אבטחה', icon: Shield },
   { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
   { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },

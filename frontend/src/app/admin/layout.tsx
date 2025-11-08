@@ -28,7 +28,8 @@ import {
   CreditCard,
   Building2,
   Mail,
-  Key
+  Key,
+  Repeat
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -105,6 +106,8 @@ const menuItems = [
   { href: '/admin/seo', label: 'SEO', icon: Search },
   { href: '/admin/email-templates', label: 'תבניות אימייל', icon: Mail },
   { href: '/admin/api-keys', label: 'מפתחות API', icon: Key },
+  { href: '/admin/recurring-orders', label: 'הזמנות חוזרות', icon: Repeat },
+  { href: '/admin/subscriptions', label: 'מנויים', icon: CreditCard },
   { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
   { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },

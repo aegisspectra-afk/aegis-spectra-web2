@@ -10,9 +10,11 @@ import { Package } from '@/types/packages';
 import { motion } from 'framer-motion';
 import { Edit, Trash2, Plus, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
+import { useToastContext } from '@/components/ToastProvider';
 
 export default function AdminPackagesPage() {
   const router = useRouter();
+  const { showToast } = useToastContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'Residential' | 'Commercial' | 'Enterprise'>('all');
   const [packagesList, setPackagesList] = useState<Package[]>(packages);
@@ -59,13 +61,15 @@ export default function AdminPackagesPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-4xl font-bold">ניהול חבילות</h1>
-              <Link
-                href="/admin/packages/new"
+              <button
+                onClick={() => {
+                  showToast('יצירת חבילה חדשה - תכונה בקרוב', 'info');
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg font-semibold hover:bg-gold/90 transition"
               >
                 <Plus className="size-5" />
                 חבילה חדשה
-              </Link>
+              </button>
             </div>
             <p className="text-zinc-400">ניהול כל החבילות במערכת</p>
           </div>
@@ -161,14 +165,40 @@ export default function AdminPackagesPage() {
                           <Link
                             href={`/admin/packages/${pkg.id}`}
                             className="p-2 text-zinc-400 hover:text-gold transition"
+                            title="ערוך חבילה"
                           >
                             <Edit className="size-5" />
                           </Link>
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               if (confirm(`האם למחוק את ${pkg.nameHebrew}?`)) {
-                                // TODO: Implement delete
-                                alert('מחיקה לא מומשה עדיין');
+                                try {
+                                  const token = localStorage.getItem('admin_token');
+                                  if (!token) {
+                                    alert('אין הרשאה');
+                                    return;
+                                  }
+
+                                  const response = await fetch(`/api/admin/packages/${pkg.id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                      'Authorization': `Bearer ${token}`,
+                                    },
+                                  });
+
+                                  const data = await response.json();
+                                  
+                                  if (data.success) {
+                                    // Remove from local list
+                                    setPackagesList(prev => prev.filter(p => p.id !== pkg.id));
+                                    showToast('חבילה נמחקה בהצלחה', 'success');
+                                  } else {
+                                    showToast(data.error || 'שגיאה במחיקת חבילה', 'error');
+                                  }
+                                } catch (error) {
+                                  console.error('Error deleting package:', error);
+                                  showToast('שגיאה במחיקת חבילה', 'error');
+                                }
                               }
                             }}
                             className="p-2 text-zinc-400 hover:text-red-400 transition"
@@ -178,6 +208,7 @@ export default function AdminPackagesPage() {
                           <Link
                             href={`/admin/packages/${pkg.id}/versions`}
                             className="px-3 py-1 text-xs border border-zinc-700 rounded hover:border-gold transition"
+                            title="צפה בהיסטוריית גרסאות"
                           >
                             גרסאות
                           </Link>

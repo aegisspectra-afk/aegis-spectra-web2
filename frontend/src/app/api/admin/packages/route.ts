@@ -2,16 +2,14 @@
  * Admin Packages API - CRUD operations for packages
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
 import { packages, getPackageBySlug } from '@/data/packages';
 import { Package } from '@/types/packages';
 
 // GET: List all packages (admin)
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication check
-    // if (!isAdmin(request)) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    await requireAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -49,7 +47,7 @@ export async function GET(request: NextRequest) {
 // POST: Create new package
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Add authentication check
+    await requireAdmin(request);
     const body = await request.json();
     const packageData: Package = body;
 

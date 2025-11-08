@@ -2,16 +2,18 @@
  * Admin Package Detail API - Get, Update, Delete package
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
 import { packages, getPackageBySlug } from '@/data/packages';
 import { Package } from '@/types/packages';
 
 // GET: Get package by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    await requireAdmin(request);
+    const { id } = await params;
     const packageData = packages.find(p => p.id === id);
 
     if (!packageData) {
@@ -37,10 +39,11 @@ export async function GET(
 // PUT: Update package
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    await requireAdmin(request);
+    const { id } = await params;
     const body = await request.json();
     const packageData: Package = body;
 
@@ -82,10 +85,11 @@ export async function PUT(
 // DELETE: Delete package
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    await requireAdmin(request);
+    const { id } = await params;
 
     // Find package
     const existingPackage = packages.find(p => p.id === id);

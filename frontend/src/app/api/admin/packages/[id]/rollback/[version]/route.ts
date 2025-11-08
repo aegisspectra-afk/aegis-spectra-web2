@@ -2,14 +2,16 @@
  * Package Rollback API - Rollback to specific version
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
 
 // POST: Rollback package to specific version
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string; version: string } }
+  { params }: { params: Promise<{ id: string; version: string }> }
 ) {
   try {
-    const { id, version } = params;
+    await requireAdmin(request);
+    const { id, version } = await params;
 
     // TODO: Load version data from database
     // TODO: Restore package to that version

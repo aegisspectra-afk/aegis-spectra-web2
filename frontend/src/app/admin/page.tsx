@@ -88,8 +88,19 @@ export default function AdminDashboard() {
 
       const data = await res.json();
 
-      if (data.ok) {
-        setStats(data.stats || data.dashboard);
+      if (data.ok || data.success) {
+        // Transform API response to match DashboardStats interface
+        const apiData = data.data || data.stats || data.dashboard || {};
+        setStats({
+          totalSales: apiData.totalSales || apiData.total_orders || 0,
+          totalRevenue: apiData.totalRevenue || apiData.total_revenue || 0,
+          totalOrders: apiData.totalOrders || apiData.total_orders || 0,
+          totalCustomers: apiData.totalCustomers || apiData.unique_customers || apiData.total_customers || 0,
+          activeTickets: apiData.activeTickets || apiData.active_tickets || 0,
+          lowStockAlerts: apiData.lowStockAlerts || apiData.low_stock_alerts || 0,
+          topProducts: apiData.topProducts || apiData.top_products || [],
+          salesByDay: apiData.salesByDay || apiData.sales_by_day || [],
+        });
       } else {
         setError(data.error || "שגיאה בטעינת נתונים");
       }

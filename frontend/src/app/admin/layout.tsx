@@ -25,7 +25,8 @@ import {
   Download,
   Search,
   Truck,
-  CreditCard
+  CreditCard,
+  Building2
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -92,6 +93,8 @@ const menuItems = [
   { href: '/admin/inventory', label: 'מלאי', icon: Package },
   { href: '/admin/shipping', label: 'משלוחים', icon: Truck },
   { href: '/admin/payments', label: 'תשלומים', icon: CreditCard },
+  { href: '/admin/crm', label: 'CRM', icon: Users },
+  { href: '/admin/vendors', label: 'ספקים', icon: Building2 },
   { href: '/admin/coupons', label: 'קופונים', icon: Tag },
   { href: '/admin/reviews', label: 'ביקורות', icon: Star },
   { href: '/admin/blog', label: 'בלוג', icon: FileText },

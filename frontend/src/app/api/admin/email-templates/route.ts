@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const admin = await requireAdmin(request);
-    const body = await request.json();
-    const { name, subject, body, type, variables, is_active } = body;
+    const requestBody = await request.json();
+    const { name, subject, body, type, variables, is_active } = requestBody;
 
     if (!name || !subject || !body || !type) {
       return NextResponse.json(

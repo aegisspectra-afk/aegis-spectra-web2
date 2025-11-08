@@ -58,7 +58,7 @@ export async function PATCH(
   try {
     const admin = await requireAdmin(request);
     const { id } = await params;
-    const body = await request.json();
+    const requestBody = await request.json();
 
     const [currentTemplate] = await sql`
       SELECT * FROM email_templates WHERE id = ${parseInt(id)} LIMIT 1
@@ -71,7 +71,7 @@ export async function PATCH(
       );
     }
 
-    const { name, subject, body, type, variables, is_active } = body;
+    const { name, subject, body, type, variables, is_active } = requestBody;
 
     const [updatedTemplate] = await sql`
       UPDATE email_templates
@@ -100,7 +100,7 @@ export async function PATCH(
       AuditActions.SETTINGS_UPDATED,
       'email_template',
       id,
-      { changes: Object.keys(body) },
+      { changes: Object.keys(requestBody) },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined
     );

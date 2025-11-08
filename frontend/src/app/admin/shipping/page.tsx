@@ -260,7 +260,7 @@ export default function AdminShippingPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">מגבלת משקל (ק"ג)</label>
+                    <label className="block text-sm font-medium mb-2">מגבלת משקל (ק&quot;ג)</label>
                     <input
                       type="number"
                       value={formData.weight_limit}

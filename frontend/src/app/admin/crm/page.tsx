@@ -100,7 +100,7 @@ export default function AdminCRMPage() {
               <Users className="size-8 text-blue-400" />
               <span className="text-2xl font-bold text-white">{stats.totalCustomers}</span>
             </div>
-            <p className="text-zinc-400 text-sm">סה"כ לקוחות</p>
+            <p className="text-zinc-400 text-sm">סה&quot;כ לקוחות</p>
           </div>
           <div className="bg-black/30 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
@@ -109,7 +109,7 @@ export default function AdminCRMPage() {
                 {stats.totalRevenue.toLocaleString('he-IL')} ₪
               </span>
             </div>
-            <p className="text-zinc-400 text-sm">סה"כ הכנסות</p>
+            <p className="text-zinc-400 text-sm">סה&quot;כ הכנסות</p>
           </div>
           <div className="bg-black/30 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
@@ -171,7 +171,7 @@ export default function AdminCRMPage() {
                 <tr>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">לקוח</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">הזמנות</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">סה"כ הוצאה</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">סה&quot;כ הוצאה</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">נקודות נאמנות</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">דרגה</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-zinc-300">הזמנה אחרונה</th>

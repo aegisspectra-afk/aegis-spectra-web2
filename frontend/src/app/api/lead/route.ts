@@ -2,6 +2,7 @@ import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { emailService } from '@/lib/email';
 import { verifyRecaptcha } from '@/lib/recaptcha';
+import { notifyNewLead } from '@/lib/notifications';
 
 const sql = neon();
 
@@ -32,15 +33,17 @@ export async function POST(request: NextRequest) {
     }
 
     // שמירה ב-DB
-    await sql`
+    const [newLead] = await sql`
       INSERT INTO leads (name, phone, email, city, message, product_sku, created_at)
       VALUES (${name}, ${phone}, ${email || null}, ${city}, ${message}, ${product_sku}, NOW())
+      RETURNING id
     `.catch(async (e) => {
       // If email column doesn't exist, try without it
       if (e.message?.includes('email') || e.message?.includes('column')) {
         return await sql`
           INSERT INTO leads (name, phone, city, message, product_sku, created_at)
           VALUES (${name}, ${phone}, ${city}, ${message}, ${product_sku}, NOW())
+          RETURNING id
         `;
       }
       throw e;
@@ -70,6 +73,11 @@ export async function POST(request: NextRequest) {
           message
         }
       }).catch(err => console.error('Failed to send confirmation email to customer:', err));
+    }
+
+    // Create notification for admin (async, don't wait)
+    if (newLead && newLead.id) {
+      notifyNewLead(newLead.id, name, phone).catch(() => {});
     }
 
     return NextResponse.json({ ok: true, msg: 'Lead saved successfully' });

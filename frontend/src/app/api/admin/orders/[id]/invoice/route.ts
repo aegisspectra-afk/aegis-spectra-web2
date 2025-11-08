@@ -3,10 +3,11 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
+import { getOrderDataForInvoice, generateInvoiceHTML } from '@/lib/pdf-generator';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Generate invoice PDF
+// GET - Generate invoice PDF (HTML for now, can be converted to PDF using browser print or puppeteer)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,36 +16,18 @@ export async function GET(
     await requireAdmin(request);
     const { id } = await params;
 
-    // TODO: Implement PDF generation using a library like pdfkit or puppeteer
-    // For now, return a simple HTML invoice that can be printed
-    
-    const html = `
-      <!DOCTYPE html>
-      <html dir="rtl" lang="he">
-        <head>
-          <meta charset="UTF-8">
-          <title>חשבונית - ${id}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .invoice-details { margin-bottom: 30px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { padding: 10px; border: 1px solid #ddd; text-align: right; }
-            .total { font-size: 1.5em; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>חשבונית</h1>
-            <p>מספר הזמנה: ${id}</p>
-          </div>
-          <div class="invoice-details">
-            <p>תאריך: ${new Date().toLocaleDateString('he-IL')}</p>
-          </div>
-          <p>חשבונית תוצג כאן לאחר יישום יצירת PDF</p>
-        </body>
-      </html>
-    `;
+    // Get order data
+    const orderData = await getOrderDataForInvoice(id);
+
+    if (!orderData) {
+      return NextResponse.json(
+        { ok: false, error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    // Generate HTML invoice
+    const html = generateInvoiceHTML(orderData);
 
     return new NextResponse(html, {
       headers: {

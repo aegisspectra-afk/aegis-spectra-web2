@@ -1,6 +1,7 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
+import { notifyLowStock } from '@/lib/notifications';
 
 const sql = neon();
 
@@ -169,6 +170,19 @@ export async function POST(request: NextRequest) {
       FROM products
       WHERE id = ${product.id}
     `;
+
+    // Check for low stock and create notification
+    if (updatedProduct && updatedProduct.stock !== undefined) {
+      const minStock = updatedProduct.min_stock || 10;
+      if (updatedProduct.stock <= minStock) {
+        notifyLowStock(
+          updatedProduct.id,
+          updatedProduct.name,
+          updatedProduct.stock,
+          minStock
+        ).catch(() => {});
+      }
+    }
 
     return NextResponse.json({
       ok: true,

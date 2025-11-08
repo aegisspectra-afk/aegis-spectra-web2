@@ -1,6 +1,7 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
+import { notifyNewOrder } from '@/lib/notifications';
 
 const sql = neon();
 
@@ -146,6 +147,9 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId, order: body }),
     }).catch(() => {});
+
+    // Create notification for admin (async, don't wait)
+    notifyNewOrder(orderId, `${customer.firstName} ${customer.lastName}`, total).catch(() => {});
 
     return NextResponse.json({
       ok: true,

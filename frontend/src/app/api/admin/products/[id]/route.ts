@@ -5,6 +5,7 @@ import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
 import { createAuditLog, AuditActions } from '@/lib/audit-log';
+import { notifyLowStock } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,6 +158,19 @@ export async function PATCH(
         { ok: false, error: 'Product not found or update failed' },
         { status: 404 }
       );
+    }
+
+    // Check for low stock and create notification
+    if (stock !== undefined && updatedProduct.stock !== undefined) {
+      const minStock = updatedProduct.min_stock || 10;
+      if (updatedProduct.stock <= minStock) {
+        notifyLowStock(
+          updatedProduct.id,
+          updatedProduct.name,
+          updatedProduct.stock,
+          minStock
+        ).catch(() => {});
+      }
     }
 
             // Create audit log

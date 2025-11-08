@@ -6,6 +6,8 @@ import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, AlertTrian
 import Link from "next/link";
 import { useToastContext } from "@/components/ToastProvider";
 import { StatsCard } from "@/components/admin/StatsCard";
+import { SalesChart } from "@/components/admin/SalesChart";
+import { ProductsChart } from "@/components/admin/ProductsChart";
 
 interface DashboardStats {
   totalSales: number;
@@ -246,7 +248,17 @@ export default function AdminDashboard() {
               </Link>
             </div>
 
-            {/* Top Products */}
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {stats.salesByDay && stats.salesByDay.length > 0 && (
+                <SalesChart data={stats.salesByDay} />
+              )}
+              {stats.topProducts && stats.topProducts.length > 0 && (
+                <ProductsChart data={stats.topProducts} />
+              )}
+            </div>
+
+            {/* Top Products List */}
             {stats.topProducts && stats.topProducts.length > 0 && (
               <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
                 <h2 className="text-xl font-bold mb-4">מוצרים מובילים</h2>

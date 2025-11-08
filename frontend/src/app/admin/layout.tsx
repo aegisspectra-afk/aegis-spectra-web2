@@ -29,7 +29,9 @@ import {
   Building2,
   Mail,
   Key,
-  Repeat
+  Repeat,
+  Bell,
+  Plug
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -110,6 +112,9 @@ const menuItems = [
   { href: '/admin/subscriptions', label: 'מנויים', icon: CreditCard },
   { href: '/admin/permissions', label: 'הרשאות', icon: Shield },
   { href: '/admin/security', label: 'אבטחה', icon: Shield },
+  { href: '/admin/sms', label: 'SMS', icon: MessageSquare },
+  { href: '/admin/push-notifications', label: 'Push', icon: Bell },
+  { href: '/admin/integrations', label: 'אינטגרציות', icon: Plug },
   { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
   { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },

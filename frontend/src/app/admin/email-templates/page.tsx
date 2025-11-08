@@ -256,7 +256,7 @@ export default function AdminEmailTemplatesPage() {
                     placeholder="תוכן האימייל (HTML או טקסט)"
                   />
                   <p className="text-xs text-zinc-400 mt-1">
-                    ניתן להשתמש במשתנים: {'{{name}}'}, {'{{email}}'}, {'{{order_id}}'}, {'{{total}}'} וכו'
+                    ניתן להשתמש במשתנים: {'{{name}}'}, {'{{email}}'}, {'{{order_id}}'}, {'{{total}}'} וכו&apos;
                   </p>
                 </div>
                 <div>

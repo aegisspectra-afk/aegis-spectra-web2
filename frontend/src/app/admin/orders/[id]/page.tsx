@@ -237,11 +237,11 @@ export default function AdminOrderDetailsPage() {
               <h2 className="text-2xl font-bold mb-4">סיכום הזמנה</h2>
               <div className="space-y-3">
                 <div className="flex justify-between text-zinc-300">
-                  <span>סה"כ פריטים:</span>
+                  <span>סה&quot;כ פריטים:</span>
                   <span>{order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}</span>
                 </div>
                 <div className="flex justify-between text-zinc-300">
-                  <span>סה"כ ביניים:</span>
+                  <span>סה&quot;כ ביניים:</span>
                   <span>{order.subtotal.toLocaleString()} ₪</span>
                 </div>
                 {order.shipping > 0 && (
@@ -257,7 +257,7 @@ export default function AdminOrderDetailsPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-2xl font-bold text-gold pt-3 border-t border-zinc-800">
-                  <span>סה"כ:</span>
+                  <span>סה&quot;כ:</span>
                   <span>{order.total.toLocaleString()} ₪</span>
                 </div>
               </div>

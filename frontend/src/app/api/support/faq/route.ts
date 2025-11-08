@@ -13,7 +13,7 @@ function checkAuth(request: NextRequest): boolean {
 // GET - Get FAQ items
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '50');

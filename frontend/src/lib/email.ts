@@ -1,5 +1,7 @@
-// Email service using Resend (simplified version)
-// For production, configure RESEND_API_KEY in Netlify Environment Variables
+// Email service supporting both Resend API and Gmail SMTP
+// For production, configure either:
+// - RESEND_API_KEY (recommended for production)
+// - GMAIL_USER and GMAIL_APP_PASSWORD (alternative using Gmail SMTP)
 
 export interface EmailTemplate {
   to: string | string[];
@@ -51,48 +53,89 @@ class EmailService {
   private fromEmail = 'Aegis Spectra <noreply@aegis-spectra.com>';
 
   async sendEmail(template: EmailTemplate) {
-    // In production, use Resend API
-    // For now, log to console
+    // Try Resend first (if configured)
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import('resend');
+        const resendClient = new Resend(process.env.RESEND_API_KEY);
+        
+        // Handle multiple recipients
+        const recipients = Array.isArray(template.to) ? template.to : [template.to];
+        
+        // Send to all recipients
+        const sendPromises = recipients.map(recipient =>
+          resendClient.emails.send({
+            from: template.from || this.fromEmail,
+            to: recipient,
+            subject: template.subject,
+            html: template.html,
+          })
+        );
+        
+        const results = await Promise.all(sendPromises);
+        const result = results[0]; // Return first result for compatibility
+
+        console.log('✅ Email sent via Resend:', { to: template.to, messageId: result.data?.id });
+        return { success: true, messageId: result.data?.id };
+      } catch (error) {
+        console.error('Resend email sending failed, trying Gmail SMTP:', error);
+        // Fall through to Gmail SMTP
+      }
+    }
+
+    // Try Gmail SMTP (if configured)
+    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+      try {
+        const nodemailer = await import('nodemailer');
+        
+        const transporter = nodemailer.default.createTransport({
+          service: 'gmail',
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_APP_PASSWORD, // Use App Password, not regular password
+          },
+        });
+
+        // Handle multiple recipients
+        const recipients = Array.isArray(template.to) ? template.to : [template.to];
+        
+        // Send to all recipients
+        const sendPromises = recipients.map(recipient =>
+          transporter.sendMail({
+            from: template.from || `Aegis Spectra <${process.env.GMAIL_USER}>`,
+            to: recipient,
+            subject: template.subject,
+            html: template.html,
+          })
+        );
+        
+        const results = await Promise.all(sendPromises);
+        const result = results[0]; // Return first result for compatibility
+
+        console.log('✅ Email sent via Gmail SMTP:', { to: template.to, messageId: result.messageId });
+        return { success: true, messageId: result.messageId };
+      } catch (error) {
+        console.error('Gmail SMTP email sending failed:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+    }
+
+    // No email service configured
+    console.warn('⚠️ No email service configured. Email not sent:', {
+      to: template.to,
+      subject: template.subject,
+      from: template.from || this.fromEmail
+    });
+    
+    // In development, still return success for testing
     if (process.env.NODE_ENV === 'development') {
-      console.log('📧 Email would be sent:', {
-        to: template.to,
-        subject: template.subject,
-        from: template.from || this.fromEmail
-      });
       return { success: true, messageId: 'dev-' + Date.now() };
     }
-
-    // Production: Use Resend
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('Resend API key not configured, email not sent');
-      return { success: false, error: 'Email service not configured' };
-    }
-
-    try {
-      const { Resend } = await import('resend');
-      const resendClient = new Resend(process.env.RESEND_API_KEY);
-      
-      // Handle multiple recipients
-      const recipients = Array.isArray(template.to) ? template.to : [template.to];
-      
-      // Send to all recipients
-      const sendPromises = recipients.map(recipient =>
-        resendClient.emails.send({
-          from: template.from || this.fromEmail,
-          to: recipient,
-          subject: template.subject,
-          html: template.html,
-        })
-      );
-      
-      const results = await Promise.all(sendPromises);
-      const result = results[0]; // Return first result for compatibility
-
-      return { success: true, messageId: result.data?.id };
-    } catch (error) {
-      console.error('Email sending failed:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
+    
+    return { success: false, error: 'Email service not configured. Please set RESEND_API_KEY or GMAIL_USER + GMAIL_APP_PASSWORD' };
   }
 
   async sendLeadNotification(data: LeadNotificationEmail) {

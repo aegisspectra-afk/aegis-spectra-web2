@@ -220,23 +220,92 @@ export async function POST(request: NextRequest) {
         to: email,
         subject: 'ברוכים הבאים ל-Aegis Spectra - אימות אימייל',
         html: `
-          <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0B0B0D; color: #ECECEC;">
-            <h2 style="color: #D4AF37; margin-bottom: 20px;">ברוכים הבאים ל-Aegis Spectra!</h2>
-            <p style="margin-bottom: 15px;">שלום ${name},</p>
-            <p style="margin-bottom: 15px;">תודה על ההרשמה לאתר שלנו. אנחנו שמחים שהצטרפת אלינו!</p>
-            <p style="margin-bottom: 20px;">כדי להשלים את ההרשמה, אנא לחץ על הקישור הבא כדי לאמת את האימייל שלך:</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${verificationUrl}" style="display: inline-block; background-color: #D4AF37; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">אמת אימייל</a>
+          <!DOCTYPE html>
+          <html dir="rtl" lang="he">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>ברוכים הבאים ל-Aegis Spectra</title>
+          </head>
+          <body style="font-family: Arial, 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; margin: 0; padding: 0; background-color: #f5f5f5;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #0B0B0D; color: #ECECEC; padding: 0;">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0B0B0D 100%); padding: 40px 30px; text-align: center; border-bottom: 3px solid #D4AF37;">
+                <h1 style="color: #D4AF37; margin: 0; font-size: 28px; font-weight: bold;">🛡️ Aegis Spectra</h1>
+                <p style="color: #ECECEC; margin: 10px 0 0 0; font-size: 16px;">ברוכים הבאים!</p>
+              </div>
+              
+              <!-- Content -->
+              <div style="padding: 40px 30px;">
+                <h2 style="color: #ECECEC; margin: 0 0 20px 0; font-size: 24px;">שלום ${name},</h2>
+                
+                <p style="color: #ECECEC; margin: 0 0 20px 0; font-size: 16px; line-height: 1.6;">
+                  תודה על ההרשמה לאתר שלנו! אנחנו שמחים שהצטרפת אלינו.
+                </p>
+                
+                <p style="color: #ECECEC; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">
+                  כדי להשלים את ההרשמה ולאמת את האימייל שלך, אנא לחץ על הכפתור הבא:
+                </p>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                  <a href="${verificationUrl}" style="display: inline-block; background-color: #D4AF37; color: #000; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(212, 175, 55, 0.3);">
+                    ✅ אמת אימייל עכשיו
+                  </a>
+                </div>
+                
+                <!-- Alternative Link -->
+                <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 30px 0; border: 1px solid #333;">
+                  <p style="color: #999; margin: 0 0 10px 0; font-size: 14px;">או העתק את הקישור הבא לדפדפן שלך:</p>
+                  <p style="color: #D4AF37; margin: 0; font-size: 12px; word-break: break-all; font-family: monospace;">
+                    ${verificationUrl}
+                  </p>
+                </div>
+                
+                <!-- Important Info -->
+                <div style="background-color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 30px 0; border-right: 4px solid #D4AF37;">
+                  <p style="color: #ECECEC; margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">⚠️ חשוב לדעת:</p>
+                  <ul style="color: #ECECEC; margin: 0; padding-right: 20px; font-size: 14px; line-height: 1.8;">
+                    <li>הקישור יפוג בעוד 24 שעות</li>
+                    <li>האימייל שלך לא יאומת עד שתלחץ על הקישור</li>
+                    <li>אם לא ביצעת הרשמה, אנא התעלם מהאימייל הזה</li>
+                  </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #333;">
+                  <p style="color: #999; margin: 0 0 15px 0; font-size: 14px;">יש לך שאלות? אנחנו כאן לעזור:</p>
+                  <p style="color: #ECECEC; margin: 5px 0; font-size: 14px;">
+                    📞 טלפון: <a href="tel:+972559737025" style="color: #D4AF37; text-decoration: none;">+972-55-973-7025</a>
+                  </p>
+                  <p style="color: #ECECEC; margin: 5px 0; font-size: 14px;">
+                    📧 אימייל: <a href="mailto:aegisspectra@gmail.com" style="color: #D4AF37; text-decoration: none;">aegisspectra@gmail.com</a>
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: #1a1a1a; padding: 30px; text-align: center; border-top: 1px solid #333;">
+                <p style="color: #666; margin: 0; font-size: 12px;">
+                  © ${new Date().getFullYear()} Aegis Spectra Security. כל הזכויות שמורות.
+                </p>
+                <p style="color: #666; margin: 10px 0 0 0; font-size: 12px;">
+                  אם לא ביצעת הרשמה לאתר שלנו, אנא התעלם מהאימייל הזה.
+                </p>
+              </div>
             </div>
-            <p style="margin-bottom: 10px; font-size: 14px; color: #999;">או העתק את הקישור הבא לדפדפן שלך:</p>
-            <p style="margin-bottom: 20px; font-size: 12px; color: #666; word-break: break-all;">${verificationUrl}</p>
-            <p style="margin-bottom: 10px; font-size: 14px; color: #999;">הקישור יפוג בעוד 24 שעות.</p>
-            <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #666;">
-              אם לא ביצעת הרשמה לאתר שלנו, אנא התעלם מהאימייל הזה.
-            </p>
-          </div>
+          </body>
+          </html>
         `
-      }).catch(err => console.error('Failed to send verification email:', err));
+      }).then(result => {
+        if (result.success) {
+          console.log('✅ Verification email sent successfully:', { to: email, messageId: result.messageId });
+        } else {
+          console.error('❌ Failed to send verification email:', result.error);
+        }
+      }).catch(err => {
+        console.error('❌ Error sending verification email:', err);
+      });
     }
 
     // Create response with JSON data

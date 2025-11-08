@@ -15,7 +15,7 @@ function checkAuth(request: NextRequest): boolean {
 // GET - Calculate dynamic pricing
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const productId = searchParams.get('product_id');
     const sku = searchParams.get('sku');
     const quantity = parseInt(searchParams.get('quantity') || '1');

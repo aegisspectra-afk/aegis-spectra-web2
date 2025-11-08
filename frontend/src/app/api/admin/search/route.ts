@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const query = searchParams.get('q') || '';
     const types = searchParams.get('types')?.split(',') || [];
     const dateFrom = searchParams.get('dateFrom');

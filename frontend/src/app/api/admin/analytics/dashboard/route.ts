@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireManager(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const from = searchParams.get('from') || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const to = searchParams.get('to') || new Date().toISOString();
     const eventType = searchParams.get('eventType');

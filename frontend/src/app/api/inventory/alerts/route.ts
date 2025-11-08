@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const status = searchParams.get('status') || 'active';
     const alertType = searchParams.get('type');
 

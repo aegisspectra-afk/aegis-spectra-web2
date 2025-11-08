@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   try {
     const admin = await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const active = searchParams.get('active');
 
     let query = sql`

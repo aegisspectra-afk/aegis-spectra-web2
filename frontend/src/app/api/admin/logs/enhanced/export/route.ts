@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const action = searchParams.get('action');
     const resource_type = searchParams.get('resource_type');
     const user_id = searchParams.get('user_id');

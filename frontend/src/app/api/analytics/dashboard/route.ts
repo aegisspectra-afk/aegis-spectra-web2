@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // Require manager/admin role
     await requireManager(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
 

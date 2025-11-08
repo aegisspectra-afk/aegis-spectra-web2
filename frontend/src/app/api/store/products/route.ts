@@ -597,7 +597,7 @@ export async function GET(request: NextRequest) {
       stockCount: 10,
     }));
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const sort = searchParams.get('sort');

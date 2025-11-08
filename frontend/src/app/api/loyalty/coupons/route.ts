@@ -13,7 +13,7 @@ function checkAuth(request: NextRequest): boolean {
 // GET - Get coupons for user or validate coupon
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const userId = searchParams.get('user_id');
     const userEmail = searchParams.get('user_email');
     const code = searchParams.get('code');

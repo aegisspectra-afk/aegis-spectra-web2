@@ -6,7 +6,7 @@ const sql = neon();
 // GET - Get order tracking information
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const orderId = searchParams.get('order_id');
     const trackingNumber = searchParams.get('tracking_number');
     const email = searchParams.get('email');

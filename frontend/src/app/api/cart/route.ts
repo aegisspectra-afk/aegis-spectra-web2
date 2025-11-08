@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Remove item from cart
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const sku = searchParams.get('sku');
 
     if (!sku) {

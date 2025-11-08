@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const productId = searchParams.get('product_id');
     const sku = searchParams.get('sku');
     const lowStockOnly = searchParams.get('low_stock_only') === 'true';

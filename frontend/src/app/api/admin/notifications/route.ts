@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const admin = await requireAdmin(request);
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const read = searchParams.get('read');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');

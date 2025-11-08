@@ -13,7 +13,7 @@ function checkAuth(request: NextRequest): boolean {
 // GET - Get reviews for a product
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const productId = searchParams.get('product_id');
     const sku = searchParams.get('sku');
     const status = searchParams.get('status') || 'approved'; // Only show approved by default

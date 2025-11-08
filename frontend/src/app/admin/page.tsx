@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, AlertTriangle, Users, DollarSign, LogOut, User } from "lucide-react";
+import { BarChart3, Package, ShoppingCart, MessageSquare, TrendingUp, AlertTriangle, Users, DollarSign, LogOut, User, Download, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useToastContext } from "@/components/ToastProvider";
+import { StatsCard } from "@/components/admin/StatsCard";
 
 interface DashboardStats {
   totalSales: number;

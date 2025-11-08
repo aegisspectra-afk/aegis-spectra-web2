@@ -106,6 +106,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create audit log
+    await createAuditLog(
+      admin.id,
+      admin.email,
+      AuditActions.PRODUCT_CREATED,
+      'product',
+      newProduct.id,
+      { sku: newProduct.sku, name: newProduct.name },
+      request.headers.get('x-forwarded-for') || undefined,
+      request.headers.get('user-agent') || undefined
+    );
+
     return NextResponse.json({
       ok: true,
       product: newProduct,

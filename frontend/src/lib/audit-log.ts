@@ -148,5 +148,29 @@ export const AuditActions = {
   EXPORT_DATA: 'export_data',
   IMPORT_DATA: 'import_data',
   BULK_ACTION: 'bulk_action',
+  
+  // Support Tickets
+  TICKET_CREATED: 'ticket_created',
+  TICKET_UPDATED: 'ticket_updated',
+  TICKET_DELETED: 'ticket_deleted',
+  TICKET_STATUS_CHANGED: 'ticket_status_changed',
+  
+  // Coupons & Discounts
+  COUPON_CREATED: 'coupon_created',
+  COUPON_UPDATED: 'coupon_updated',
+  COUPON_DELETED: 'coupon_deleted',
+  
+  // Reviews
+  REVIEW_APPROVED: 'review_approved',
+  REVIEW_REJECTED: 'review_rejected',
+  REVIEW_DELETED: 'review_deleted',
+  
+  // Blog
+  BLOG_POST_CREATED: 'blog_post_created',
+  BLOG_POST_UPDATED: 'blog_post_updated',
+  BLOG_POST_DELETED: 'blog_post_deleted',
+  
+  // User Role
+  USER_ROLE_CHANGED: 'user_role_changed',
 } as const;
 

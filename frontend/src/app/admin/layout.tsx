@@ -17,7 +17,13 @@ import {
   Menu,
   X,
   Shield,
-  UserPlus
+  UserPlus,
+  MessageSquare,
+  Tag,
+  Star,
+  FileText,
+  Download,
+  Search
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -73,18 +79,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  const menuItems = [
-    { href: '/admin', label: 'דשבורד', icon: LayoutDashboard },
-    { href: '/admin/orders', label: 'הזמנות', icon: ShoppingCart },
-    { href: '/admin/leads', label: 'לידים', icon: Users },
-    { href: '/admin/packages', label: 'חבילות', icon: Package },
-    { href: '/admin/products', label: 'מוצרים', icon: Package },
-    { href: '/admin/users', label: 'משתמשים', icon: Users },
-    { href: '/admin/inventory', label: 'מלאי', icon: Package },
-    { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
-    { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
-    { href: '/admin/settings', label: 'הגדרות', icon: Settings },
-  ];
+const menuItems = [
+  { href: '/admin', label: 'דשבורד', icon: LayoutDashboard },
+  { href: '/admin/orders', label: 'הזמנות', icon: ShoppingCart },
+  { href: '/admin/leads', label: 'לידים', icon: Users },
+  { href: '/admin/support', label: 'תמיכה', icon: MessageSquare },
+  { href: '/admin/packages', label: 'חבילות', icon: Package },
+  { href: '/admin/products', label: 'מוצרים', icon: Package },
+  { href: '/admin/users', label: 'משתמשים', icon: Users },
+  { href: '/admin/inventory', label: 'מלאי', icon: Package },
+  { href: '/admin/coupons', label: 'קופונים', icon: Tag },
+  { href: '/admin/reviews', label: 'ביקורות', icon: Star },
+  { href: '/admin/blog', label: 'בלוג', icon: FileText },
+  { href: '/admin/search', label: 'חיפוש מתקדם', icon: Search },
+  { href: '/admin/export', label: 'ייצוא נתונים', icon: Download },
+  { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
+  { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
+  { href: '/admin/settings', label: 'הגדרות', icon: Settings },
+];
 
   return (
     <div className="min-h-screen bg-charcoal text-white">

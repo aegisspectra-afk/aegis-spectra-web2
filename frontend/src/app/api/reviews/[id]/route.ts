@@ -1,5 +1,7 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
+import { createAuditLog, AuditActions } from '@/lib/audit-log';
 
 const sql = neon();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
@@ -67,7 +69,14 @@ export async function PATCH(
     }
 
     // Check permissions
-    const isAdmin = checkAuth(request);
+    let isAdmin = false;
+    let admin = null;
+    try {
+      admin = await requireAdmin(request);
+      isAdmin = true;
+    } catch {
+      // Not admin
+    }
     const isOwner = user_email && existing.user_email && existing.user_email === user_email;
 
     // Only admin can change status or admin_notes
@@ -101,6 +110,33 @@ export async function PATCH(
       RETURNING *
     `;
 
+    // Create audit log if admin
+    if (admin && status) {
+      if (status === 'approved') {
+        await createAuditLog(
+          admin.id,
+          admin.email,
+          AuditActions.REVIEW_APPROVED,
+          'review',
+          reviewId,
+          { reviewId },
+          request.headers.get('x-forwarded-for') || undefined,
+          request.headers.get('user-agent') || undefined
+        );
+      } else if (status === 'rejected') {
+        await createAuditLog(
+          admin.id,
+          admin.email,
+          AuditActions.REVIEW_REJECTED,
+          'review',
+          reviewId,
+          { reviewId },
+          request.headers.get('x-forwarded-for') || undefined,
+          request.headers.get('user-agent') || undefined
+        );
+      }
+    }
+
     return NextResponse.json({ ok: true, review });
   } catch (error: any) {
     console.error('Error updating review:', error);
@@ -117,19 +153,25 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!checkAuth(request)) {
-      return NextResponse.json(
-        { ok: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
+    const admin = await requireAdmin(request);
     const { id } = await params;
     const reviewId = parseInt(id);
 
     await sql`
       DELETE FROM reviews WHERE id = ${reviewId}
     `;
+
+    // Create audit log
+    await createAuditLog(
+      admin.id,
+      admin.email,
+      AuditActions.REVIEW_DELETED,
+      'review',
+      reviewId,
+      { reviewId },
+      request.headers.get('x-forwarded-for') || undefined,
+      request.headers.get('user-agent') || undefined
+    );
 
     return NextResponse.json({ ok: true, message: 'Review deleted successfully' });
   } catch (error: any) {

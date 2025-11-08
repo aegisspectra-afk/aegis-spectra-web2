@@ -1,14 +1,8 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth-server';
 
 const sql = neon();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
-
-function checkAuth(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization');
-  const providedPassword = authHeader?.replace('Bearer ', '');
-  return providedPassword === ADMIN_PASSWORD;
-}
 
 // GET - Get support tickets
 export async function GET(request: NextRequest) {
@@ -18,12 +12,18 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
     const category = searchParams.get('category');
+    
+    // Check if admin (for admin panel)
+    let isAdmin = false;
+    try {
+      await requireAdmin(request);
+      isAdmin = true;
+    } catch {
+      // Not admin, continue with user-only access
+    }
     const assignedTo = searchParams.get('assigned_to');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
-
-    // If not admin, only show user's tickets
-    const isAdmin = checkAuth(request);
 
     let query = sql`
       SELECT t.*,

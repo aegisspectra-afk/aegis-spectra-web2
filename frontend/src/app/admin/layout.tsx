@@ -16,7 +16,8 @@ import {
   LogOut,
   Menu,
   X,
-  Shield
+  Shield,
+  UserPlus
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -75,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const menuItems = [
     { href: '/admin', label: 'דשבורד', icon: LayoutDashboard },
     { href: '/admin/orders', label: 'הזמנות', icon: ShoppingCart },
+    { href: '/admin/leads', label: 'לידים', icon: Users },
     { href: '/admin/packages', label: 'חבילות', icon: Package },
     { href: '/admin/products', label: 'מוצרים', icon: Package },
     { href: '/admin/users', label: 'משתמשים', icon: Users },

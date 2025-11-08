@@ -4,6 +4,7 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
+import { createAuditLog, AuditActions } from '@/lib/audit-log';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,3 +1,6 @@
+/**
+ * Admin Lead Status API
+ */
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
@@ -7,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 const sql = neon();
 
-// PATCH - Update user role (admin only)
+// PATCH - Update lead status
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,59 +18,50 @@ export async function PATCH(
   try {
     const admin = await requireAdmin(request);
     const { id } = await params;
-    const userId = parseInt(id);
-
     const body = await request.json();
-    const { role } = body;
+    const { status } = body;
 
-    if (!role || !['customer', 'support', 'manager', 'admin', 'super_admin'].includes(role)) {
+    if (!status || !['new', 'contacted', 'qualified', 'converted', 'lost'].includes(status)) {
       return NextResponse.json(
-        { ok: false, error: 'Invalid role' },
+        { ok: false, error: 'Invalid status' },
         { status: 400 }
       );
     }
 
-    // Don't allow changing super_admin unless current user is super_admin
-    if (role === 'super_admin' && admin.role !== 'super_admin') {
-      return NextResponse.json(
-        { ok: false, error: 'Only super_admin can assign super_admin role' },
-        { status: 403 }
-      );
-    }
-
-    // Don't allow demoting super_admin
-    const [currentUser] = await sql`
-      SELECT role FROM users WHERE id = ${userId} LIMIT 1
+    // Get current lead
+    const [currentLead] = await sql`
+      SELECT status FROM leads WHERE id = ${parseInt(id)} LIMIT 1
     `.catch(() => []);
 
-    if (currentUser && currentUser.role === 'super_admin' && role !== 'super_admin' && admin.role !== 'super_admin') {
+    if (!currentLead) {
       return NextResponse.json(
-        { ok: false, error: 'Cannot demote super_admin' },
-        { status: 403 }
+        { ok: false, error: 'Lead not found' },
+        { status: 404 }
       );
     }
 
+    // Update lead status
     await sql`
-      UPDATE users
-      SET role = ${role}, updated_at = NOW()
-      WHERE id = ${userId}
+      UPDATE leads
+      SET status = ${status}, updated_at = NOW()
+      WHERE id = ${parseInt(id)}
     `;
 
     // Create audit log
     await createAuditLog(
       admin.id,
       admin.email,
-      AuditActions.USER_UPDATED,
-      'user',
-      userId,
-      { oldRole: currentUser.role, newRole: role },
+      'lead_status_changed',
+      'lead',
+      parseInt(id),
+      { oldStatus: currentLead.status, newStatus: status },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined
     );
 
     return NextResponse.json({
       ok: true,
-      message: 'Role updated successfully',
+      message: 'Lead status updated successfully',
     });
   } catch (error: any) {
     if (error.message === 'Unauthorized' || error.message.includes('Forbidden')) {
@@ -77,9 +71,9 @@ export async function PATCH(
       );
     }
 
-    console.error('Error updating user role:', error);
+    console.error('Error updating lead status:', error);
     return NextResponse.json(
-      { ok: false, error: 'Failed to update user role' },
+      { ok: false, error: 'Failed to update lead status' },
       { status: 500 }
     );
   }

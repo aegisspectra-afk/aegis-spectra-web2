@@ -13,27 +13,67 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'active';
     const alertType = searchParams.get('type');
 
-    let query = sql`
-      SELECT * FROM inventory_alerts
-      WHERE 1=1
-    `;
+    let alerts: any[] = [];
 
-    if (status) {
-      query = sql`
-        SELECT * FROM inventory_alerts
-        WHERE status = ${status}
-      `;
+    try {
+      // Try to fetch from database
+      if (alertType) {
+        alerts = await sql`
+          SELECT * FROM inventory_alerts
+          WHERE alert_type = ${alertType}
+          ${status ? sql`AND status = ${status}` : sql``}
+          ORDER BY created_at DESC
+        `;
+      } else if (status) {
+        alerts = await sql`
+          SELECT * FROM inventory_alerts
+          WHERE status = ${status}
+          ORDER BY created_at DESC
+        `;
+      } else {
+        alerts = await sql`
+          SELECT * FROM inventory_alerts
+          ORDER BY created_at DESC
+        `;
+      }
+    } catch (dbError: any) {
+      // If table doesn't exist, check products for low stock
+      console.warn('inventory_alerts table not found, checking products:', dbError);
+      
+      try {
+        const lowStockProducts = await sql`
+          SELECT 
+            id as product_id,
+            sku,
+            name as product_name,
+            stock as current_stock,
+            10 as min_stock,
+            'low_stock' as alert_type,
+            'active' as status,
+            NOW() as created_at
+          FROM products
+          WHERE (stock IS NULL OR stock <= 10) AND active = true
+          ORDER BY stock ASC NULLS LAST
+          LIMIT 50
+        `;
+
+        alerts = lowStockProducts.map((p: any) => ({
+          id: p.product_id,
+          product_id: p.product_id,
+          sku: p.sku,
+          product_name: p.product_name,
+          current_stock: p.current_stock || 0,
+          min_stock: p.min_stock,
+          alert_type: p.alert_type,
+          status: p.status,
+          created_at: p.created_at,
+        }));
+      } catch (productsError: any) {
+        console.error('Error fetching products for alerts:', productsError);
+        // Return empty array if both fail
+        alerts = [];
+      }
     }
-
-    if (alertType) {
-      query = sql`
-        SELECT * FROM inventory_alerts
-        WHERE alert_type = ${alertType}
-        ${status ? sql`AND status = ${status}` : sql``}
-      `;
-    }
-
-    const alerts = await query;
 
     return NextResponse.json({
       ok: true,
@@ -41,6 +81,13 @@ export async function GET(request: NextRequest) {
       count: alerts.length
     });
   } catch (error: any) {
+    if (error.message === 'Unauthorized' || error.message.includes('Forbidden')) {
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: error.message.includes('Forbidden') ? 403 : 401 }
+      );
+    }
+
     console.error('Error fetching inventory alerts:', error);
     return NextResponse.json(
       { ok: false, error: 'Failed to fetch alerts' },

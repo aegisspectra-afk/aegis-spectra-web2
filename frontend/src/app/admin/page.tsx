@@ -209,6 +209,15 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <Link
+                href="/admin/orders"
+                className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
+              >
+                <ShoppingCart className="text-cyan-400 mb-3" size={32} />
+                <h3 className="font-semibold text-white mb-1">ניהול הזמנות</h3>
+                <p className="text-gray-400 text-sm">עקוב אחר הזמנות, עדכן סטטוס</p>
+              </Link>
+
+              <Link
                 href="/admin/packages"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
@@ -221,7 +230,7 @@ export default function AdminDashboard() {
                 href="/admin/products"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
-                <ShoppingCart className="text-cyan-400 mb-3" size={32} />
+                <Package className="text-cyan-400 mb-3" size={32} />
                 <h3 className="font-semibold text-white mb-1">ניהול מוצרים</h3>
                 <p className="text-gray-400 text-sm">עקוב אחר מוצרים, עדכן מלאי</p>
               </Link>
@@ -230,18 +239,9 @@ export default function AdminDashboard() {
                 href="/admin/users"
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
               >
-                <MessageSquare className="text-cyan-400 mb-3" size={32} />
+                <Users className="text-cyan-400 mb-3" size={32} />
                 <h3 className="font-semibold text-white mb-1">ניהול משתמשים</h3>
                 <p className="text-gray-400 text-sm">הרשאות, תפקידים, ניהול</p>
-              </Link>
-
-              <Link
-                href="/admin/analytics"
-                className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-cyan-500 transition-colors"
-              >
-                <BarChart3 className="text-cyan-400 mb-3" size={32} />
-                <h3 className="font-semibold text-white mb-1">אנליטיקה</h3>
-                <p className="text-gray-400 text-sm">דוחות מפורטים, טרנדים</p>
               </Link>
             </div>
 

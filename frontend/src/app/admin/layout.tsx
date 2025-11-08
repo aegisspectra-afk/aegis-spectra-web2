@@ -74,11 +74,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { href: '/admin', label: 'דשבורד', icon: LayoutDashboard },
+    { href: '/admin/orders', label: 'הזמנות', icon: ShoppingCart },
     { href: '/admin/packages', label: 'חבילות', icon: Package },
-    { href: '/admin/products', label: 'מוצרים', icon: ShoppingCart },
+    { href: '/admin/products', label: 'מוצרים', icon: Package },
     { href: '/admin/users', label: 'משתמשים', icon: Users },
-    { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
     { href: '/admin/inventory', label: 'מלאי', icon: Package },
+    { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
+    { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
+    { href: '/admin/settings', label: 'הגדרות', icon: Settings },
   ];
 
   return (

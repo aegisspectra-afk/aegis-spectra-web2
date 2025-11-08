@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => setShowCreateForm(true)}
+              onClick={() => router.push('/admin/users/new')}
               className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors flex items-center gap-2"
             >
               <Plus size={18} />

@@ -43,7 +43,6 @@ export default function AdminPackageEditPage() {
         pricing: pkg.pricing,
         features: pkg.features,
         specifications: pkg.specifications,
-        addons: pkg.addons,
         popular: pkg.popular || false,
         recommended: pkg.recommended || false,
       });

@@ -57,7 +57,8 @@ export async function GET(request: NextRequest) {
       if (status) {
         ordersQuery = sql`${ordersQuery} AND status = ${status}`;
       }
-      const orders = await ordersQuery.limit(10).catch(() => []);
+      ordersQuery = sql`${ordersQuery} LIMIT 10`;
+      const orders = await ordersQuery.catch(() => []);
       results.push(...orders);
     }
 
@@ -80,7 +81,8 @@ export async function GET(request: NextRequest) {
       if (status) {
         productsQuery = sql`${productsQuery} AND active = ${status === 'active'}`;
       }
-      const products = await productsQuery.limit(10).catch(() => []);
+      productsQuery = sql`${productsQuery} LIMIT 10`;
+      const products = await productsQuery.catch(() => []);
       results.push(...products);
     }
 
@@ -109,7 +111,8 @@ export async function GET(request: NextRequest) {
       if (status) {
         usersQuery = sql`${usersQuery} AND status = ${status}`;
       }
-      const users = await usersQuery.limit(10).catch(() => []);
+      usersQuery = sql`${usersQuery} LIMIT 10`;
+      const users = await usersQuery.catch(() => []);
       results.push(...users);
     }
 
@@ -136,7 +139,8 @@ export async function GET(request: NextRequest) {
       if (dateTo) {
         leadsQuery = sql`${leadsQuery} AND created_at <= ${dateTo}`;
       }
-      const leads = await leadsQuery.limit(10).catch(() => []);
+      leadsQuery = sql`${leadsQuery} LIMIT 10`;
+      const leads = await leadsQuery.catch(() => []);
       results.push(...leads);
     }
 
@@ -165,7 +169,8 @@ export async function GET(request: NextRequest) {
       if (status) {
         reviewsQuery = sql`${reviewsQuery} AND status = ${status}`;
       }
-      const reviews = await reviewsQuery.limit(10).catch(() => []);
+      reviewsQuery = sql`${reviewsQuery} LIMIT 10`;
+      const reviews = await reviewsQuery.catch(() => []);
       results.push(...reviews);
     }
 
@@ -194,7 +199,8 @@ export async function GET(request: NextRequest) {
       if (status) {
         blogQuery = sql`${blogQuery} AND status = ${status}`;
       }
-      const blogPosts = await blogQuery.limit(10).catch(() => []);
+      blogQuery = sql`${blogQuery} LIMIT 10`;
+      const blogPosts = await blogQuery.catch(() => []);
       results.push(...blogPosts);
     }
 

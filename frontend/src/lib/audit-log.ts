@@ -101,7 +101,8 @@ export async function getAuditLogs(
       query = sql`${query} OFFSET ${filters.offset}`;
     }
 
-    return await query;
+    const results = await query;
+    return results as AuditLog[];
   } catch (error: any) {
     console.error('Error fetching audit logs:', error);
     return [];

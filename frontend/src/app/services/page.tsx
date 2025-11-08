@@ -175,14 +175,14 @@ export default function ServicesPage() {
                         className="rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm p-6 hover:border-zinc-600 transition-all h-full flex flex-col"
                         whileHover={{ y: -8 }}
                       >
-                        <div className="inline-flex items-center justify-center size-14 bg-zinc-800/50 rounded-xl mb-4 border border-zinc-700/50">
+                        <div className="inline-flex items-center justify-center size-14 bg-zinc-800/50 rounded-xl mb-4 border border-zinc-700/50 flex-shrink-0">
                           <Icon className="size-7 text-zinc-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
-                        <p className="text-zinc-300 leading-relaxed text-sm mb-4 flex-grow">
+                        <h3 className="text-xl font-bold text-white mb-3 flex-shrink-0">{service.title}</h3>
+                        <p className="text-zinc-300 leading-relaxed text-sm mb-4 flex-grow min-h-[80px]">
                           {service.description}
                         </p>
-                        <ul className="space-y-2">
+                        <ul className="space-y-2 flex-shrink-0">
                           {service.features.map((feature, fi) => (
                             <li key={fi} className="flex items-center gap-2 text-sm text-zinc-400">
                               <div className="size-1.5 rounded-full bg-zinc-400" />

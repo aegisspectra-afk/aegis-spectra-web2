@@ -13,7 +13,7 @@ export default function CTA() {
         <ScrollReveal>
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
-              <span className="text-white">הגיע הזמן שלך להצטרף אליהם</span>
+              <span className="text-white">הגיע הזמן להצטרף אלינו</span>
             </h2>
             <p className="text-xl text-zinc-300 mb-8 max-w-2xl mx-auto">
               השאר את הפרטים שלך ונחזור אליך עם הצעה מותאמת אישית לאבטחה מתקדמת.

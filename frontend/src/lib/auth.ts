@@ -79,8 +79,8 @@ export function isStrongPassword(password: string): { valid: boolean; errors: st
   if (password.length < 8) {
     errors.push('סיסמה חייבת להכיל לפחות 8 תווים');
   }
-  if (!/[A-Z]/.test(password) && !/[א-ת]/.test(password)) {
-    errors.push('סיסמה חייבת להכיל אות גדולה או אות עברית');
+  if (!/[A-Z]/.test(password)) {
+    errors.push('סיסמה חייבת להכיל אות גדולה באנגלית');
   }
   if (!/[a-z]/.test(password)) {
     errors.push('סיסמה חייבת להכיל אות קטנה');

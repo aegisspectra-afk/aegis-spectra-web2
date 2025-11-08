@@ -144,11 +144,24 @@ export default function AdminDashboard() {
             <button
               onClick={() => {
                 const token = localStorage.getItem("admin_token");
-                if (token) fetchStats(token);
+                if (token) {
+                  setLoading(true);
+                  fetchStats(token);
+                }
               }}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+              disabled={loading}
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              רענן נתונים
+              {loading ? (
+                <>
+                  <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  מרענן...
+                </>
+              ) : (
+                <>
+                  רענן נתונים
+                </>
+              )}
             </button>
             <button
               onClick={handleLogout}
@@ -176,37 +189,37 @@ export default function AdminDashboard() {
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <Link href="/admin/orders" className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-colors cursor-pointer">
                 <div className="flex items-center justify-between mb-4">
                   <DollarSign className="text-green-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.totalRevenue.toLocaleString("he-IL")} ₪</span>
                 </div>
                 <p className="text-gray-400 text-sm">סה&quot;כ הכנסות</p>
-              </div>
+              </Link>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <Link href="/admin/orders" className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer">
                 <div className="flex items-center justify-between mb-4">
                   <ShoppingCart className="text-blue-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.totalOrders}</span>
                 </div>
                 <p className="text-gray-400 text-sm">סה&quot;כ הזמנות</p>
-              </div>
+              </Link>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <Link href="/admin/users" className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-purple-500 transition-colors cursor-pointer">
                 <div className="flex items-center justify-between mb-4">
                   <Users className="text-purple-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.totalCustomers}</span>
                 </div>
                 <p className="text-gray-400 text-sm">לקוחות</p>
-              </div>
+              </Link>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <Link href="/admin/inventory/alerts" className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-yellow-500 transition-colors cursor-pointer">
                 <div className="flex items-center justify-between mb-4">
                   <AlertTriangle className="text-yellow-400" size={24} />
                   <span className="text-2xl font-bold text-white">{stats.lowStockAlerts}</span>
                 </div>
                 <p className="text-gray-400 text-sm">התראות מלאי</p>
-              </div>
+              </Link>
             </div>
 
             {/* Quick Actions */}

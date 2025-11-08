@@ -34,7 +34,10 @@ import {
   Plug,
   Image as ImageIcon,
   Database,
-  Gauge
+  Gauge,
+  ChevronDown,
+  ChevronUp,
+  Store
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -43,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     // Check authentication
@@ -90,39 +94,82 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-const menuItems = [
+interface MenuItem {
+  href?: string;
+  label: string;
+  icon: any;
+  children?: MenuItem[];
+}
+
+const menuItems: MenuItem[] = [
   { href: '/admin', label: 'דשבורד', icon: LayoutDashboard },
   { href: '/admin/orders', label: 'הזמנות', icon: ShoppingCart },
+  {
+    label: 'חנות',
+    icon: Store,
+    children: [
+      { href: '/admin/products', label: 'מוצרים', icon: Package },
+      { href: '/admin/packages', label: 'חבילות', icon: Package },
+      { href: '/admin/inventory', label: 'מלאי', icon: Package },
+      { href: '/admin/coupons', label: 'קופונים', icon: Tag },
+      { href: '/admin/reviews', label: 'ביקורות', icon: Star },
+    ],
+  },
   { href: '/admin/leads', label: 'לידים', icon: Users },
-  { href: '/admin/support', label: 'תמיכה', icon: MessageSquare },
-  { href: '/admin/packages', label: 'חבילות', icon: Package },
-  { href: '/admin/products', label: 'מוצרים', icon: Package },
   { href: '/admin/users', label: 'משתמשים', icon: Users },
-  { href: '/admin/inventory', label: 'מלאי', icon: Package },
-  { href: '/admin/shipping', label: 'משלוחים', icon: Truck },
-  { href: '/admin/payments', label: 'תשלומים', icon: CreditCard },
-  { href: '/admin/crm', label: 'CRM', icon: Users },
-  { href: '/admin/vendors', label: 'ספקים', icon: Building2 },
-  { href: '/admin/coupons', label: 'קופונים', icon: Tag },
-  { href: '/admin/reviews', label: 'ביקורות', icon: Star },
   { href: '/admin/blog', label: 'בלוג', icon: FileText },
-  { href: '/admin/search', label: 'חיפוש מתקדם', icon: Search },
-  { href: '/admin/export', label: 'ייצוא נתונים', icon: Download },
-  { href: '/admin/seo', label: 'SEO', icon: Search },
-  { href: '/admin/email-templates', label: 'תבניות אימייל', icon: Mail },
-  { href: '/admin/api-keys', label: 'מפתחות API', icon: Key },
-  { href: '/admin/recurring-orders', label: 'הזמנות חוזרות', icon: Repeat },
-  { href: '/admin/subscriptions', label: 'מנויים', icon: CreditCard },
-  { href: '/admin/permissions', label: 'הרשאות', icon: Shield },
-  { href: '/admin/security', label: 'אבטחה', icon: Shield },
-  { href: '/admin/sms', label: 'SMS', icon: MessageSquare },
-  { href: '/admin/push-notifications', label: 'Push', icon: Bell },
-  { href: '/admin/integrations', label: 'אינטגרציות', icon: Plug },
-  { href: '/admin/images', label: 'תמונות', icon: ImageIcon },
-  { href: '/admin/backup', label: 'גיבויים', icon: Database },
-  { href: '/admin/performance', label: 'ביצועים', icon: Gauge },
-  { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
-  { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
+  { href: '/admin/support', label: 'תמיכה', icon: MessageSquare },
+  {
+    label: 'מכירות ושיווק',
+    icon: BarChart3,
+    children: [
+      { href: '/admin/crm', label: 'CRM', icon: Users },
+      { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
+      { href: '/admin/search', label: 'חיפוש מתקדם', icon: Search },
+      { href: '/admin/export', label: 'ייצוא נתונים', icon: Download },
+      { href: '/admin/seo', label: 'SEO', icon: Search },
+    ],
+  },
+  {
+    label: 'תשלומים ומשלוחים',
+    icon: CreditCard,
+    children: [
+      { href: '/admin/payments', label: 'תשלומים', icon: CreditCard },
+      { href: '/admin/shipping', label: 'משלוחים', icon: Truck },
+      { href: '/admin/recurring-orders', label: 'הזמנות חוזרות', icon: Repeat },
+      { href: '/admin/subscriptions', label: 'מנויים', icon: CreditCard },
+    ],
+  },
+  {
+    label: 'תקשורת',
+    icon: MessageSquare,
+    children: [
+      { href: '/admin/email-templates', label: 'תבניות אימייל', icon: Mail },
+      { href: '/admin/sms', label: 'SMS', icon: MessageSquare },
+      { href: '/admin/push-notifications', label: 'Push', icon: Bell },
+    ],
+  },
+  {
+    label: 'ניהול ואבטחה',
+    icon: Shield,
+    children: [
+      { href: '/admin/permissions', label: 'הרשאות', icon: Shield },
+      { href: '/admin/security', label: 'אבטחה', icon: Shield },
+      { href: '/admin/api-keys', label: 'מפתחות API', icon: Key },
+      { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
+    ],
+  },
+  {
+    label: 'תשתית',
+    icon: Database,
+    children: [
+      { href: '/admin/vendors', label: 'ספקים', icon: Building2 },
+      { href: '/admin/images', label: 'תמונות', icon: ImageIcon },
+      { href: '/admin/backup', label: 'גיבויים', icon: Database },
+      { href: '/admin/performance', label: 'ביצועים', icon: Gauge },
+      { href: '/admin/integrations', label: 'אינטגרציות', icon: Plug },
+    ],
+  },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },
 ];
 
@@ -163,17 +210,79 @@ const menuItems = [
             </div>
 
             {/* Navigation */}
-            <nav className="space-y-2">
-              {menuItems.map((item) => {
+            <nav className="space-y-1">
+              {menuItems.map((item, index) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || 
-                                (item.href === '/admin' && pathname === '/admin') ||
-                                (item.href !== '/admin' && pathname.startsWith(item.href));
+                const hasChildren = item.children && item.children.length > 0;
+                const isCategoryOpen = openCategories[item.label] || false;
+                const isActive = item.href && (
+                  pathname === item.href || 
+                  (item.href === '/admin' && pathname === '/admin') ||
+                  (item.href !== '/admin' && pathname.startsWith(item.href))
+                ) || (hasChildren && item.children?.some(child => 
+                  pathname === child.href || (child.href && pathname.startsWith(child.href))
+                ));
+                
+                if (hasChildren) {
+                  return (
+                    <div key={index}>
+                      <button
+                        onClick={() => setOpenCategories({ ...openCategories, [item.label]: !isCategoryOpen })}
+                        className={`
+                          w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors
+                          ${isActive 
+                            ? 'bg-gold/20 text-gold border-r-2 border-gold' 
+                            : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className="size-5" />
+                          <span>{item.label}</span>
+                        </div>
+                        {isCategoryOpen ? (
+                          <ChevronUp className="size-4" />
+                        ) : (
+                          <ChevronDown className="size-4" />
+                        )}
+                      </button>
+                      {isCategoryOpen && (
+                        <div className="mr-4 mt-1 space-y-1 border-r-2 border-zinc-700">
+                          {item.children?.map((child, childIndex) => {
+                            const ChildIcon = child.icon;
+                            const isChildActive = child.href && (
+                              pathname === child.href || 
+                              (child.href !== '/admin' && pathname.startsWith(child.href))
+                            );
+                            
+                            return (
+                              <Link
+                                key={childIndex}
+                                href={child.href || '#'}
+                                onClick={() => setSidebarOpen(false)}
+                                className={`
+                                  flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm
+                                  ${isChildActive 
+                                    ? 'bg-gold/10 text-gold' 
+                                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                  }
+                                `}
+                              >
+                                <ChildIcon className="size-4" />
+                                <span>{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
                 
                 return (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={index}
+                    href={item.href || '#'}
                     onClick={() => setSidebarOpen(false)}
                     className={`
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-colors

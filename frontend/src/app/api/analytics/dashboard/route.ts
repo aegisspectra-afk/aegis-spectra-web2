@@ -114,17 +114,16 @@ export async function GET(request: NextRequest) {
     // Customer metrics - with error handling
     let customerMetrics: any[] = [];
     try {
-      customerMetrics = await sql`
-        SELECT 
-          COUNT(DISTINCT customer_email) as total_customers,
-          COUNT(DISTINCT customer_email) FILTER (
-            WHERE created_at >= NOW() - INTERVAL '30 days'
-          ) as new_customers_30d,
-          COUNT(DISTINCT customer_email) FILTER (
-            WHERE created_at >= NOW() - INTERVAL '7 days'
-          ) as new_customers_7d
-        FROM orders
-      `;
+      // Get total users count
+      const userCount = await sql`
+        SELECT COUNT(*) as total_users FROM users
+      `.catch(() => [{ total_users: 0 }]);
+      
+      customerMetrics = [{
+        total_customers: parseInt(userCount[0]?.total_users || '0'),
+        new_customers_30d: 0,
+        new_customers_7d: 0
+      }];
     } catch (err: any) {
       console.error('Error fetching customer metrics:', err);
       customerMetrics = [{

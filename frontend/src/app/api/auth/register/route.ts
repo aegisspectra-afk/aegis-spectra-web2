@@ -213,23 +213,28 @@ export async function POST(request: NextRequest) {
 
     // Send verification email (async, don't wait)
     if (email) {
-      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${emailVerificationToken}`;
+      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://aegis-spectra.netlify.app'}/verify-email?token=${emailVerificationToken}`;
       
-      emailService.sendWelcomeEmail({
-        user: { name, email }
-      }).catch(err => console.error('Failed to send welcome email:', err));
-
-      // Send verification email
+      // Send welcome email with verification link
       emailService.sendEmail({
         to: email,
-        subject: 'אימות אימייל - Aegis Spectra',
+        subject: 'ברוכים הבאים ל-Aegis Spectra - אימות אימייל',
         html: `
-          <h2>ברוכים הבאים ל-Aegis Spectra!</h2>
-          <p>שלום ${name},</p>
-          <p>תודה על ההרשמה. אנא לחץ על הקישור הבא כדי לאמת את האימייל שלך:</p>
-          <a href="${verificationUrl}">${verificationUrl}</a>
-          <p>הקישור יפוג בעוד 24 שעות.</p>
-          <p>האימייל שלך לא יאומת עד שתלחץ על הקישור.</p>
+          <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0B0B0D; color: #ECECEC;">
+            <h2 style="color: #D4AF37; margin-bottom: 20px;">ברוכים הבאים ל-Aegis Spectra!</h2>
+            <p style="margin-bottom: 15px;">שלום ${name},</p>
+            <p style="margin-bottom: 15px;">תודה על ההרשמה לאתר שלנו. אנחנו שמחים שהצטרפת אלינו!</p>
+            <p style="margin-bottom: 20px;">כדי להשלים את ההרשמה, אנא לחץ על הקישור הבא כדי לאמת את האימייל שלך:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" style="display: inline-block; background-color: #D4AF37; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">אמת אימייל</a>
+            </div>
+            <p style="margin-bottom: 10px; font-size: 14px; color: #999;">או העתק את הקישור הבא לדפדפן שלך:</p>
+            <p style="margin-bottom: 20px; font-size: 12px; color: #666; word-break: break-all;">${verificationUrl}</p>
+            <p style="margin-bottom: 10px; font-size: 14px; color: #999;">הקישור יפוג בעוד 24 שעות.</p>
+            <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #666;">
+              אם לא ביצעת הרשמה לאתר שלנו, אנא התעלם מהאימייל הזה.
+            </p>
+          </div>
         `
       }).catch(err => console.error('Failed to send verification email:', err));
     }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Plus, Edit, Trash2, Shield, UserCheck, Mail, Phone } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Shield, UserCheck, Mail, Phone, CheckCircle } from "lucide-react";
 import { useToastContext } from "@/components/ToastProvider";
 
 interface User {
@@ -211,8 +211,8 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         {user.email_verified ? (
-                          <span className="flex items-center gap-1 text-green-400 text-sm">
-                            <UserCheck size={14} />
+                          <span className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                            <CheckCircle size={14} />
                             מאומת
                           </span>
                         ) : (
@@ -225,6 +225,42 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            const token = localStorage.getItem("admin_token");
+                            if (!token) return;
+                            
+                            try {
+                              const res = await fetch(`/api/admin/users/${user.id}/verify`, {
+                                method: "PATCH",
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({ verified: !user.email_verified }),
+                              });
+
+                              const data = await res.json();
+                              if (data.ok) {
+                                showToast(user.email_verified ? "משתמש בוטל אימות" : "משתמש אומת בהצלחה", "success");
+                                fetchUsers(token);
+                              } else {
+                                showToast(data.error || "שגיאה באימות משתמש", "error");
+                              }
+                            } catch (err) {
+                              console.error("Error verifying user:", err);
+                              showToast("שגיאה באימות משתמש", "error");
+                            }
+                          }}
+                          className={`p-2 rounded transition-colors ${
+                            user.email_verified
+                              ? "text-yellow-400 hover:bg-yellow-900/20"
+                              : "text-green-400 hover:bg-green-900/20"
+                          }`}
+                          title={user.email_verified ? "בטל אימות" : "אמת משתמש"}
+                        >
+                          <UserCheck size={18} />
+                        </button>
                         <button
                           onClick={() => setEditingUser(user)}
                           className="p-2 text-cyan-400 hover:bg-cyan-900/20 rounded transition-colors"

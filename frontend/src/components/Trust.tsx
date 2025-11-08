@@ -19,7 +19,7 @@ const trustItems = [
   {
     icon: Users,
     title: "ניסיון מקצועי",
-    description: "ניסיון צבאי ומקצועי בהתקנות אבטחה",
+    description: "ניסיון רב שנים בהתקנות אבטחה מקצועיות",
   },
   {
     icon: Clock,
@@ -50,16 +50,16 @@ export default function Trust() {
               <ScrollReveal key={item.title} delay={index * 0.1} direction="up">
                 <TiltCard intensity={8}>
                   <motion.div
-                    className="text-center p-8 rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm hover:border-zinc-600 transition-all group"
+                    className="text-center p-8 rounded-2xl border border-zinc-800/50 bg-black/40 backdrop-blur-sm hover:border-zinc-600 transition-all group h-full flex flex-col"
                     whileHover={{ y: -8 }}
                   >
-                    <div className="mx-auto mb-4 p-6 rounded-full bg-zinc-800/50 border border-zinc-700/50 w-fit group-hover:bg-zinc-700/50 transition-colors">
+                    <div className="mx-auto mb-4 p-6 rounded-full bg-zinc-800/50 border border-zinc-700/50 w-fit group-hover:bg-zinc-700/50 transition-colors flex-shrink-0">
                       <Icon className="size-12 text-zinc-300" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-white group-hover:text-zinc-200 transition">
+                    <h3 className="text-xl font-bold mb-3 text-white group-hover:text-zinc-200 transition flex-shrink-0">
                       {item.title}
                     </h3>
-                    <p className="text-zinc-300 leading-relaxed">{item.description}</p>
+                    <p className="text-zinc-300 leading-relaxed flex-grow">{item.description}</p>
                   </motion.div>
                 </TiltCard>
               </ScrollReveal>

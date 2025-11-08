@@ -97,7 +97,7 @@ export default function LeadForm() {
   return (
     <form 
       onSubmit={onSubmit}
-      className="grid md:grid-cols-2 gap-4"
+      className="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
       {/* Honeypot field for spam protection */}
       <div className="hidden">
@@ -106,9 +106,13 @@ export default function LeadForm() {
         </label>
       </div>
 
-      <div className="relative">
+      <div className="relative md:col-span-1">
+        <label htmlFor="name" className="block text-sm font-medium mb-2 text-zinc-300">
+          שם מלא *
+        </label>
         <input 
-          className={`${base} ${errors.name && touched.name ? errorClass : ""}`}
+          id="name"
+          className={`w-full ${base} ${errors.name && touched.name ? errorClass : ""}`}
           name="name" 
           type="text"
           required 
@@ -124,9 +128,13 @@ export default function LeadForm() {
         )}
       </div>
       
-      <div className="relative">
+      <div className="relative md:col-span-1">
+        <label htmlFor="phone" className="block text-sm font-medium mb-2 text-zinc-300">
+          טלפון *
+        </label>
         <input 
-          className={`${base} ${errors.phone && touched.phone ? errorClass : ""}`}
+          id="phone"
+          className={`w-full ${base} ${errors.phone && touched.phone ? errorClass : ""}`}
           name="phone" 
           type="tel"
           required 
@@ -157,44 +165,64 @@ export default function LeadForm() {
         )}
       </div>
       
-      <input 
-        className={base}
-        name="city" 
-        type="text"
-        placeholder="עיר" 
-        disabled={status === "loading"}
-        aria-label="עיר"
-        onBlur={(e) => handleBlur("city", e.target.value)}
-      />
+      <div className="relative md:col-span-1">
+        <label htmlFor="city" className="block text-sm font-medium mb-2 text-zinc-300">
+          עיר
+        </label>
+        <input 
+          id="city"
+          className={`w-full ${base}`}
+          name="city" 
+          type="text"
+          placeholder="עיר" 
+          disabled={status === "loading"}
+          aria-label="עיר"
+          onBlur={(e) => handleBlur("city", e.target.value)}
+        />
+      </div>
       
-      <input 
-        className={base}
-        name="product_sku" 
-        type="text"
-        placeholder="דגם מועדף (למשל H-01-2TB)" 
-        disabled={status === "loading"}
-        aria-label="דגם מועדף"
-        onBlur={(e) => handleBlur("product_sku", e.target.value)}
-      />
+      <div className="relative md:col-span-1">
+        <label htmlFor="product_sku" className="block text-sm font-medium mb-2 text-zinc-300">
+          דגם מועדף
+        </label>
+        <input 
+          id="product_sku"
+          className={`w-full ${base}`}
+          name="product_sku" 
+          type="text"
+          placeholder="דגם מועדף (למשל H-01-2TB)" 
+          disabled={status === "loading"}
+          aria-label="דגם מועדף"
+          onBlur={(e) => handleBlur("product_sku", e.target.value)}
+        />
+      </div>
       
-      <textarea 
-        className={`${base} md:col-span-2`}
-        name="message" 
-        placeholder="הערות" 
-        rows={4}
-        disabled={status === "loading"}
-        aria-label="הערות"
-        onBlur={(e) => handleBlur("message", e.target.value)}
-      />
+      <div className="relative md:col-span-2">
+        <label htmlFor="message" className="block text-sm font-medium mb-2 text-zinc-300">
+          הערות
+        </label>
+        <textarea 
+          id="message"
+          className={`w-full ${base} resize-none`}
+          name="message" 
+          placeholder="הערות" 
+          rows={4}
+          disabled={status === "loading"}
+          aria-label="הערות"
+          onBlur={(e) => handleBlur("message", e.target.value)}
+        />
+      </div>
       
-      <button 
-        type="submit"
-        className="md:col-span-2 rounded-xl bg-gold text-black font-semibold py-3 hover:bg-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
-        disabled={status === "loading"}
-        aria-label="שלח טופס"
-      >
-        {status === "loading" ? "שולח..." : "שליחה"}
-      </button>
+      <div className="md:col-span-2">
+        <button 
+          type="submit"
+          className="w-full rounded-xl bg-gold text-black font-semibold py-3 hover:bg-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-charcoal"
+          disabled={status === "loading"}
+          aria-label="שלח טופס"
+        >
+          {status === "loading" ? "שולח..." : "שליחה"}
+        </button>
+      </div>
       
       {status === "ok" && (
         <p className="text-green-400 md:col-span-2 text-center">

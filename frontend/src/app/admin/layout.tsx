@@ -23,7 +23,9 @@ import {
   Star,
   FileText,
   Download,
-  Search
+  Search,
+  Truck,
+  CreditCard
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -88,11 +90,14 @@ const menuItems = [
   { href: '/admin/products', label: 'מוצרים', icon: Package },
   { href: '/admin/users', label: 'משתמשים', icon: Users },
   { href: '/admin/inventory', label: 'מלאי', icon: Package },
+  { href: '/admin/shipping', label: 'משלוחים', icon: Truck },
+  { href: '/admin/payments', label: 'תשלומים', icon: CreditCard },
   { href: '/admin/coupons', label: 'קופונים', icon: Tag },
   { href: '/admin/reviews', label: 'ביקורות', icon: Star },
   { href: '/admin/blog', label: 'בלוג', icon: FileText },
   { href: '/admin/search', label: 'חיפוש מתקדם', icon: Search },
   { href: '/admin/export', label: 'ייצוא נתונים', icon: Download },
+  { href: '/admin/seo', label: 'SEO', icon: Search },
   { href: '/admin/analytics', label: 'אנליטיקה', icon: BarChart3 },
   { href: '/admin/logs', label: 'יומן פעילות', icon: Shield },
   { href: '/admin/settings', label: 'הגדרות', icon: Settings },

@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
           last_used = NOW(),
           is_active = true,
           expires_at = ${expiresAt.toISOString()}
-      `.catch((error) => {
+      `.catch((error: any) => {
         console.error('Error creating session:', error);
         // Continue anyway - session might exist
       });

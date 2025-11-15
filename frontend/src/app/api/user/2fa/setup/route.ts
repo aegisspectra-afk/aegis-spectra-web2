@@ -116,10 +116,10 @@ export async function POST(request: NextRequest) {
     // Verify token
     let verified = false;
     try {
+      // otplib authenticator.verify accepts token and secret, window is optional
       verified = authenticator.verify({
         token,
         secret: userData.two_factor_secret_temp,
-        window: 2, // Allow 2 time steps before/after
       });
     } catch (verifyError: any) {
       console.error('Token verification error:', verifyError);
@@ -195,7 +195,6 @@ export async function DELETE(request: NextRequest) {
           verified = authenticator.verify({
             token,
             secret: userData.two_factor_secret,
-            window: 2,
           });
         } catch (verifyError: any) {
           verified = false;

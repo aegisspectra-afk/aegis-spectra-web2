@@ -78,7 +78,9 @@ export function ApiKeysManagement({ userEmail }: ApiKeysManagementProps) {
         fetchKeys();
         // Reveal the new key
         if (data.key.full_key) {
-          setRevealedKeys(new Set([...revealedKeys, data.key.id]));
+          const newRevealedKeys = new Set(revealedKeys);
+          newRevealedKeys.add(data.key.id);
+          setRevealedKeys(newRevealedKeys);
         }
       } else {
         showToast(data.error || "שגיאה ביצירת מפתח", "error");

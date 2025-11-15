@@ -153,7 +153,7 @@ export default function Home() {
               </motion.a>
             ))}
             {/* Show login/register or dashboard/logout */}
-            {typeof window !== 'undefined' && localStorage.getItem("user_token") ? (
+            {isMounted && typeof window !== 'undefined' && localStorage.getItem("user_token") ? (
               <div className="flex items-center gap-4">
                 <motion.a
                   href="/user"

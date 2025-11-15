@@ -1,7 +1,15 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for coupons');
+  sql = null;
+}
+
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
 
 function checkAuth(request: NextRequest): boolean {
@@ -19,38 +27,55 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code');
 
     if (code) {
-      // Validate coupon
-      const [coupon] = await sql`
-        SELECT * FROM loyalty_coupons
-        WHERE code = ${code}
-          AND status = 'active'
-          AND (valid_until IS NULL OR valid_until > NOW())
-          AND used_count < usage_limit
-      `;
-
-      if (!coupon) {
+      // If no database, return invalid coupon
+      if (!sql) {
+        console.log('Database not available, coupon validation not possible');
         return NextResponse.json(
           { ok: false, error: 'Invalid or expired coupon' },
           { status: 404 }
         );
       }
 
-      // Check if user-specific and matches
-      if (coupon.user_id && userId && coupon.user_id !== parseInt(userId)) {
+      try {
+        // Validate coupon
+        const [coupon] = await sql`
+          SELECT * FROM loyalty_coupons
+          WHERE code = ${code}
+            AND status = 'active'
+            AND (valid_until IS NULL OR valid_until > NOW())
+            AND used_count < usage_limit
+        `;
+
+        if (!coupon) {
+          return NextResponse.json(
+            { ok: false, error: 'Invalid or expired coupon' },
+            { status: 404 }
+          );
+        }
+
+        // Check if user-specific and matches
+        if (coupon.user_id && userId && coupon.user_id !== parseInt(userId)) {
+          return NextResponse.json(
+            { ok: false, error: 'Coupon not valid for this user' },
+            { status: 403 }
+          );
+        }
+
+        if (coupon.user_email && userEmail && coupon.user_email !== userEmail) {
+          return NextResponse.json(
+            { ok: false, error: 'Coupon not valid for this user' },
+            { status: 403 }
+          );
+        }
+
+        return NextResponse.json({ ok: true, coupon });
+      } catch (dbError: any) {
+        console.error('Database error validating coupon:', dbError);
         return NextResponse.json(
-          { ok: false, error: 'Coupon not valid for this user' },
-          { status: 403 }
+          { ok: false, error: 'Invalid or expired coupon' },
+          { status: 404 }
         );
       }
-
-      if (coupon.user_email && userEmail && coupon.user_email !== userEmail) {
-        return NextResponse.json(
-          { ok: false, error: 'Coupon not valid for this user' },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json({ ok: true, coupon });
     }
 
     // Get user's coupons
@@ -61,19 +86,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const coupons = await sql`
-      SELECT * FROM loyalty_coupons
-      WHERE ${userId ? sql`user_id = ${parseInt(userId)}` : sql`user_email = ${userEmail}`}
-        AND status = 'active'
-        AND (valid_until IS NULL OR valid_until > NOW())
-        AND used_count < usage_limit
-      ORDER BY created_at DESC
-    `;
+    // If no database, return empty coupons
+    if (!sql) {
+      console.log('Database not available, using fallback coupons');
+      return NextResponse.json({
+        ok: true,
+        coupons: []
+      });
+    }
 
-    return NextResponse.json({
-      ok: true,
-      coupons
-    });
+    try {
+      const coupons = await sql`
+        SELECT * FROM loyalty_coupons
+        WHERE ${userId ? sql`user_id = ${parseInt(userId)}` : sql`user_email = ${userEmail}`}
+          AND status = 'active'
+          AND (valid_until IS NULL OR valid_until > NOW())
+          AND used_count < usage_limit
+        ORDER BY created_at DESC
+      `;
+
+      return NextResponse.json({
+        ok: true,
+        coupons
+      });
+    } catch (dbError: any) {
+      console.error('Database error fetching coupons:', dbError);
+      // Return empty coupons on database error
+      return NextResponse.json({
+        ok: true,
+        coupons: []
+      });
+    }
   } catch (error: any) {
     console.error('Error fetching coupons:', error);
     return NextResponse.json(

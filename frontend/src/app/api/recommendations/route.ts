@@ -3,7 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for recommendations');
+  sql = null;
+}
 
 // GET - Get product recommendations
 export async function GET(request: NextRequest) {
@@ -22,9 +29,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // If no database, return empty recommendations
+    if (!sql) {
+      console.log('Database not available, using fallback recommendations');
+      return NextResponse.json({
+        ok: true,
+        recommendations: [],
+        type,
+        count: 0
+      });
+    }
+
     let recommendations: any[] = [];
 
-    switch (type) {
+    try {
+      switch (type) {
       case 'similar':
         // Similar products based on category, tags, specs
         if (productId) {
@@ -69,12 +88,21 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    return NextResponse.json({
-      ok: true,
-      recommendations,
-      type,
-      count: recommendations.length
-    });
+      return NextResponse.json({
+        ok: true,
+        recommendations,
+        type,
+        count: recommendations.length
+      });
+    } catch (dbError: any) {
+      console.error('Database error fetching recommendations:', dbError);
+      return NextResponse.json({
+        ok: true,
+        recommendations: [],
+        type,
+        count: 0
+      });
+    }
   } catch (error: any) {
     console.error('Error fetching recommendations:', error);
     return NextResponse.json(
@@ -86,7 +114,7 @@ export async function GET(request: NextRequest) {
 
 // Get similar products based on category, tags, specs
 async function getSimilarProducts(productIdOrSku: string, limit: number) {
-  const sql = neon();
+  if (!sql) return [];
   
   // Try to get product by ID or SKU
   let product: any;
@@ -125,7 +153,7 @@ async function getSimilarProducts(productIdOrSku: string, limit: number) {
 
 // Get related products (bought together)
 async function getRelatedProducts(productIdOrSku: string, limit: number) {
-  const sql = neon();
+  if (!sql) return [];
   
   // Try to get product by ID or SKU
   let product: any;
@@ -164,7 +192,7 @@ async function getRelatedProducts(productIdOrSku: string, limit: number) {
 
 // Get popular products
 async function getPopularProducts(limit: number) {
-  const sql = neon();
+  if (!sql) return [];
   
   // Get products sorted by rating, reviews, and sales
   const popular = await sql`
@@ -186,7 +214,7 @@ async function getPopularProducts(limit: number) {
 
 // Get personalized recommendations based on user history
 async function getPersonalizedRecommendations(userId: string, limit: number) {
-  const sql = neon();
+  if (!sql) return [];
   
   // Get user's order history
   const userOrders = await sql`

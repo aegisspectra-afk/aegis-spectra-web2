@@ -3,7 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
 import { createAuditLog, AuditActions } from '@/lib/audit-log';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for review details');
+  sql = null;
+}
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
 
 function checkAuth(request: NextRequest): boolean {
@@ -21,12 +28,19 @@ export async function GET(
     const { id } = await params;
     const reviewId = parseInt(id);
 
+    if (!sql) {
+      return NextResponse.json(
+        { ok: false, error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
     const [review] = await sql`
       SELECT r.*,
              (SELECT COUNT(*) FROM review_helpful_votes WHERE review_id = r.id AND is_helpful = true) as helpful_count
       FROM reviews r
       WHERE r.id = ${reviewId}
-    `;
+    `.catch(() => []);
 
     if (!review) {
       return NextResponse.json(
@@ -56,10 +70,17 @@ export async function PATCH(
     const body = await request.json();
     const { status, admin_notes, rating, title, review_text, images, user_email } = body;
 
+    if (!sql) {
+      return NextResponse.json(
+        { ok: false, error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
     // Get existing review
     const [existing] = await sql`
       SELECT * FROM reviews WHERE id = ${reviewId}
-    `;
+    `.catch(() => []);
 
     if (!existing) {
       return NextResponse.json(
@@ -108,7 +129,7 @@ export async function PATCH(
         updated_at = NOW()
       WHERE id = ${reviewId}
       RETURNING *
-    `;
+    `.catch(() => []);
 
     // Create audit log if admin
     if (admin && status) {
@@ -157,9 +178,16 @@ export async function DELETE(
     const { id } = await params;
     const reviewId = parseInt(id);
 
+    if (!sql) {
+      return NextResponse.json(
+        { ok: false, error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
     await sql`
       DELETE FROM reviews WHERE id = ${reviewId}
-    `;
+    `.catch(() => {});
 
     // Create audit log
     await createAuditLog(

@@ -27,6 +27,7 @@ export interface PackageSpecification {
     max: number;
     default: number;
     types: CameraType[];
+    brands?: string[]; // e.g., ['Dahua', 'EZVIZ']
   };
   nvr: {
     channels: number;

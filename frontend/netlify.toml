@@ -4,6 +4,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Disable Netlify Emails plugin (we use Gmail SMTP instead)
+[[plugins]]
+  package = "@netlify/plugin-emails"
+  enabled = false
+
 [build.environment]
   NODE_VERSION = "18"
 

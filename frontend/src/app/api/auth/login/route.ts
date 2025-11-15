@@ -1,8 +1,27 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyPassword, generateToken, generateSessionId, isValidEmail, checkRateLimit } from '@/lib/auth';
+import { verifyPassword, generateToken, generateSessionId, isValidEmail, checkRateLimit, hashPassword } from '@/lib/auth';
 
-const sql = neon();
+// Initialize Neon with fallback
+let sql: any;
+try {
+  sql = neon();
+} catch (error) {
+  console.warn('Neon client not available, using fallback for login');
+  sql = null;
+}
+
+// Fallback test user for local development
+const FALLBACK_USER = {
+  id: 1,
+  name: 'משתמש בדיקה',
+  email: 'test@example.com',
+  phone: '0501234567',
+  password_hash: '$2b$12$p5fA.WB.gZCNweMjQfN2R.RRSVPCkMgZI/Mfk7dlwmz6psAzBEamy', // Test123!@#
+  role: 'customer',
+  email_verified: true,
+  api_key_hash: 'df481bbeeafdc87dedb391a15d29b8659d9e93c48875fe9f0ca5296cfe29d361'
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,12 +59,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email or phone
-    const users = await sql`
-      SELECT id, name, email, phone, password_hash, role, email_verified, api_key_hash
-      FROM users 
-      WHERE email = ${email} OR phone = ${email}
-      LIMIT 1
-    `.catch(() => []);
+    let users: any[] = [];
+    let user: any = null;
+
+    if (sql) {
+      try {
+        users = await sql`
+          SELECT id, name, email, phone, password_hash, role, email_verified, api_key_hash
+          FROM users 
+          WHERE email = ${email} OR phone = ${email}
+          LIMIT 1
+        `;
+      } catch (error: any) {
+        console.warn('Database query failed, using fallback user:', error.message);
+      }
+    }
+
+    // Fallback to test user for local development
+    if (users.length === 0 && !sql) {
+      console.log('Using fallback user for local development');
+      if (email === FALLBACK_USER.email || email === FALLBACK_USER.phone) {
+        users = [FALLBACK_USER];
+      }
+    }
 
     if (users.length === 0) {
       // Don't reveal if user exists - same error message
@@ -55,7 +91,7 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const user = users[0];
+    user = users[0];
 
     // Verify password securely using bcrypt
     const isPasswordValid = await verifyPassword(password, user.password_hash);
@@ -73,24 +109,26 @@ export async function POST(request: NextRequest) {
       console.warn(`User ${user.id} logged in with unverified email`);
     }
 
-    // Update last login
-    await sql`
-      UPDATE users 
-      SET last_login = NOW(), updated_at = NOW()
-      WHERE id = ${user.id}
-    `.catch(() => {
-      // Ignore if update fails
-    });
-
-    // Update API key last used
-    if (user.api_key_hash) {
+    // Update last login (only if database is available)
+    if (sql) {
       await sql`
-        UPDATE api_keys 
-        SET last_used = NOW()
-        WHERE api_key_hash = ${user.api_key_hash}
+        UPDATE users 
+        SET last_login = NOW(), updated_at = NOW()
+        WHERE id = ${user.id}
       `.catch(() => {
         // Ignore if update fails
       });
+
+      // Update API key last used
+      if (user.api_key_hash) {
+        await sql`
+          UPDATE api_keys 
+          SET last_used = NOW()
+          WHERE api_key_hash = ${user.api_key_hash}
+        `.catch(() => {
+          // Ignore if update fails
+        });
+      }
     }
 
     // Generate unique session ID for this login
@@ -103,36 +141,38 @@ export async function POST(request: NextRequest) {
     // Generate secure JWT token with session ID
     const token = generateToken(user.id, user.email, user.role, sessionId, rememberMeBool);
 
-    // Create session in database with IP tracking
-    await sql`
-      CREATE TABLE IF NOT EXISTS sessions (
-        id SERIAL PRIMARY KEY,
-        session_id VARCHAR(255) UNIQUE NOT NULL,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        ip_address VARCHAR(45) NOT NULL,
-        user_agent TEXT,
-        created_at TIMESTAMP DEFAULT NOW(),
-        expires_at TIMESTAMP NOT NULL,
-        last_used TIMESTAMP DEFAULT NOW(),
-        is_active BOOLEAN DEFAULT true
-      )
-    `.catch(() => {
-      // Table might already exist
-    });
+    // Create session in database with IP tracking (only if database is available)
+    if (sql) {
+      await sql`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id SERIAL PRIMARY KEY,
+          session_id VARCHAR(255) UNIQUE NOT NULL,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          ip_address VARCHAR(45) NOT NULL,
+          user_agent TEXT,
+          created_at TIMESTAMP DEFAULT NOW(),
+          expires_at TIMESTAMP NOT NULL,
+          last_used TIMESTAMP DEFAULT NOW(),
+          is_active BOOLEAN DEFAULT true
+        )
+      `.catch(() => {
+        // Table might already exist
+      });
 
-    // Insert session into database
-    const expiresAt = new Date(Date.now() + maxAge * 1000);
-    await sql`
-      INSERT INTO sessions (session_id, user_id, ip_address, user_agent, expires_at, created_at, last_used, is_active)
-      VALUES (${sessionId}, ${user.id}, ${clientIp}, ${userAgent}, ${expiresAt.toISOString()}, NOW(), NOW(), true)
-      ON CONFLICT (session_id) DO UPDATE SET
-        last_used = NOW(),
-        is_active = true,
-        expires_at = ${expiresAt.toISOString()}
-    `.catch((error) => {
-      console.error('Error creating session:', error);
-      // Continue anyway - session might exist
-    });
+      // Insert session into database
+      const expiresAt = new Date(Date.now() + maxAge * 1000);
+      await sql`
+        INSERT INTO sessions (session_id, user_id, ip_address, user_agent, expires_at, created_at, last_used, is_active)
+        VALUES (${sessionId}, ${user.id}, ${clientIp}, ${userAgent}, ${expiresAt.toISOString()}, NOW(), NOW(), true)
+        ON CONFLICT (session_id) DO UPDATE SET
+          last_used = NOW(),
+          is_active = true,
+          expires_at = ${expiresAt.toISOString()}
+      `.catch((error: any) => {
+        console.error('Error creating session:', error);
+        // Continue anyway - session might exist
+      });
+    }
 
     // Create response with JSON data
     const response = NextResponse.json({ 

@@ -110,6 +110,7 @@ const menuItems: MenuItem[] = [
     children: [
       { href: '/admin/products', label: 'מוצרים', icon: Package },
       { href: '/admin/packages', label: 'חבילות', icon: Package },
+      { href: '/admin/packages/audit', label: 'בדיקת מחירי חבילות', icon: BarChart3 },
       { href: '/admin/inventory', label: 'מלאי', icon: Package },
       { href: '/admin/coupons', label: 'קופונים', icon: Tag },
       { href: '/admin/reviews', label: 'ביקורות', icon: Star },

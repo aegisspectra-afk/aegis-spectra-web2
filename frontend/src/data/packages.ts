@@ -57,6 +57,7 @@ export const packages: Package[] = [
         max: 3,
         default: 2,
         types: ['IP', '4MP'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 4,
@@ -174,6 +175,7 @@ export const packages: Package[] = [
         max: 4,
         default: 3,
         types: ['IP', '4MP', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 8,
@@ -281,6 +283,7 @@ export const packages: Package[] = [
         max: 5,
         default: 4,
         types: ['IP', '4MP'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 8,
@@ -401,6 +404,7 @@ export const packages: Package[] = [
         max: 8,
         default: 6,
         types: ['IP', '4MP', '4K', 'Color Night', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 16,
@@ -514,6 +518,7 @@ export const packages: Package[] = [
         max: 8,
         default: 6,
         types: ['IP', '4MP', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 16,
@@ -631,6 +636,7 @@ export const packages: Package[] = [
         max: 12,
         default: 10,
         types: ['IP', '4MP', '4K', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 32,
@@ -753,6 +759,7 @@ export const packages: Package[] = [
         max: 20,
         default: 15,
         types: ['IP', '4MP', '4K', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 64,
@@ -882,6 +889,7 @@ export const packages: Package[] = [
         max: 50,
         default: 25,
         types: ['IP', '4MP', '4K', 'AI'],
+        brands: ['Dahua'],
       },
       nvr: {
         channels: 128,

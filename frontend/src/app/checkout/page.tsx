@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   ShoppingCart, CreditCard, Lock, CheckCircle, ArrowRight, ArrowLeft, Package,
   User, MapPin, Truck, Tag, Shield, Minus, Plus
@@ -19,7 +19,8 @@ import { useReCaptcha } from '@/components/ReCaptcha';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
+  const searchParams = useSearchParams();
+  const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart, addToCart } = useCart();
   const { execute: executeRecaptcha, isReady: recaptchaReady } = useReCaptcha("checkout_form");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,8 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState<{ code: string; percent?: number; freeShip?: boolean } | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [productAdded, setProductAdded] = useState(false);
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -41,11 +44,57 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    // Redirect if cart is empty
-    if (cart.length === 0) {
-      router.push('/cart');
+    setMounted(true);
+  }, []);
+
+  // Handle URL parameters - add product to cart if sku is provided
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const sku = searchParams.get('sku');
+    const quantity = parseInt(searchParams.get('quantity') || '1', 10);
+    
+    if (sku && !productAdded) {
+      // Fetch product details and add to cart
+      const addProductToCart = async () => {
+        try {
+          const response = await fetch(`/api/products/sku/${sku}`);
+          const data = await response.json();
+          
+          if (data.ok && data.product) {
+            const product = data.product;
+            addToCart({
+              sku: product.sku,
+              name: product.name,
+              price: product.price_sale || product.price_regular,
+              quantity: quantity,
+            }, quantity);
+            setProductAdded(true);
+            
+            // Clean URL - remove query params after adding
+            router.replace('/checkout', { scroll: false });
+          }
+        } catch (error) {
+          console.error('Error adding product to cart:', error);
+        }
+      };
+      
+      addProductToCart();
     }
-  }, [cart, router]);
+  }, [mounted, searchParams, productAdded, addToCart, router]);
+
+  useEffect(() => {
+    // Redirect if cart is empty (only after mount and product was added)
+    if (mounted && cart.length === 0 && productAdded) {
+      // Small delay to allow cart to update
+      const timer = setTimeout(() => {
+        if (cart.length === 0) {
+          router.push('/cart');
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [cart, router, mounted, productAdded]);
 
   const getSubtotal = () => {
     return getCartTotal();
@@ -221,6 +270,33 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  // Show loading state only during SSR or when adding product from URL
+  const skuFromUrl = mounted ? searchParams.get('sku') : null;
+  const isLoadingProduct = skuFromUrl && !productAdded && cart.length === 0;
+  
+  if (!mounted || isLoadingProduct) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-charcoal text-white pt-24 pb-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center py-20">
+              <div className="animate-pulse">
+                <div className="h-16 w-16 bg-zinc-800 rounded-full mx-auto mb-6" />
+                <div className="h-8 w-64 bg-zinc-800 rounded-lg mx-auto mb-4" />
+                <div className="h-4 w-48 bg-zinc-800 rounded-lg mx-auto mb-8" />
+                {isLoadingProduct && (
+                  <p className="text-zinc-400 text-sm mt-4">מוסיף מוצר לעגלה...</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (cart.length === 0) {
     return (

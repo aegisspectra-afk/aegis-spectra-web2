@@ -59,10 +59,36 @@ export function PackageHero({ packageData }: PackageHeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg sm:text-xl md:text-2xl text-zinc-300 mb-8 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg sm:text-xl md:text-2xl text-zinc-300 mb-4 max-w-3xl mx-auto leading-relaxed"
           >
             {packageData.description}
           </motion.p>
+
+          {/* Camera Type Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/50 border border-gold/30">
+              <span className="text-sm text-zinc-400">מותג מצלמה:</span>
+              <span className="text-sm sm:text-base text-gold font-semibold">
+                {packageData.specifications.cameras.brands && packageData.specifications.cameras.brands.length > 0
+                  ? packageData.specifications.cameras.brands.join(', ')
+                  : 'לא צוין'}
+              </span>
+              {packageData.specifications.cameras.types && packageData.specifications.cameras.types.length > 0 && (
+                <>
+                  <span className="text-zinc-600">•</span>
+                  <span className="text-sm text-zinc-400">סוג:</span>
+                  <span className="text-sm sm:text-base text-gold font-semibold">
+                    {packageData.specifications.cameras.types.join(', ')}
+                  </span>
+                </>
+              )}
+            </div>
+          </motion.div>
 
           {/* Price */}
           <motion.div

@@ -2,7 +2,14 @@ import { neon } from '@netlify/neon';
 import { NextRequest } from 'next/server';
 import { hashPassword, verifyPassword, generateToken, verifyToken } from '@/lib/auth';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for auth-server');
+  sql = null;
+}
 
 export type UserRole = 'super_admin' | 'admin' | 'manager' | 'customer' | 'support';
 
@@ -29,6 +36,10 @@ export interface AuthResult {
  */
 export async function authenticateUser(email: string, password: string): Promise<AuthResult> {
   try {
+    if (!sql) {
+      return { ok: false, error: 'Database not available' };
+    }
+
     const [user] = await sql`
       SELECT id, name, email, phone, password_hash, role, email_verified, created_at, last_login
       FROM users
@@ -112,24 +123,26 @@ export async function getUserFromRequest(request: NextRequest): Promise<User | n
       // If it's an admin token, return admin user
       if (email && (email.includes('@aegis-spectra.com') || email.includes('@gmail.com'))) {
         // Try to find user in database
-        const [user] = await sql`
-          SELECT id, name, email, phone, role, email_verified, created_at, last_login
-          FROM users
-          WHERE LOWER(email) = LOWER(${email})
-          LIMIT 1
-        `.catch(() => []);
+        if (sql) {
+          const [user] = await sql`
+            SELECT id, name, email, phone, role, email_verified, created_at, last_login
+            FROM users
+            WHERE LOWER(email) = LOWER(${email})
+            LIMIT 1
+          `.catch(() => []);
 
-        if (user) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone || '',
-            role: (user.role as UserRole) || 'admin',
-            email_verified: user.email_verified || false,
-            created_at: user.created_at,
-            last_login: user.last_login,
-          };
+          if (user) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: user.phone || '',
+              role: (user.role as UserRole) || 'admin',
+              email_verified: user.email_verified || false,
+              created_at: user.created_at,
+              last_login: user.last_login,
+            };
+          }
         }
 
         // If user not found in DB, return admin user from token
@@ -155,6 +168,20 @@ export async function getUserFromRequest(request: NextRequest): Promise<User | n
     }
 
     // Get user from database
+    if (!sql) {
+      // Fallback: return user from token if no database
+      return {
+        id: decoded.userId,
+        name: (decoded as any).name || 'User',
+        email: decoded.email,
+        phone: '',
+        role: (decoded.role as UserRole) || 'customer',
+        email_verified: true,
+        created_at: new Date().toISOString(),
+        last_login: undefined,
+      };
+    }
+
     const [user] = await sql`
       SELECT id, name, email, phone, role, email_verified, created_at, last_login
       FROM users

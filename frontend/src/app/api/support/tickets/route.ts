@@ -2,7 +2,14 @@ import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth-server';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for support tickets');
+  sql = null;
+}
 
 // GET - Get support tickets
 export async function GET(request: NextRequest) {
@@ -24,6 +31,18 @@ export async function GET(request: NextRequest) {
     const assignedTo = searchParams.get('assigned_to');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = parseInt(searchParams.get('offset') || '0');
+
+    // If no database, return empty tickets
+    if (!sql) {
+      console.log('Database not available, using fallback tickets');
+      return NextResponse.json({
+        ok: true,
+        tickets: [],
+        total: 0,
+        limit,
+        offset
+      });
+    }
 
     let query = sql`
       SELECT t.*,
@@ -71,34 +90,46 @@ export async function GET(request: NextRequest) {
       `;
     }
 
-    const tickets = await sql`
-      ${query}
-      ORDER BY t.created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
+    try {
+      const tickets = await sql`
+        ${query}
+        ORDER BY t.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
 
-    // Get total count
-    const totalQuery = sql`
-      SELECT COUNT(*) as count
-      FROM support_tickets t
-      WHERE 1=1
-      ${!isAdmin && userEmail ? sql`AND t.user_email = ${userEmail}` : sql``}
-      ${status ? sql`AND t.status = ${status}` : sql``}
-      ${priority ? sql`AND t.priority = ${priority}` : sql``}
-      ${category ? sql`AND t.category = ${category}` : sql``}
-      ${assignedTo && isAdmin ? sql`AND t.assigned_to = ${assignedTo}` : sql``}
-    `;
-    const totalResult = await totalQuery;
-    const total = parseInt(totalResult[0]?.count || '0');
+      // Get total count
+      const totalQuery = sql`
+        SELECT COUNT(*) as count
+        FROM support_tickets t
+        WHERE 1=1
+        ${!isAdmin && userEmail ? sql`AND t.user_email = ${userEmail}` : sql``}
+        ${status ? sql`AND t.status = ${status}` : sql``}
+        ${priority ? sql`AND t.priority = ${priority}` : sql``}
+        ${category ? sql`AND t.category = ${category}` : sql``}
+        ${assignedTo && isAdmin ? sql`AND t.assigned_to = ${assignedTo}` : sql``}
+      `;
+      const totalResult = await totalQuery;
+      const total = parseInt(totalResult[0]?.count || '0');
 
-    return NextResponse.json({
-      ok: true,
-      tickets,
-      total,
-      limit,
-      offset
-    });
+      return NextResponse.json({
+        ok: true,
+        tickets,
+        total,
+        limit,
+        offset
+      });
+    } catch (dbError: any) {
+      console.error('Database error fetching tickets:', dbError);
+      // Return empty tickets on database error
+      return NextResponse.json({
+        ok: true,
+        tickets: [],
+        total: 0,
+        limit,
+        offset
+      });
+    }
   } catch (error: any) {
     console.error('Error fetching tickets:', error);
     return NextResponse.json(

@@ -1,7 +1,15 @@
 import { neon } from '@netlify/neon';
 import { NextRequest, NextResponse } from 'next/server';
 
-const sql = neon();
+// Initialize Neon client with fallback
+let sql: any = null;
+try {
+  sql = neon();
+} catch (error: any) {
+  console.warn('Neon client not available, using fallback for loyalty points');
+  sql = null;
+}
+
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aegis2024';
 
 function checkAuth(request: NextRequest): boolean {
@@ -24,47 +32,85 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let points;
-    if (userId) {
-      [points] = await sql`
-        SELECT * FROM loyalty_points WHERE user_id = ${parseInt(userId)} LIMIT 1
-      `;
-    } else {
-      [points] = await sql`
-        SELECT * FROM loyalty_points WHERE user_email = ${userEmail} LIMIT 1
-      `;
+    // If no database, return fallback data
+    if (!sql) {
+      console.log('Database not available, using fallback loyalty points');
+      return NextResponse.json({
+        ok: true,
+        points: {
+          user_id: userId ? parseInt(userId) : null,
+          user_email: userEmail || null,
+          points: 0,
+          tier: 'Bronze',
+          total_earned: 0,
+          total_redeemed: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        recent_transactions: []
+      });
     }
 
-    if (!points) {
-      // Create new loyalty account
+    let points;
+    try {
       if (userId) {
         [points] = await sql`
-          INSERT INTO loyalty_points (user_id, points, tier)
-          VALUES (${parseInt(userId)}, 0, 'Bronze')
-          RETURNING *
+          SELECT * FROM loyalty_points WHERE user_id = ${parseInt(userId)} LIMIT 1
         `;
       } else {
         [points] = await sql`
-          INSERT INTO loyalty_points (user_email, points, tier)
-          VALUES (${userEmail}, 0, 'Bronze')
-          RETURNING *
+          SELECT * FROM loyalty_points WHERE user_email = ${userEmail} LIMIT 1
         `;
       }
+
+      if (!points) {
+        // Create new loyalty account
+        if (userId) {
+          [points] = await sql`
+            INSERT INTO loyalty_points (user_id, points, tier)
+            VALUES (${parseInt(userId)}, 0, 'Bronze')
+            RETURNING *
+          `;
+        } else {
+          [points] = await sql`
+            INSERT INTO loyalty_points (user_email, points, tier)
+            VALUES (${userEmail}, 0, 'Bronze')
+            RETURNING *
+          `;
+        }
+      }
+
+      // Get recent transactions
+      const transactions = await sql`
+        SELECT * FROM loyalty_transactions
+        WHERE ${userId ? sql`user_id = ${parseInt(userId)}` : sql`user_email = ${userEmail}`}
+        ORDER BY created_at DESC
+        LIMIT 10
+      `;
+
+      return NextResponse.json({
+        ok: true,
+        points,
+        recent_transactions: transactions
+      });
+    } catch (dbError: any) {
+      console.error('Database error fetching loyalty points:', dbError);
+      // Return fallback data on database error
+      return NextResponse.json({
+        ok: true,
+        points: {
+          user_id: userId ? parseInt(userId) : null,
+          user_email: userEmail || null,
+          points: 0,
+          tier: 'Bronze',
+          total_earned: 0,
+          total_redeemed: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        recent_transactions: []
+      });
     }
-
-    // Get recent transactions
-    const transactions = await sql`
-      SELECT * FROM loyalty_transactions
-      WHERE ${userId ? sql`user_id = ${parseInt(userId)}` : sql`user_email = ${userEmail}`}
-      ORDER BY created_at DESC
-      LIMIT 10
-    `;
-
-    return NextResponse.json({
-      ok: true,
-      points,
-      recent_transactions: transactions
-    });
   } catch (error: any) {
     console.error('Error fetching loyalty points:', error);
     return NextResponse.json(

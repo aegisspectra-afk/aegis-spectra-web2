@@ -25,9 +25,27 @@ export function PackageFeatures({ packageData }: PackageFeaturesProps) {
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             תכונות עיקריות
           </h2>
-          <p className="text-zinc-400 text-lg">
+          <p className="text-zinc-400 text-lg mb-4">
             כל מה שכלול בחבילה
           </p>
+          {/* סוג מצלמה - בולט */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/50 border border-gold/30 mb-4">
+            <span className="text-sm text-zinc-400">מותג מצלמה:</span>
+            <span className="text-sm sm:text-base text-gold font-semibold">
+              {packageData.specifications.cameras.brands && packageData.specifications.cameras.brands.length > 0
+                ? packageData.specifications.cameras.brands.join(', ')
+                : 'לא צוין'}
+            </span>
+            {packageData.specifications.cameras.types && packageData.specifications.cameras.types.length > 0 && (
+              <>
+                <span className="text-zinc-600">•</span>
+                <span className="text-sm text-zinc-400">סוג:</span>
+                <span className="text-sm sm:text-base text-gold font-semibold">
+                  {packageData.specifications.cameras.types.join(', ')}
+                </span>
+              </>
+            )}
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

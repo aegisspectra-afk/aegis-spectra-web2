@@ -66,7 +66,7 @@ export default function PackageAuditPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-black/40 border border-zinc-800 rounded-lg p-6">
-            <div className="text-zinc-400 text-sm mb-2">סה"כ חבילות</div>
+            <div className="text-zinc-400 text-sm mb-2">סה&quot;כ חבילות</div>
             <div className="text-3xl font-bold text-white">{report.summary.total}</div>
           </div>
           <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">

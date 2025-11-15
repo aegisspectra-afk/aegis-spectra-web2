@@ -144,7 +144,7 @@ function TwoFactorAuthSection({ enabled, onToggle }: { enabled: boolean; onToggl
           <h4 className="font-semibold text-white mb-3">הגדרת 2FA</h4>
           <div className="space-y-4">
             <div className="text-sm text-zinc-300">
-              <p className="mb-2">1. סרוק את ה-QR code באפליקציית האימות שלך (Google Authenticator, Authy, וכו')</p>
+              <p className="mb-2">1. סרוק את ה-QR code באפליקציית האימות שלך (Google Authenticator, Authy, וכו&apos;)</p>
               {qrCode && (
                 <div className="flex justify-center mb-4">
                   <img src={qrCode} alt="QR Code" className="w-48 h-48 bg-white p-2 rounded" />

@@ -105,7 +105,7 @@ export function LiveChat({ userEmail }: LiveChatProps) {
         className="fixed bottom-6 left-6 z-50 bg-gold text-black rounded-full p-4 shadow-lg hover:bg-gold/90 transition flex items-center gap-2"
       >
         <MessageSquare className="size-6" />
-        <span className="font-semibold">צ'אט חי</span>
+        <span className="font-semibold">צ&apos;אט חי</span>
       </button>
     );
   }
@@ -120,7 +120,7 @@ export function LiveChat({ userEmail }: LiveChatProps) {
       <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-black/30 rounded-t-2xl">
         <div className="flex items-center gap-2">
           <MessageSquare className="size-5 text-gold" />
-          <h3 className="font-semibold text-white">צ'אט חי</h3>
+          <h3 className="font-semibold text-white">צ&apos;אט חי</h3>
         </div>
         <div className="flex items-center gap-2">
           <button

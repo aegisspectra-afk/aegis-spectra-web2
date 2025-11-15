@@ -81,7 +81,7 @@ export function PersonalStats({ userEmail }: PersonalStatsProps) {
         <div className="rounded-xl border border-zinc-800 bg-black/20 p-6">
           <div className="flex items-center gap-3 mb-3">
             <Package className="size-5 text-blue-400" />
-            <div className="text-sm text-zinc-400">סה"כ הזמנות</div>
+            <div className="text-sm text-zinc-400">סה&quot;כ הזמנות</div>
           </div>
           <div className="text-3xl font-bold text-white">{stats.total_orders}</div>
           <div className="text-xs text-zinc-500 mt-1">
@@ -92,7 +92,7 @@ export function PersonalStats({ userEmail }: PersonalStatsProps) {
         <div className="rounded-xl border border-zinc-800 bg-black/20 p-6">
           <div className="flex items-center gap-3 mb-3">
             <DollarSign className="size-5 text-green-400" />
-            <div className="text-sm text-zinc-400">סה"כ הוצאות</div>
+            <div className="text-sm text-zinc-400">סה&quot;כ הוצאות</div>
           </div>
           <div className="text-3xl font-bold text-white">{stats.total_spent.toLocaleString()} ₪</div>
           <div className="text-xs text-zinc-500 mt-1">
